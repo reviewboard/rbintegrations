@@ -1,0 +1,14 @@
+# Wildcards
+.*.swp
+.*.swo
+*.bak
+*.egg-info
+*.pyc
+
+# Unit testing cache
+.coverage
+.nodeids
+
+# Build-related directories
+build
+dist

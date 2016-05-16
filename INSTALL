@@ -1,0 +1,9 @@
+Review Board Integrations Installation
+======================================
+
+This package is compatible with Review Board 3.0 and higher, and is
+automatically installed along with Review Board.
+
+It can be upgraded manually with::
+
+    pip install -U rbintegrations
