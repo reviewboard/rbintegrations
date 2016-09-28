@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.utils.translation import ugettext_lazy as _
 from reviewboard.extensions.base import Extension
 from reviewboard.extensions.hooks import IntegrationHook
 
@@ -10,12 +11,13 @@ class RBIntegrationsExtension(Extension):
     """Extends Review Board with support for many common integrations."""
 
     metadata = {
-        'Name': 'Review Board Integrations',
-        'Summary': 'A set of third-party serivce integrations for '
-                   'Review Board.',
+        'Name': _('Review Board Integrations'),
+        'Summary': _('A set of third-party service integrations for '
+                     'Review Board.'),
     }
 
     integrations = [
+        SlackIntegration,
     ]
 
     def initialize(self):
