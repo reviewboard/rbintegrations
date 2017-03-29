@@ -2,7 +2,7 @@
 Review Board Integrations 0.5 Beta 1 Release Notes
 ==================================================
 
-**Release date**: TBA
+**Release date**: March 29, 2017
 
 
 New Features
