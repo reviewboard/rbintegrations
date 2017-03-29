@@ -1,8 +1,8 @@
 .. _rb-integrations_notes:
 
-=======================================
-Review Board Integrations Release Notes
-=======================================
+==========================
+Integrations Release Notes
+==========================
 
 0.5 Releases
 ============
