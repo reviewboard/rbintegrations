@@ -7,7 +7,7 @@
 
 # Unit testing cache
 .coverage
-.nodeids
+.noseids
 
 # Build-related directories
 build

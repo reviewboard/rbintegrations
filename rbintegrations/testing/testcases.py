@@ -24,6 +24,9 @@ class IntegrationTestCase(RBIntegrationsExtensionTestCase):
     def setUp(self):
         super(IntegrationTestCase, self).setUp()
 
-        self.integration = \
-            get_integration_manager().get_integration(
-                self.integration_cls.integration_id)
+        integration_mgr = get_integration_manager()
+
+        self.integration = integration_mgr.get_integration(
+            self.integration_cls.integration_id)
+
+        integration_mgr.clear_all_configs_cache()

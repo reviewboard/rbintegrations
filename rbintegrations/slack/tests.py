@@ -1012,7 +1012,7 @@ class SlackIntegrationTests(IntegrationTestCase):
                                     body_top='This is my review.')
         self.create_general_comment(review)
 
-        self._create_config()
+        self._create_config(with_local_site=True)
         self.integration.enable_integration()
 
         self.spy_on(urlopen, call_original=False)
