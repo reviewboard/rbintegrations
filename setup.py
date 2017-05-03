@@ -19,6 +19,9 @@ setup(
     maintainer='Beanbag, Inc.',
     maintainer_email='support@beanbaginc.com',
     packages=find_packages(),
+    install_requires=[
+        'PyYAML>=3.12',
+    ],
     entry_points={
         'reviewboard.extensions':
             '%s = rbintegrations.extension:RBIntegrationsExtension' % PACKAGE,
