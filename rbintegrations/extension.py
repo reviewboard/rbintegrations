@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from reviewboard.extensions.base import Extension
 from reviewboard.extensions.hooks import IntegrationHook, URLHook
 
+from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.slack.integration import SlackIntegration
 from rbintegrations.travisci.integration import TravisCIIntegration
 
@@ -19,6 +20,7 @@ class RBIntegrationsExtension(Extension):
     }
 
     integrations = [
+        CircleCIIntegration,
         SlackIntegration,
         TravisCIIntegration,
     ]
@@ -42,5 +44,7 @@ class RBIntegrationsExtension(Extension):
 
         URLHook(self, [
             url(r'^rbintegrations/travis-ci/',
-                include('rbintegrations.travisci.urls'))
+                include('rbintegrations.travisci.urls')),
+            url(r'^rbintegrations/circle-ci/',
+                include('rbintegrations.circleci.urls')),
         ])
