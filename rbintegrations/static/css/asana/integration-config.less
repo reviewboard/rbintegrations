@@ -1,0 +1,21 @@
+/*
+ * This gets replaced with a Selectize widget, and we don't want the page to
+ * jump around.
+ */
+#id_asana_workspace {
+  display: none;
+}
+
+.field-asana_workspace .selectize-control.loading .selectize-input:before {
+  animation: fa-spin 1s infinite steps(8);
+  content: '\f110';
+  display: block;
+  font: normal normal normal 14px/1 FontAwesome;
+  position: absolute;
+  top: 10px;
+  right: 32px;
+  width: 16px;
+  height: 16px;
+  transform: translate(0, 0);
+  z-index: 2;
+}

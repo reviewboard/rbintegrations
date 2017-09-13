@@ -1,0 +1,93 @@
+@import (reference) "@{STATIC_ROOT}rb/css/defs.less";
+
+
+@asana-checkbox-color: #b7bfc6;
+@asana-checkbox-color-completed: #b2ebe1;
+@asana-link-color: #151b26;
+@asana-link-color-completed: #b7bfc6;
+
+
+#field_rbintegrations_asana {
+  font-size: @textarea-font-size;
+
+  ul {
+    background-color: @textarea-editor-background;
+    border: @textarea-border;
+    margin: @textarea-editor-margin;
+    padding: 0;
+
+    &:empty {
+      border: 0;
+    }
+  }
+}
+
+.asana-field.selectize-control.loading .selectize-input:before {
+  animation: fa-spin 1s infinite steps(8);
+  content: '\f110';
+  display: block;
+  font: normal normal normal 14px/1 FontAwesome;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 16px;
+  height: 16px;
+  transform: translate(0, 0);
+  z-index: 2;
+}
+
+.asana-task-option {
+  margin-left: 2px;
+}
+
+.asana-task {
+  border-bottom: 1px solid lighten(@textarea-border-color, 10%);
+  height: 28px;
+  list-style: none;
+  padding: 0 5px !important;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .asana-task-checkbox {
+    border: 1px solid @asana-checkbox-color;
+    border-radius: 50%;
+    display: inline-block;
+    fill: @asana-checkbox-color;
+    height: 20px;
+    line-height: 22px;
+    margin: 3px 10px 3px 0;
+    text-align: center;
+    vertical-align: middle;
+    width: 20px;
+  }
+
+  a,
+  a:active,
+  a:visited {
+    align-items: center;
+    color: @asana-link-color;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  &.completed {
+    .asana-task-checkbox {
+      background: @asana-checkbox-color-completed;
+      border-color: @asana-checkbox-color-completed;
+      fill: #ffffff;
+    }
+
+    a,
+    a:active,
+    a:visited {
+      color: @asana-link-color-completed;
+    }
+  }
+
+  svg {
+    height: 12px;
+    width: 12px;
+  }
+}

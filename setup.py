@@ -20,6 +20,7 @@ setup(
     maintainer_email='support@beanbaginc.com',
     packages=find_packages(),
     install_requires=[
+        'asana',
         'PyYAML>=3.12',
     ],
     entry_points={
