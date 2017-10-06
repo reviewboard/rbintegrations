@@ -1,0 +1,112 @@
+=====================================
+Integrations 0.5 Beta 2 Release Notes
+=====================================
+
+**Release date**: TBD
+
+
+New Features
+============
+
+CircleCI Integration
+--------------------
+
+This release adds support for CircleCI_, a popular continuous integration
+service used to automatically build software and run tests to ensure code
+quality and repeated testing.
+
+This integration requires CircleCI 2.0, a repository hosted on GitHub or
+Bitbucket, and requires manual changes to :file:`.circleci/config.yml` in the
+repository. A "reviewboard" job must be added that performs any tests that are
+needed. This should look something like:
+
+.. code-block:: yaml
+
+   reviewboard:
+     steps:
+       - checkout
+       - run:
+         name: Apply Patch
+         command: |
+           sudo pip install RBTools
+           rbt patch --api-token "$REVIEWBOARD_API_TOKEN" \
+                     --server "$REVIEWBOARD_SERVER" \
+                     --diff-revision "$REVIEWBOARD_DIFF_REVISION" \
+                     "$REVIEWBOARD_REVIEW_REQUEST"
+
+       - run:
+         # Your tests here
+         ...
+
+   notify:
+     webhooks:
+       - url: https://reviewboard.example.com/rbintegrations/circle-ci/webhook/
+
+(Note that your commands should never treat the build as safe, and should not
+deploy any changes from this build.)
+
+The configuration steps can make use of the following build parameters:
+
+``CIRCLE_JOB``:
+    This will be ``reviewboard``
+
+``REVIEWBOARD_SERVER``:
+    The URL to the Review Board server. This must be accessible to CircleCI
+    over the Internet.
+
+``REVIEWBOARD_REVIEW_REQUEST``:
+    The ID of the review request being tested.
+
+``REVIEWBOARD_DIFF_REVISION``:
+    The posted Review Board revision of the diff being tested.
+
+``REVIEWBOARD_API_TOKEN``:
+    An API token used to communicate with Review Board's API in order to
+    report status.
+
+``REVIEWBOARD_STATUS_UPDATE_ID``:
+    The ID of the status update used to report the result of the build.
+
+Full documentation will be added for configuring a CircleCI repository by the
+final release.
+
+
+.. _CircleCI: https://circleci.com/
+
+
+Travis CI Integration
+---------------------
+
+Supported for `Travis CI`_ has also been added. This is another popular
+continuous integration service, often used by open source products. It only
+works with GitHub repositories.
+
+Configuration works a bit differently from CircleCI. Due to current
+restrictions when working with Travis CI's API, all builds will show up in the
+main "Branches" view, which won't differentiate between builds from commits
+and builds from Review Board. In order to avoid polluting this for a
+production Travis CI project, we recommend creating a branch used solely for
+review requests (such as ``review-requests/master`` or
+``review-requests/1.0.x``) on the GitHub repository and set that branch in the
+Travis CI integration configuration.
+
+The integration will use a custom version of the existing Travis CI
+configuration for your repository when performing a build. It will update the
+``script`` section to fetch the patch from Review Board, and will update the
+``notifications`` section to enable a WebHook for notifying Review Board about
+the status of the build. It will also add special environment variables used
+as part of the notification process.
+
+Documentation will be added for configuring a Travis CI repository by the
+final release.
+
+
+.. _Travis CI: https://travis-ci.com/
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michael Udaltsov

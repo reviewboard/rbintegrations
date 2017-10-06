@@ -38,6 +38,7 @@ import rbintegrations
 # ones.
 extensions = [
     'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
     'beanbag_docutils.sphinx.ext.django_utils',
     'beanbag_docutils.sphinx.ext.extlinks',
     'beanbag_docutils.sphinx.ext.http_role',
