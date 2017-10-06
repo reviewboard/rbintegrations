@@ -2,7 +2,7 @@
 Integrations 0.5 Beta 2 Release Notes
 =====================================
 
-**Release date**: TBD
+**Release date**: October 5, 2017
 
 
 New Features
