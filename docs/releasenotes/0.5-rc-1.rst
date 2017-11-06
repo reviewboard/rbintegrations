@@ -1,0 +1,22 @@
+===================================
+Integrations 0.5 RC 1 Release Notes
+===================================
+
+**Release date**: TBD
+
+
+Bug Fixes
+=========
+
+CircleCI
+--------
+
+* Generating an API token for the CircleCI user no longer attempts to send
+  an e-mail to the user's address.
+
+
+Contributors
+============
+
+* Barret Rennie
+* Christian Hammond
