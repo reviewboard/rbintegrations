@@ -2,7 +2,7 @@
 Integrations 0.5 RC 1 Release Notes
 ===================================
 
-**Release date**: TBD
+**Release date**: November 6, 2017
 
 
 Bug Fixes
