@@ -6,6 +6,7 @@ from reviewboard.extensions.base import Extension
 from reviewboard.extensions.hooks import IntegrationHook, URLHook
 
 from rbintegrations.circleci.integration import CircleCIIntegration
+from rbintegrations.idonethis.integration import IDoneThisIntegration
 from rbintegrations.slack.integration import SlackIntegration
 from rbintegrations.travisci.integration import TravisCIIntegration
 
@@ -21,6 +22,7 @@ class RBIntegrationsExtension(Extension):
 
     integrations = [
         CircleCIIntegration,
+        IDoneThisIntegration,
         SlackIntegration,
         TravisCIIntegration,
     ]
