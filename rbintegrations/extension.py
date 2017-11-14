@@ -11,6 +11,7 @@ from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.idonethis.integration import IDoneThisIntegration
 from rbintegrations.slack.integration import SlackIntegration
 from rbintegrations.travisci.integration import TravisCIIntegration
+from rbintegrations.trello.integration import TrelloIntegration
 
 
 class RBIntegrationsExtension(Extension):
@@ -28,11 +29,15 @@ class RBIntegrationsExtension(Extension):
         IDoneThisIntegration,
         SlackIntegration,
         TravisCIIntegration,
+        TrelloIntegration
     ]
 
     css_bundles = {
-        'asana-field': {
-            'source_filenames': ['css/asana/asana.less'],
+        'fields': {
+            'source_filenames': [
+                'css/asana/asana.less',
+                'css/trello/trello.less',
+            ],
             'apply_to': reviewable_url_names + review_request_url_names,
         },
         'asana-integration-config': {
@@ -44,8 +49,11 @@ class RBIntegrationsExtension(Extension):
     }
 
     js_bundles = {
-        'asana-field': {
-            'source_filenames': ['js/asana/asanaFieldView.es6.js'],
+        'fields': {
+            'source_filenames': [
+                'js/asana/asanaFieldView.es6.js',
+                'js/trello/trelloFieldView.es6.js',
+            ],
             'apply_to': reviewable_url_names + review_request_url_names,
         },
         'asana-integration-config': {
@@ -64,8 +72,10 @@ class RBIntegrationsExtension(Extension):
         URLHook(self, [
             url(r'^rbintegrations/asana/',
                 include('rbintegrations.asana.urls')),
-            url(r'^rbintegrations/travis-ci/',
-                include('rbintegrations.travisci.urls')),
             url(r'^rbintegrations/circle-ci/',
                 include('rbintegrations.circleci.urls')),
+            url(r'^rbintegrations/travis-ci/',
+                include('rbintegrations.travisci.urls')),
+            url(r'^rbintegrations/trello/',
+                include('rbintegrations.trello.urls')),
         ])

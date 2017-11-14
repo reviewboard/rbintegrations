@@ -1,0 +1,63 @@
+@import (reference) "@{STATIC_ROOT}rb/css/defs.less";
+
+#field_rbintegrations_trello ul {
+  background-color: @textarea-editor-background;
+  border: @textarea-border;
+  margin: @textarea-editor-margin;
+  padding: 0;
+
+  &:empty {
+    border: 0;
+  }
+
+  .trello-card {
+    border-bottom: 1px solid lighten(@textarea-border-color, 10%);
+    height: 28px;
+    line-height: 28px;
+    list-style: none;
+    padding: 0 10px;
+    vertical-align: middle;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .trello-card-card a {
+      font-weight: normal;
+    }
+  }
+
+  .trello-card-details {
+    display: none;
+  }
+}
+
+.trello-field.selectize-control.loading .selectize-input:before {
+  animation: fa-spin 1s infinite steps(8);
+  content: '\f110';
+  display: block;
+  font: normal normal normal 14px/1 FontAwesome;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 16px;
+  height: 16px;
+  transform: translate(0, 0);
+  z-index: 2;
+}
+
+.trello-card-card {
+  a {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+  }
+}
+
+.trello-card-details {
+  color: @grey;
+}
+
+.trello-card-list, .trello-card-board {
+  font-weight: bold;
+}
