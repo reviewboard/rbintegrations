@@ -5,7 +5,7 @@
 Integrations 0.5 Release Notes
 ==============================
 
-**Release date**: TBD
+**Release date**: November 20, 2017
 
 
 Welcome to the first stable release of the Review Board Integrations
