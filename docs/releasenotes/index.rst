@@ -10,6 +10,7 @@ Integrations Release Notes
 .. toctree::
    :maxdepth: 1
 
+   0.5
    0.5-rc-1
    0.5-beta-2
    0.5-beta-1
