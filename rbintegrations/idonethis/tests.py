@@ -1054,9 +1054,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
                         '#group',
             })
 
-    def test_no_post_review_published_to_submitter_only(self):
+    def test_no_post_review_published_to_owner_only(self):
         """Testing IDoneThisIntegration doesn't post on review published to
-        submitter only
+        owner only
         """
         review_request = self.create_review_request(
             create_repository=True,
@@ -1073,7 +1073,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.post_entry)
         self.spy_on(urlopen, call_original=False)
 
-        review.publish(to_submitter_only=True)
+        review.publish(to_owner_only=True)
 
         self.assertEqual(len(self.integration.post_entry.spy.calls), 0)
         self.assertEqual(len(urlopen.spy.calls), 0)
@@ -1100,6 +1100,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.get_configs.spy.calls), 0)
         self.assertEqual(len(urlopen.spy.calls), 0)
 
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
+
     def test_no_post_with_inactive_user(self):
         """Testing IDoneThisIntegration doesn't post with inactive user"""
         review_request = self.create_review_request(
@@ -1124,6 +1126,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.get_configs.spy.calls), 0)
         self.assertEqual(len(urlopen.spy.calls), 0)
 
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
+
     def test_no_post_without_api_token(self):
         """Testing IDoneThisIntegration doesn't post without an API Token"""
         review_request = self.create_review_request(
@@ -1147,6 +1151,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(self.integration.get_configs.spy.calls), 0)
         self.assertEqual(len(urlopen.spy.calls), 0)
+
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
 
     def test_no_post_without_matching_condition(self):
         """Testing IDoneThisIntegration doesn't post without a matching
@@ -1173,6 +1179,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(get_user_team_ids.spy.calls), 0)
         self.assertEqual(len(urlopen.spy.calls), 0)
 
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
+
     def test_no_post_without_matching_team_id(self):
         """Testing IDoneThisIntegration doesn't post without a matching
         team ID
@@ -1197,6 +1205,37 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(get_user_team_ids.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 0)
+
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
+
+    def test_no_post_with_team_ids_error(self):
+        """Testing IDoneThisIntegration doesn't post after error while
+        requesting the user team IDs
+        """
+        review_request = self.create_review_request(
+            create_repository=True,
+            submitter=self.user,
+            summary='Test Review Request',
+            publish=True)
+
+        self._create_config(team_id='team123')
+        self.integration.enable_integration()
+
+        self.assertNotIn(self.team_ids_cache_key, cache)
+
+        self.spy_on(self.integration.post_entry)
+        self.spy_on(get_user_team_ids)
+        self.spy_on(urlopen, call_fake=_urlopen_raise_httperror)
+
+        review_request.close(review_request.SUBMITTED, self.user)
+
+        self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
+        self.assertEqual(len(get_user_team_ids.spy.calls), 1)
+        self.assertEqual(len(urlopen.spy.calls), 1)
+
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
+        self.assertEqual(urlopen.spy.calls[0].args[0].get_full_url(),
+                         'https://beta.idonethis.com/api/v2/teams')
 
     def test_try_post_with_httperror(self):
         """Testing IDoneThisIntegration tries to post to multiple teams with
@@ -1223,6 +1262,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 2)
         self.assertEqual(len(logging.error.spy.calls), 2)
 
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
+
     def test_try_post_with_urlerror(self):
         """Testing IDoneThisIntegration tries to post to multiple teams with
         URLError
@@ -1247,6 +1288,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 2)
         self.assertEqual(len(logging.error.spy.calls), 2)
+
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
 
     def test_post_to_multiple_teams(self):
         """Testing IDoneThisIntegration posts to multiple matched teams"""
@@ -1316,6 +1359,8 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(get_user_team_ids.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 2)
+
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
 
         self.assertEqual(
             json.loads(urlopen.spy.calls[0].args[0].get_data()),
@@ -1430,7 +1475,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         """Testing IDoneThisIntegration posts multiple events with a single
         request for the user team IDs
         """
-        def _urlopen(request):
+        def _urlopen(request, **kwargs):
             if request.get_full_url().endswith('/teams'):
                 return StringIO(json.dumps([
                     {
@@ -1461,6 +1506,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(get_user_team_ids.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 2)
 
+        self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
         self.assertEqual(urlopen.spy.calls[0].args[0].get_full_url(),
                          'https://beta.idonethis.com/api/v2/teams')
 
@@ -1890,7 +1936,8 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
             }])
 
         self.spy_on(cache_memoize)
-        self.spy_on(urlopen, call_fake=lambda request: StringIO(response))
+        self.spy_on(urlopen,
+                    call_fake=lambda request, **kwargs: StringIO(response))
         self.spy_on(logging.error)
 
         team_ids = get_user_team_ids(self.user)
@@ -1914,7 +1961,8 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         gets empty list
         """
         self.spy_on(cache_memoize)
-        self.spy_on(urlopen, call_fake=lambda request: StringIO('[]'))
+        self.spy_on(urlopen,
+                    call_fake=lambda request, **kwargs: StringIO('[]'))
         self.spy_on(logging.error)
 
         team_ids = get_user_team_ids(self.user)
@@ -1938,7 +1986,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
 
         self.assertEqual(len(cache_memoize.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
-        self.assertEqual(len(logging.error.spy.calls), 1)
+        self.assertEqual(len(logging.error.spy.calls), 2)
 
         self.assertEqual(team_ids, None)
         self.assertNotIn(self.team_ids_cache_key, cache)
@@ -1955,7 +2003,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
 
         self.assertEqual(len(cache_memoize.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
-        self.assertEqual(len(logging.error.spy.calls), 1)
+        self.assertEqual(len(logging.error.spy.calls), 2)
 
         self.assertEqual(team_ids, None)
         self.assertNotIn(self.team_ids_cache_key, cache)
@@ -1965,7 +2013,8 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         invalid JSON
         """
         self.spy_on(cache_memoize)
-        self.spy_on(urlopen, call_fake=lambda request: StringIO('[invalid'))
+        self.spy_on(urlopen,
+                    call_fake=lambda request, **kwargs: StringIO('[invalid'))
         self.spy_on(logging.error)
 
         team_ids = get_user_team_ids(self.user)
@@ -1982,7 +2031,8 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         invalid team data
         """
         self.spy_on(cache_memoize)
-        self.spy_on(urlopen, call_fake=lambda request: StringIO('[{"a":"b"}]'))
+        self.spy_on(urlopen,
+                    call_fake=lambda request, **kw: StringIO('[{"a":"b"}]'))
         self.spy_on(logging.error)
 
         team_ids = get_user_team_ids(self.user)
@@ -1995,12 +2045,15 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         self.assertNotIn(self.team_ids_cache_key, cache)
 
 
-def _urlopen_raise_httperror(request):
+def _urlopen_raise_httperror(request, **kwargs):
     """Fake urlopen that raises an HTTPError for testing.
 
     Args:
         request (urllib2.Request):
             The request to open.
+
+        **kwargs (dict):
+            Additional keyword arguments passed to urlopen.
 
     Raises:
         urllib2.HTTPError:
@@ -2009,12 +2062,15 @@ def _urlopen_raise_httperror(request):
     raise HTTPError(request.get_full_url(), 401, '', {}, StringIO(''))
 
 
-def _urlopen_raise_urlerror(request):
+def _urlopen_raise_urlerror(request, **kwargs):
     """Fake urlopen that raises a URLError for testing.
 
     Args:
         request (urllib2.Request):
             The request to open.
+
+        **kwargs (dict):
+            Additional keyword arguments passed to urlopen.
 
     Raises:
         urllib2.URLError:

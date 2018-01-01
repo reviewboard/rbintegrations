@@ -126,7 +126,7 @@ class IDoneThisIntegration(Integration):
 
             # Lazy load team IDs after the first matching configuration.
             if user_team_ids is None:
-                user_team_ids = set(get_user_team_ids(user))
+                user_team_ids = get_user_team_ids(user)
 
             if not user_team_ids:
                 # We finished posting to all of the user's teams, the request
@@ -278,7 +278,7 @@ class IDoneThisIntegration(Integration):
                         review_request=review_request,
                         signal_name='review_request_reopened')
 
-    def _on_review_published(self, user, review, to_submitter_only, **kwargs):
+    def _on_review_published(self, user, review, to_owner_only, **kwargs):
         """Handler for when a review is published.
 
         Posts an entry to any configured I Done This teams when a review is
@@ -291,14 +291,14 @@ class IDoneThisIntegration(Integration):
             review (reviewboard.reviews.models.review.Review):
                 The review that was published.
 
-            to_submitter_only (boolean):
+            to_owner_only (boolean):
                 Whether the review should be sent only to the review request
-                submitter.
+                owner.
 
             **kwargs (dict):
                 Additional keyword arguments passed to the handler.
         """
-        if to_submitter_only:
+        if to_owner_only:
             return
 
         num_issues = 0

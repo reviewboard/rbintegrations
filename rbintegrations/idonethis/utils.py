@@ -103,15 +103,7 @@ def get_user_team_ids(user):
                           error_info)
             raise
 
-        try:
-            return set(t['hash_id'] for t in json.loads(teams_data))
-        except Exception as e:
-            logging.error('IDoneThis: Failed to parse teams for user "%s": '
-                          '%s, teams data: %s',
-                          user.username,
-                          e,
-                          teams_data)
-            raise
+        return set(t['hash_id'] for t in json.loads(teams_data))
 
     api_token = get_user_api_token(user)
 
@@ -119,10 +111,13 @@ def get_user_team_ids(user):
         return None
 
     try:
-        return cache_memoize(_make_user_team_ids_cache_key(user),
-                             _get_user_team_ids_uncached,
-                             expiration=TEAM_IDS_CACHE_EXPIRATION)
-    except Exception:
+        return set(cache_memoize(_make_user_team_ids_cache_key(user),
+                                 _get_user_team_ids_uncached,
+                                 expiration=TEAM_IDS_CACHE_EXPIRATION))
+    except Exception as e:
+        logging.error('IDoneThis: Failed to load teams for user "%s": %s',
+                      user.username,
+                      e)
         return None
 
 
