@@ -32,24 +32,15 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         config = self._create_config()
         self.integration.enable_integration()
 
+        data = {}
+
         def _make_request(api, url, body=None, method='GET', headers={},
                           content_type=None):
-            self.assertEqual(
-                url, 'https://api.travis-ci.org/repo/myorg%2Fmyrepo/requests')
-
-            request = json.loads(body)['request']
-            self.assertEqual(
-                request['config']['env']['global'],
-                [
-                    'REVIEWBOARD_STATUS_UPDATE_ID=1',
-                    'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d' % config.pk,
-                ])
-            self.assertEqual(request['message'],
-                             'Test Summary\n\nTest Description')
-            self.assertTrue('git checkout %s' % diffset.base_commit_id
-                            in request['config']['script'])
-            self.assertEqual(request['branch'], 'review-requests')
-
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = url
+            data['request'] = json.loads(body)['request']
             return '{}'
 
         self.spy_on(TravisAPI._make_request, call_fake=_make_request)
@@ -57,6 +48,22 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         review_request.publish(review_request.submitter)
 
         self.assertTrue(TravisAPI._make_request.called)
+
+        self.assertEqual(
+            data['url'],
+            'https://api.travis-ci.org/repo/myorg%2Fmyrepo/requests')
+
+        self.assertEqual(
+            data['request']['config']['env']['global'],
+            [
+                'REVIEWBOARD_STATUS_UPDATE_ID=1',
+                'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d' % config.pk,
+            ])
+        self.assertEqual(data['request']['message'],
+                         'Test Summary\n\nTest Description')
+        self.assertTrue('git checkout %s' % diffset.base_commit_id
+                        in data['request']['config']['script'])
+        self.assertEqual(data['request']['branch'], 'review-requests')
 
     def test_build_new_review_request_on_enterprise_travis(self):
         """Testing TravisCIIntegration builds a new review request with Travis
@@ -71,25 +78,15 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         config = self._create_config(enterprise=True)
         self.integration.enable_integration()
 
+        data = {}
+
         def _make_request(api, url, body=None, method='GET', headers={},
                           content_type=None):
-            self.assertEqual(
-                url,
-                'https://travis.example.com/api/repo/myorg%2Fmyrepo/requests')
-
-            request = json.loads(body)['request']
-            self.assertEqual(
-                request['config']['env']['global'],
-                [
-                    'REVIEWBOARD_STATUS_UPDATE_ID=1',
-                    'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d' % config.pk,
-                ])
-            self.assertEqual(request['message'],
-                             'Test Summary\n\nTest Description')
-            self.assertTrue('git checkout %s' % diffset.base_commit_id
-                            in request['config']['script'])
-            self.assertEqual(request['branch'], 'review-requests')
-
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = url
+            data['request'] = json.loads(body)['request']
             return '{}'
 
         self.spy_on(TravisAPI._make_request, call_fake=_make_request)
@@ -97,6 +94,22 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         review_request.publish(review_request.submitter)
 
         self.assertTrue(TravisAPI._make_request.called)
+
+        self.assertEqual(
+            data['url'],
+            'https://travis.example.com/api/repo/myorg%2Fmyrepo/requests')
+
+        self.assertEqual(
+            data['request']['config']['env']['global'],
+            [
+                'REVIEWBOARD_STATUS_UPDATE_ID=1',
+                'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d' % config.pk,
+            ])
+        self.assertEqual(data['request']['message'],
+                         'Test Summary\n\nTest Description')
+        self.assertTrue('git checkout %s' % diffset.base_commit_id
+                        in data['request']['config']['script'])
+        self.assertEqual(data['request']['branch'], 'review-requests')
 
     def test_non_github_review_request(self):
         """Testing TravisCIIntegration skipping a non-GitHub review request"""
