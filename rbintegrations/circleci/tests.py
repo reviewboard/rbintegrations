@@ -30,18 +30,14 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self._create_config()
         self.integration.enable_integration()
 
-        def _urlopen(request):
-            self.assertEqual(request.get_full_url(),
-                             'https://circleci.com/api/v1.1/project/github/'
-                             'myorg/myrepo/tree/review-requests?'
-                             'circle-token=None')
-            build_params = json.loads(request.data)['build_parameters']
-            self.assertEqual(build_params['CIRCLE_JOB'], 'reviewboard')
-            self.assertIn('REVIEWBOARD_API_TOKEN', build_params)
-            self.assertIn('REVIEWBOARD_DIFF_REVISION', build_params)
-            self.assertIn('REVIEWBOARD_REVIEW_REQUEST', build_params)
-            self.assertIn('REVIEWBOARD_SERVER', build_params)
-            self.assertIn('REVIEWBOARD_STATUS_UPDATE_ID', build_params)
+        data = {}
+
+        def _urlopen(request, **kwargs):
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = request.get_full_url()
+            data['build_params'] = json.loads(request.data)['build_parameters']
 
             class _Response(object):
                 def read(self):
@@ -56,6 +52,17 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         review_request.publish(review_request.submitter)
 
         self.assertTrue(urlopen.spy.called)
+        self.assertEqual(data['url'],
+                         'https://circleci.com/api/v1.1/project/github/'
+                         'myorg/myrepo/tree/review-requests?'
+                         'circle-token=None')
+
+        self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
+        self.assertIn('REVIEWBOARD_API_TOKEN', data['build_params'])
+        self.assertIn('REVIEWBOARD_DIFF_REVISION', data['build_params'])
+        self.assertIn('REVIEWBOARD_REVIEW_REQUEST', data['build_params'])
+        self.assertIn('REVIEWBOARD_SERVER', data['build_params'])
+        self.assertIn('REVIEWBOARD_STATUS_UPDATE_ID', data['build_params'])
 
     def test_build_new_review_request_with_local_site(self):
         """Testing CircleCIIntegration builds a new review request with a local
@@ -70,22 +77,14 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self._create_config(with_local_site=True)
         self.integration.enable_integration()
 
-        def _urlopen(request):
-            self.assertEqual(request.get_full_url(),
-                             'https://circleci.com/api/v1.1/project/github/'
-                             'myorg/myrepo/tree/review-requests?'
-                             'circle-token=None')
-            build_params = json.loads(request.data)['build_parameters']
-            self.assertEqual(build_params['CIRCLE_JOB'], 'reviewboard')
-            self.assertIn('REVIEWBOARD_API_TOKEN', build_params)
-            self.assertIn('REVIEWBOARD_DIFF_REVISION', build_params)
-            self.assertIn('REVIEWBOARD_REVIEW_REQUEST', build_params)
-            self.assertIn('REVIEWBOARD_STATUS_UPDATE_ID', build_params)
+        data = {}
 
-            self.assertEqual(build_params['REVIEWBOARD_SERVER'],
-                             'http://example.com/s/%s/' % self.local_site_name)
-            self.assertEqual(build_params['REVIEWBOARD_LOCAL_SITE'],
-                             self.local_site_name)
+        def _urlopen(request, **kwargs):
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = request.get_full_url()
+            data['build_params'] = json.loads(request.data)['build_parameters']
 
             class _Response(object):
                 def read(self):
@@ -100,6 +99,21 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         review_request.publish(review_request.submitter)
 
         self.assertTrue(urlopen.spy.called)
+        self.assertEqual(data['url'],
+                         'https://circleci.com/api/v1.1/project/github/'
+                         'myorg/myrepo/tree/review-requests?'
+                         'circle-token=None')
+
+        self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
+        self.assertIn('REVIEWBOARD_API_TOKEN', data['build_params'])
+        self.assertIn('REVIEWBOARD_DIFF_REVISION', data['build_params'])
+        self.assertIn('REVIEWBOARD_REVIEW_REQUEST', data['build_params'])
+        self.assertIn('REVIEWBOARD_STATUS_UPDATE_ID', data['build_params'])
+
+        self.assertEqual(data['build_params']['REVIEWBOARD_SERVER'],
+                         'http://example.com/s/%s/' % self.local_site_name)
+        self.assertEqual(data['build_params']['REVIEWBOARD_LOCAL_SITE'],
+                         self.local_site_name)
 
     def test_non_github_review_request(self):
         """Testing CircleCIIntegration skipping a non-GitHub review request"""

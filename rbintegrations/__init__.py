@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 #:
 #: (Major, Minor, Micro, Patch, alpha/beta/rc/final, Release Number, Released)
 #:
-VERSION = (0, 5, 0, 0, 'final', 0, True)
+VERSION = (0, 5, 1, 0, 'alpha', 0, False)
 
 
 def get_version_string():
