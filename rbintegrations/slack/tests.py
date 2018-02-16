@@ -556,6 +556,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             submitter=self.user,
             summary='Test Review Request',
             description='My description.',
+            target_people=[self.user],
             publish=True)
 
         draft = ReviewRequestDraft.create(review_request)
@@ -615,6 +616,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             submitter=self.user,
             summary='Test Review Request',
             description='My description.',
+            target_people=[self.user],
             publish=True)
 
         draft = ReviewRequestDraft.create(review_request)
@@ -678,6 +680,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             submitter=self.user,
             summary='Test Review Request',
             description='My description.',
+            target_people=[self.user],
             publish=False)
         self.create_file_attachment(review_request)
         review_request.publish(self.user)
