@@ -1,3 +1,5 @@
+"""Forms for chat integrations."""
+
 from __future__ import unicode_literals
 
 from django import forms
@@ -7,11 +9,12 @@ from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
 
 
-class SlackIntegrationConfigForm(IntegrationConfigForm):
-    """Form for configuring Slack.
+class BaseChatIntegrationConfigForm(IntegrationConfigForm):
+    """Form for configuring chat integration.
 
-    This allows an administrator to set up a Slack configuration for sending
-    messages to a given Slack WebHook URL based on the specified conditions.
+    This allows an administrator to set up a chat configuration for sending
+    messages to a given WebHook URL based on the specified
+    conditions.
     """
 
     conditions = ConditionsField(ReviewRequestConditionChoices,
@@ -20,9 +23,9 @@ class SlackIntegrationConfigForm(IntegrationConfigForm):
     webhook_url = forms.CharField(
         label=_('Webhook URL'),
         required=True,
-        help_text=_('Your unique Slack webhook URL. This can be found in the '
-                    '"Setup Instructions" box inside the Incoming WebHooks '
-                    'integration.'),
+        help_text=_('Your unique webhook URL. This can be '
+                    'found in the "Setup Instructions" box inside the '
+                    'Incoming WebHooks integration.'),
         widget=forms.TextInput(attrs={
             'size': 80,
         }))
@@ -49,9 +52,9 @@ class SlackIntegrationConfigForm(IntegrationConfigForm):
             ('Where To Post', {
                 'description': _(
                     'To start, add a new "Incoming WebHooks" service '
-                    'integration on Slack. You can then provide the '
-                    '"Unique WebHook URL" below, and optionally choose a '
-                    'custom channel to send notifications to.'
+                    'integration. You can then provide the "Unique WebHook '
+                    'URL" below, and optionally choose a custom channel to '
+                    'send notifications to.'
                 ),
                 'fields': ('webhook_url', 'channel'),
                 'classes': ('wide',)

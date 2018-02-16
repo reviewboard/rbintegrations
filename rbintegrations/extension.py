@@ -9,6 +9,7 @@ from reviewboard.urls import reviewable_url_names, review_request_url_names
 from rbintegrations.asana.integration import AsanaIntegration
 from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.idonethis.integration import IDoneThisIntegration
+from rbintegrations.mattermost.integration import MattermostIntegration
 from rbintegrations.slack.integration import SlackIntegration
 from rbintegrations.travisci.integration import TravisCIIntegration
 from rbintegrations.trello.integration import TrelloIntegration
@@ -27,6 +28,7 @@ class RBIntegrationsExtension(Extension):
         AsanaIntegration,
         CircleCIIntegration,
         IDoneThisIntegration,
+        MattermostIntegration,
         SlackIntegration,
         TravisCIIntegration,
         TrelloIntegration
