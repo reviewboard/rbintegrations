@@ -262,9 +262,12 @@ class CircleCIIntegration(Integration):
                 profile.should_send_email = False
                 profile.save()
 
-                avatar_service = avatar_services.get_avatar_service(
-                    URLAvatarService.avatar_service_id)
-                # TODO: make somewhat higher-res versions for the main avatar.
-                avatar_service.setup(user, self.icon_static_urls)
+                if avatar_services.is_enabled(
+                    URLAvatarService.avatar_service_id):
+                    avatar_service = avatar_services.get_avatar_service(
+                        URLAvatarService.avatar_service_id)
+                    # TODO: make somewhat higher-res versions for the main
+                    # avatar.
+                    avatar_service.setup(user, self.icon_static_urls)
 
                 return user
