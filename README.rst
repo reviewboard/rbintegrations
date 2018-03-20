@@ -12,8 +12,43 @@ Review Board.
 .. _`Review Board`: https://www.reviewboard.org/
 
 
-Getting Support
+Integrations
+============
+
+Several integrations are provided out of the box, with more planned for future
+releases. See the links below for a description of each integration and
+instructions.
+
+
+Chat
+----
+
+* `Mattermost <https://www.reviewboard.org/integrations/mattermost/>`_
+* `Slack <https://www.reviewboard.org/integrations/slack/>`_
+
+
+Continuous Integration
+----------------------
+
+* `CircleCI <https://www.reviewboard.org/integrations/circleci/>`_
+* `Travis CI <https://www.reviewboard.org/integrations/travis-ci/>`_
+
+
+Task Tracking
+-------------
+
+* `Asana <https://www.reviewboard.org/integrations/asana/>`_
+* `Trello <https://www.reviewboard.org/integrations/trello/>`_
+
+
+Status Tracking
 ---------------
+
+* `I Done This <https://www.reviewboard.org/integrations/idonethis/>`_
+
+
+Getting Support
+===============
 
 We can help you get going with Review Board, and diagnose any issues that may
 come up. There are two levels of support: Public community support, and
@@ -36,7 +71,7 @@ older releases (when possible).
 
 
 Our Happy Users
----------------
+===============
 
 There are thousands of companies and organizations using Review Board today.
 We respect the privacy of our users, but some of them have asked to feature them
@@ -50,7 +85,7 @@ If you're using Review Board, and you're a happy user,
 
 
 Reporting Bugs
---------------
+==============
 
 Hit a bug? Let us know by
 `filing a bug report <https://www.reviewboard.org/bugs/new/>`_.
@@ -61,7 +96,7 @@ else has already filed the bug.
 
 
 Contributing
-------------
+============
 
 Are you a developer? Do you want to add new integrations or improve our
 existing integrations? Great! Let's help you get started.
@@ -87,7 +122,7 @@ on over to our `development discussion list`_.
 
 
 Related Projects
-----------------
+================
 
 * `Review Board`_ -
   Our powerful, open source code review tool.

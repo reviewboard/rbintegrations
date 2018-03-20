@@ -361,3 +361,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/2.7', None),
     'rb3.0': ('%s/docs/manual/3.0/' % rbwebsite_url, None),
 }
+
+extlinks = {
+    'rbintegration': ('https://www.reviewboard.org/integrations/%s', ''),
+}
