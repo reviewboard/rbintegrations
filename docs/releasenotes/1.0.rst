@@ -5,7 +5,7 @@
 Integrations 1.0 Release Notes
 ==============================
 
-**Release date**: TBD
+**Release date**: March 20, 2018
 
 
 New Integrations
