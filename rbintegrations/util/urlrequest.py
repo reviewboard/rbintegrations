@@ -14,7 +14,8 @@ class URLRequest(BaseURLRequest):
     """
 
     def __init__(self, url, body='', headers=None, method='GET'):
-        """Initialize the URLRequest.
+        """
+        Initialize the URLRequest.
 
         Args:
             url (unicode):
