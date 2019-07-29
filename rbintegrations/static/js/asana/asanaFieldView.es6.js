@@ -29,7 +29,7 @@ const AsanaInlineEditorView = RB.InlineEditorView.extend({
                 return JSON.stringify(selected.map(
                     key => _.pick(
                         selectize.options[key],
-                        ['completed', 'id', 'workspace_id', 'name'])));
+                        ['completed', 'gid', 'workspace_id', 'name'])));
             },
             isFieldDirty: (editor, initialValue) => {
                 const value = editor.getValue();
@@ -128,7 +128,7 @@ RB.ReviewRequestFields.AsanaFieldView =
         const lis = tasks.map(task => this.taskTemplate({
             completed: task.completed,
             workspaceId: task.workspace_id,
-            taskId: task.task_id,
+            taskId: task.gid,
             taskSummary: task.name,
             tagName: 'li',
         }));
@@ -158,16 +158,22 @@ RB.ReviewRequestFields.AsanaFieldView =
         const $field = this.inlineEditorView.$field;
         const tasks = this.$el.data('raw-value');
 
+        tasks.forEach(task => {
+            if (task.gid === undefined) {
+                task.gid = String(task.id);
+            }
+        });
+
         this._renderValue(tasks || []);
 
         $field.selectize({
             copyClassesToDropdown: true,
             dropdownParent: 'body',
             labelField: 'name',
-            valueField: 'id',
+            valueField: 'gid',
             multiple: true,
             options: tasks,
-            items: _.pluck(tasks, 'id'),
+            items: tasks.map(task => task.gid),
             optgroupLabelField: 'workspace',
             searchField: 'name',
             sortField: [
@@ -179,7 +185,7 @@ RB.ReviewRequestFields.AsanaFieldView =
                     return this.taskTemplate({
                         completed: data.completed,
                         workspaceId: data.workspace_id,
-                        taskId: data.id,
+                        taskId: data.gid,
                         taskSummary: data.name,
                         tagName: 'div',
                     });
