@@ -1613,7 +1613,8 @@ class IDoneThisIntegrationFormTests(IntegrationTestCase):
         """Testing IDoneThisIntegration admin form, cleaning team ID containing
         slash raises validation error
         """
-        form = IDoneThisIntegrationConfigForm(self.integration, self.request)
+        form = IDoneThisIntegrationConfigForm(integration=self.integration,
+                                              request=self.request)
         form.cleaned_data = {
             'team_id': 't/team123',
         }

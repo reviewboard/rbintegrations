@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.generic import View
 from reviewboard.reviews.models.status_update import StatusUpdate
 
@@ -62,11 +62,9 @@ class CircleCIWebHookView(View):
         try:
             build_parameters = payload['payload']['build_parameters']
         except KeyError:
-            logger.error('Unable to find build_parameters in CircleCI '
-                         'webhook payload: %s',
-                         request.body,
-                         request=request)
-            return
+            error = 'Unable to find build_parameters in payload.'
+            logger.error('CircleCI webhook: %s', error, request=request)
+            return HttpResponseBadRequest(error)
 
         try:
             review_request_id = \
@@ -82,19 +80,20 @@ class CircleCIWebHookView(View):
                 local_site_log = ''
         except KeyError:
             # This was a normal build, not a review request.
-            return
+            return HttpResponse()
 
         logger.debug('Got CircleCI webhook event for review request %d%s '
                      '(status update %d)',
-                     review_request_id, local_site_log, status_update_id)
+                     review_request_id, local_site_log, status_update_id,
+                     request=request)
 
         try:
             status_update = StatusUpdate.objects.get(pk=status_update_id)
         except StatusUpdate.DoesNotExist:
-            logger.error('Unable to find matching status update ID %d '
-                         'for CircleCI webhook.',
-                         status_update_id)
-            return
+            error = ('Unable to find matching status update ID %d'
+                     % status_update_id)
+            logger.error('CircleCI webhook: %s', error, request=request)
+            return HttpResponseBadRequest(error)
 
         status = payload['payload']['status']
 

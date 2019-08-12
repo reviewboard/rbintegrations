@@ -122,7 +122,9 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         self._create_config()
         self.integration.enable_integration()
 
-        self.spy_on(TravisAPI._make_request, call_original=False)
+        self.spy_on(TravisAPI._make_request,
+                    owner=TravisAPI,
+                    call_original=False)
 
         review_request.publish(review_request.submitter)
 
@@ -131,8 +133,8 @@ class TravisCIIntegrationTests(IntegrationTestCase):
     def test_travisci_config_form_valid(self):
         """Testing TravisCIIntegrationConfigForm validation success"""
         form = TravisCIIntegrationConfigForm(
-            self.integration,
-            None,
+            integration=self.integration,
+            request=None,
             data={
                 'conditions_last_id': 0,
                 'conditions_mode': 'always',
@@ -142,17 +144,20 @@ class TravisCIIntegrationTests(IntegrationTestCase):
                 'travis_yml': 'script:\n    - python ./tests/runtests.py',
             })
 
-        self.spy_on(TravisAPI.get_user, call_original=False)
+        self.spy_on(TravisAPI.get_user, owner=TravisAPI, call_original=False)
         self.spy_on(TravisAPI.lint,
+                    owner=TravisAPI,
                     call_fake=lambda x, travis_yml: {'warnings': []})
 
         self.assertTrue(form.is_valid())
 
     def test_travisci_config_form_lint_failure(self):
         """Testing TravisCIIntegrationConfigForm validation lint failure"""
-        self.spy_on(TravisAPI.get_user, call_original=False)
+        self.spy_on(TravisAPI.get_user, owner=TravisAPI, call_original=False)
         self.spy_on(
-            TravisAPI.lint, call_fake=lambda x, travis_yml: {
+            TravisAPI.lint,
+            owner=TravisAPI,
+            call_fake=lambda x, travis_yml: {
                 'warnings': [{
                     'key': 'script',
                     'message': 'An error',
@@ -160,8 +165,8 @@ class TravisCIIntegrationTests(IntegrationTestCase):
             })
 
         form = TravisCIIntegrationConfigForm(
-            self.integration,
-            None,
+            integration=self.integration,
+            request=None,
             data={
                 'conditions_last_id': 0,
                 'conditions_mode': 'always',
@@ -180,11 +185,11 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         def _raise_403(obj):
             raise HTTPError('', 403, 'Authentication failed', None, None)
 
-        self.spy_on(TravisAPI.get_user, call_fake=_raise_403)
+        self.spy_on(TravisAPI.get_user, owner=TravisAPI, call_fake=_raise_403)
 
         form = TravisCIIntegrationConfigForm(
-            self.integration,
-            None,
+            integration=self.integration,
+            request=None,
             data={
                 'conditions_last_id': 0,
                 'conditions_mode': 'always',
