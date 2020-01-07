@@ -1,0 +1,35 @@
+.. default-intersphinx:: rb3.0
+
+
+================================
+Integrations 1.0.1 Release Notes
+================================
+
+**Release date**: January 7, 2020
+
+
+Compatibility
+=============
+
+Asana
+-----
+
+* Updated :rbintegration:`Asana <asana>` compatibility to use their newer,
+  future-proof ID format for tasks.
+
+
+Bug Fixes
+=========
+
+Travis CI
+---------
+
+* Fixed a bad HTTP response when handling some incoming
+  :rbintegration:`Travis CI <travis-ci>` WebHooks.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
