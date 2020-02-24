@@ -42,8 +42,12 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
             data['request'] = body
             return '{}'
 
-        self.spy_on(JenkinsAPI._make_raw_request, call_fake=_make_raw_request)
-        self.spy_on(JenkinsAPI._fetch_csrf_token, call_original=False)
+        self.spy_on(JenkinsAPI._make_raw_request,
+                    owner=JenkinsAPI,
+                    call_fake=_make_raw_request)
+        self.spy_on(JenkinsAPI._fetch_csrf_token,
+                    owner=JenkinsAPI,
+                    call_original=False)
 
         review_request.publish(review_request.submitter)
 
@@ -99,8 +103,12 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
             data['request'] = body
             return '{}'
 
-        self.spy_on(JenkinsAPI._make_raw_request, call_fake=_make_raw_request)
-        self.spy_on(JenkinsAPI._fetch_csrf_token, call_original=False)
+        self.spy_on(JenkinsAPI._make_raw_request,
+                    owner=JenkinsAPI,
+                    call_fake=_make_raw_request)
+        self.spy_on(JenkinsAPI._fetch_csrf_token,
+                    owner=JenkinsAPI,
+                    call_original=False)
 
         review_request.publish(review_request.submitter)
 
@@ -148,8 +156,12 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
         def _fetch_csrf_token(api):
             raise HTTPError('', 404, 'Not found', None, None)
 
-        self.spy_on(JenkinsAPI._make_raw_request, call_original=False)
-        self.spy_on(JenkinsAPI._fetch_csrf_token, call_fake=_fetch_csrf_token)
+        self.spy_on(JenkinsAPI._make_raw_request,
+                    owner=JenkinsAPI,
+                    call_original=False)
+        self.spy_on(JenkinsAPI._fetch_csrf_token,
+                    call_fake=_fetch_csrf_token,
+                    owner=JenkinsAPI)
 
         review_request.publish(review_request.submitter)
 
@@ -170,8 +182,12 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
         def _fetch_csrf_token(api):
             raise HTTPError('', 400, 'Bad request', None, None)
 
-        self.spy_on(JenkinsAPI._make_raw_request, call_original=False)
-        self.spy_on(JenkinsAPI._fetch_csrf_token, call_fake=_fetch_csrf_token)
+        self.spy_on(JenkinsAPI._make_raw_request,
+                    owner=JenkinsAPI,
+                    call_original=False)
+        self.spy_on(JenkinsAPI._fetch_csrf_token,
+                    owner=JenkinsAPI,
+                    call_fake=_fetch_csrf_token)
 
         review_request.publish(review_request.submitter)
 
@@ -200,8 +216,12 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
             data['request'] = body
             return '{}'
 
-        self.spy_on(JenkinsAPI._make_raw_request, call_fake=_make_raw_request)
-        self.spy_on(JenkinsAPI._fetch_csrf_token, call_original=False)
+        self.spy_on(JenkinsAPI._make_raw_request,
+                    owner=JenkinsAPI,
+                    call_fake=_make_raw_request)
+        self.spy_on(JenkinsAPI._fetch_csrf_token,
+                    owner=JenkinsAPI,
+                    call_original=False)
 
         review_request.publish(review_request.submitter)
 

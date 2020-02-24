@@ -43,7 +43,9 @@ class TravisCIIntegrationTests(IntegrationTestCase):
             data['request'] = json.loads(body)['request']
             return '{}'
 
-        self.spy_on(TravisAPI._make_request, call_fake=_make_request)
+        self.spy_on(TravisAPI._make_request,
+                    owner=TravisAPI,
+                    call_fake=_make_request)
 
         review_request.publish(review_request.submitter)
 
@@ -59,6 +61,7 @@ class TravisCIIntegrationTests(IntegrationTestCase):
                 'REVIEWBOARD_STATUS_UPDATE_ID=1',
                 'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d' % config.pk,
             ])
+
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
         self.assertTrue('git checkout %s' % diffset.base_commit_id
@@ -89,7 +92,9 @@ class TravisCIIntegrationTests(IntegrationTestCase):
             data['request'] = json.loads(body)['request']
             return '{}'
 
-        self.spy_on(TravisAPI._make_request, call_fake=_make_request)
+        self.spy_on(TravisAPI._make_request,
+                    owner=TravisAPI,
+                    call_fake=_make_request)
 
         review_request.publish(review_request.submitter)
 
@@ -232,6 +237,7 @@ class TravisCIIntegrationTests(IntegrationTestCase):
 
             service = account.service
             self.spy_on(service.client.http_post,
+                        owner=service.client,
                         call_fake=_http_post_authorize)
 
             service.authorize('myuser', 'mypass', None)

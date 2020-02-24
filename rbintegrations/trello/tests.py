@@ -19,6 +19,7 @@ class TrelloIntegrationTests(IntegrationTestCase):
     def test_card_search(self):
         """Testing TrelloCardSearchView"""
         self.spy_on(TrelloCardSearchView.get,
+                    owner=TrelloCardSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -34,6 +35,7 @@ class TrelloIntegrationTests(IntegrationTestCase):
     def test_card_search_unpublished(self):
         """Testing TrelloCardSearchView with an unpublished review request"""
         self.spy_on(TrelloCardSearchView.get,
+                    owner=TrelloCardSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -49,6 +51,7 @@ class TrelloIntegrationTests(IntegrationTestCase):
     def test_card_search_with_local_site(self):
         """Testing TrelloCardSearchView with a Local Site"""
         self.spy_on(TrelloCardSearchView.get,
+                    owner=TrelloCardSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -69,6 +72,7 @@ class TrelloIntegrationTests(IntegrationTestCase):
         not have access to
         """
         self.spy_on(TrelloCardSearchView.get,
+                    owner=TrelloCardSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 

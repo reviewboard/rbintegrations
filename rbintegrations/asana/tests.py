@@ -20,6 +20,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
     def test_workspace_list(self):
         """Testing AsanaWorkspaceListView"""
         self.spy_on(AsanaWorkspaceListView.get,
+                    owner=AsanaWorkspaceListView,
                     call_fake=lambda self, request: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -30,6 +31,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
     def test_task_search(self):
         """Testing AsanaTaskSearchView"""
         self.spy_on(AsanaTaskSearchView.get,
+                    owner=AsanaTaskSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -45,6 +47,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
     def test_task_search_unpublished(self):
         """Testing AsanaTaskSearchView with an unpublished review request"""
         self.spy_on(AsanaTaskSearchView.get,
+                    owner=AsanaTaskSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -60,6 +63,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
     def test_task_search_with_local_site(self):
         """Testing AsanaTaskSearchView with a Local Site"""
         self.spy_on(AsanaTaskSearchView.get,
+                    owner=AsanaTaskSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
@@ -80,6 +84,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
         have access to
         """
         self.spy_on(AsanaTaskSearchView.get,
+                    owner=AsanaTaskSearchView,
                     call_fake=lambda self, request, **kwargs: HttpResponse(
                         '{}', content_type='application/json'))
 
