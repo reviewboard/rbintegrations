@@ -6,8 +6,7 @@ from django.contrib.auth.models import User
 from django.utils.six.moves.urllib.request import urlopen
 from djblets.conditions import ConditionSet, Condition
 from djblets.testing.decorators import add_fixtures
-from reviewboard.accounts.trophies import (TrophyType, register_trophy,
-                                           unregister_trophy)
+from reviewboard.accounts.trophies import TrophyType, trophies_registry
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
 from reviewboard.reviews.models import ReviewRequestDraft
 
@@ -501,12 +500,12 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(urlopen, call_original=False)
         self.spy_on(self.integration.notify)
 
-        register_trophy(MyTrophy)
+        trophies_registry.register(MyTrophy)
 
         try:
             review_request.publish(self.user)
         finally:
-            unregister_trophy(MyTrophy)
+            trophies_registry.unregister(MyTrophy)
 
         self.assertEqual(len(self.integration.notify.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
