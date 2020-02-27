@@ -74,8 +74,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
                          'https://beta.idonethis.com/api/v2/entries')
         self.assertEqual(request.get_method(), 'POST')
         self.assertEqual(request.get_header('Authorization'), 'Token tok123')
+
         self.assertEqual(
-            json.loads(request.get_data()),
+            json.loads(request.data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -111,8 +112,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
 
+
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -144,8 +146,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
 
+
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -181,8 +184,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
 
+
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -213,7 +217,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -249,8 +253,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
         self.assertEqual(len(urlopen.spy.calls), 1)
 
+
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -292,7 +297,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -338,7 +343,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -376,7 +381,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -418,7 +423,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -453,7 +458,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -492,7 +497,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -527,7 +532,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -566,7 +571,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -603,7 +608,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -642,7 +647,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -680,7 +685,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -720,7 +725,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -759,7 +764,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -800,7 +805,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -839,7 +844,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -880,7 +885,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -920,7 +925,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -962,7 +967,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1002,7 +1007,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1045,7 +1050,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1317,7 +1322,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 2)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1326,7 +1331,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
             })
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[1].args[0].get_data()),
+            json.loads(urlopen.spy.calls[1].args[0].data),
             {
                 'team_id': 'teamABC',
                 'status': 'done',
@@ -1363,7 +1368,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1372,7 +1377,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
             })
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[1].args[0].get_data()),
+            json.loads(urlopen.spy.calls[1].args[0].data),
             {
                 'team_id': 'teamABC',
                 'status': 'done',
@@ -1405,7 +1410,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1434,7 +1439,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1463,7 +1468,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
 
         self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].get_data()),
+            json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1515,8 +1520,9 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
 
         self.assertEqual(urlopen.spy.calls[1].args[0].get_full_url(),
                          'https://beta.idonethis.com/api/v2/entries')
+
         self.assertEqual(
-            json.loads(urlopen.spy.calls[1].args[0].get_data()),
+            json.loads(urlopen.spy.calls[1].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1533,7 +1539,7 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
         self.assertEqual(urlopen.spy.calls[2].args[0].get_full_url(),
                          'https://beta.idonethis.com/api/v2/entries')
         self.assertEqual(
-            json.loads(urlopen.spy.calls[2].args[0].get_data()),
+            json.loads(urlopen.spy.calls[2].args[0].data),
             {
                 'team_id': 'team123',
                 'status': 'done',
@@ -1672,7 +1678,7 @@ class IDoneThisIntegrationFormTests(IntegrationTestCase):
                          'https://beta.idonethis.com/api/v2/noop')
         self.assertEqual(request.get_method(), 'GET')
         self.assertEqual(request.get_header('Authorization'), 'Token tok123')
-        self.assertEqual(request.get_data(), None)
+        self.assertIsNone(request.data)
 
         self.assertEqual(form.cleaned_data['idonethis_api_token'], 'tok123')
 
@@ -1734,7 +1740,7 @@ class IDoneThisIntegrationFormTests(IntegrationTestCase):
 
         self.assertEqual(len(decrypt_password.spy.calls), 0)
 
-        self.assertEqual(form.fields['idonethis_api_token'].initial, None)
+        self.assertIsNone(form.fields['idonethis_api_token'].initial)
 
     def test_user_load_token_decrypted(self):
         """Testing IDoneThisIntegration user form, loading decrypted API token
@@ -1894,7 +1900,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         self.assertEqual(len(cache_memoize.spy.calls), 0)
         self.assertEqual(len(urlopen.spy.calls), 0)
 
-        self.assertEqual(team_ids, None)
+        self.assertIsNone(team_ids)
         self.assertNotIn(self.team_ids_cache_key, cache)
 
     def test_get_user_team_ids_from_cache(self):
@@ -1952,7 +1958,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
                          'https://beta.idonethis.com/api/v2/teams')
         self.assertEqual(request.get_method(), 'GET')
         self.assertEqual(request.get_header('Authorization'), 'Token tok123')
-        self.assertEqual(request.get_data(), None)
+        self.assertIsNone(request.data)
 
         self.assertEqual(team_ids, {'team123', 'teamABC'})
         self.assertEqual(team_ids, cache.get(self.team_ids_cache_key))
@@ -1989,7 +1995,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
         self.assertEqual(len(logging.error.spy.calls), 2)
 
-        self.assertEqual(team_ids, None)
+        self.assertIsNone(team_ids)
         self.assertNotIn(self.team_ids_cache_key, cache)
 
     def test_get_user_team_ids_request_urlerror(self):
@@ -2006,7 +2012,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
         self.assertEqual(len(logging.error.spy.calls), 2)
 
-        self.assertEqual(team_ids, None)
+        self.assertIsNone(team_ids)
         self.assertNotIn(self.team_ids_cache_key, cache)
 
     def test_get_user_team_ids_request_invalid_json(self):
@@ -2024,7 +2030,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
         self.assertEqual(len(logging.error.spy.calls), 1)
 
-        self.assertEqual(team_ids, None)
+        self.assertIsNone(team_ids)
         self.assertNotIn(self.team_ids_cache_key, cache)
 
     def test_get_user_team_ids_request_invalid_team_data(self):
@@ -2042,7 +2048,7 @@ class IDoneThisIntegrationUtilTests(IntegrationTestCase):
         self.assertEqual(len(urlopen.spy.calls), 1)
         self.assertEqual(len(logging.error.spy.calls), 1)
 
-        self.assertEqual(team_ids, None)
+        self.assertIsNone(team_ids)
         self.assertNotIn(self.team_ids_cache_key, cache)
 
 
