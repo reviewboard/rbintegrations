@@ -289,7 +289,7 @@ class BaseChatIntegration(Integration):
         """
         return build_server_url(review_request.get_absolute_url())
 
-    def _on_review_request_closed(self, user, review_request, type,
+    def _on_review_request_closed(self, user, review_request, close_type,
                                   description=None, **kwargs):
         """Handler for when review requests are closed.
 
@@ -303,7 +303,7 @@ class BaseChatIntegration(Integration):
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request that was closed.
 
-            type (unicode):
+            close_type (unicode):
                 The close type.
 
             description (unicode):
@@ -317,17 +317,17 @@ class BaseChatIntegration(Integration):
 
         user_link = self.get_user_text_link(user, review_request.local_site)
 
-        if type == ReviewRequest.DISCARDED:
+        if close_type == ReviewRequest.DISCARDED:
             pre_text = 'Discarded by %s' % user_link
             fallback_text = 'Discarded by %s' % user_displayname(user)
-        elif type == ReviewRequest.SUBMITTED:
+        elif close_type == ReviewRequest.SUBMITTED:
             pre_text = 'Closed as completed by %s' % user_link
             fallback_text = 'Closed as completed by %s' % \
                 user_displayname(user)
         else:
             logging.error('Tried to notify on review_request_closed for '
                           ' review request pk=%d with unknown close type "%s"',
-                          review_request.pk, type)
+                          review_request.pk, close_type)
             return
 
         if not user:
