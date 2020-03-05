@@ -233,7 +233,7 @@ class TravisCIIntegrationTests(IntegrationTestCase):
                     'note_url': '',
                     'updated_at': '2012-05-04T03:30:00Z',
                     'created_at': '2012-05-04T03:30:00Z',
-                }), {}
+                }).encode('utf-8'), {}
 
             service = account.service
             self.spy_on(service.client.http_post,

@@ -39,8 +39,9 @@ def create_idonethis_request(request_path, api_token, json_payload=None):
         'Authorization': 'Token %s' % api_token,
     }
 
-    if json_payload:
+    if json_payload is not None:
         headers['Content-Type'] = 'application/json'
+        json_payload = json_payload.encode('utf-8')
 
     return Request(url, json_payload, headers)
 

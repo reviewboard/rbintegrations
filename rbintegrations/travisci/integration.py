@@ -110,7 +110,8 @@ class TravisCIIntegration(Integration):
         user = self._get_or_create_user()
 
         scmtool = repository.get_scmtool()
-        diff_data = base64.b64encode(scmtool.get_parser('').raw_diff(diffset))
+        diff_data = base64.b64encode(
+            scmtool.get_parser(b'').raw_diff(diffset))
 
         commit_message = '%s\n\n%s' % (review_request.summary,
                                        review_request.description)
@@ -137,7 +138,7 @@ class TravisCIIntegration(Integration):
 
             travis_config['script'] = [
                 'git fetch --unshallow origin',
-                'git checkout %s' % diffset.base_commit_id.encode('utf-8'),
+                'git checkout %s' % diffset.base_commit_id,
                 'echo %s | base64 --decode | patch -p1' % diff_data,
             ] + script
 
