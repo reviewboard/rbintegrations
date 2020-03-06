@@ -14,7 +14,7 @@ class TrelloIntegrationTests(IntegrationTestCase):
     """Tests for Trello."""
 
     integration_cls = TrelloIntegration
-    fixtures = ['test_site', 'test_users']
+    fixtures = ['test_users', 'test_site']
 
     def test_card_search(self):
         """Testing TrelloCardSearchView"""

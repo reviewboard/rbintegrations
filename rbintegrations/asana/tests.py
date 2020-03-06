@@ -15,7 +15,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
     """Tests for Asana."""
 
     integration_cls = AsanaIntegration
-    fixtures = ['test_site', 'test_users']
+    fixtures = ['test_users', 'test_site']
 
     def test_workspace_list(self):
         """Testing AsanaWorkspaceListView"""
@@ -52,6 +52,7 @@ class AsanaIntegrationTests(IntegrationTestCase):
                         '{}', content_type='application/json'))
 
         review_request = self.create_review_request(public=False)
+        self.client.login(username='dopey', password='dopey')
         rsp = self.client.get(local_site_reverse(
             'asana-task-search',
             kwargs={

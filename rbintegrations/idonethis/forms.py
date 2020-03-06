@@ -164,7 +164,8 @@ class IDoneThisIntegrationAccountPageForm(AccountPageForm):
         Stores an encrypted version of the API token.
         """
         api_token = self.cleaned_data['idonethis_api_token']
-        settings = self.profile.settings.setdefault('idonethis', {})
+        profile = self.user.get_profile()
+        settings = profile.settings.setdefault('idonethis', {})
 
         if api_token:
             logging.debug('IDoneThis: Saving API token for user "%s"',
@@ -175,6 +176,6 @@ class IDoneThisIntegrationAccountPageForm(AccountPageForm):
                           self.user.username)
             del settings['api_token']
 
-        self.profile.save()
+        profile.save()
 
         delete_cached_user_team_ids(self.user)
