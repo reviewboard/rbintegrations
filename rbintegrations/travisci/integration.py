@@ -131,16 +131,28 @@ class TravisCIIntegration(Integration):
 
             # Add set-up and patching to the start of the "script" section of
             # the config.
+            new_script = [
+                'git fetch --unshallow origin',
+                'git checkout %s' % diffset.base_commit_id,
+            ]
+
+            # Add parent diff if necessary
+            parent_diff_data = self._get_parent_diff(diffset)
+
+            if parent_diff_data:
+                parent_diff_data = base64.b64encode(parent_diff_data)
+                new_script.append('echo %s | base64 --decode | patch -p1' %
+                                  parent_diff_data.decode('utf-8'))
+
+            new_script.append('echo %s | base64 --decode | patch -p1' %
+                              diff_data.decode('utf-8'))
+
             script = travis_config.get('script', [])
 
             if not isinstance(script, list):
                 script = [script]
 
-            travis_config['script'] = [
-                'git fetch --unshallow origin',
-                'git checkout %s' % diffset.base_commit_id,
-                'echo %s | base64 --decode | patch -p1' % diff_data,
-            ] + script
+            travis_config['script'] = new_script + script
 
             # Set up webhook notifications.
             notifications = travis_config.get('notifications') or {}
@@ -259,3 +271,27 @@ class TravisCIIntegration(Integration):
                     avatar_service.setup(user, self.icon_static_urls)
 
                 return user
+
+    def _get_parent_diff(self, diffset):
+        """Return the raw parent diff.
+
+        Args:
+            diffset (reviewboard.diffviewer.models.DiffSet):
+                The diffset to get the parent data for.
+
+        Returns:
+            bytes:
+            The raw parent diff data, if available. None if not.
+        """
+        data = []
+
+        for filediff in diffset.files.all():
+            parent_diff = filediff.parent_diff
+
+            if parent_diff:
+                data.append(parent_diff)
+
+        if data:
+            return b''.join(data)
+        else:
+            return None
