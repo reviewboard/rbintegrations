@@ -131,10 +131,12 @@ class TravisCIIntegration(Integration):
 
             # Add set-up and patching to the start of the "script" section of
             # the config.
-            new_script = [
-                'git fetch --unshallow origin',
-                'git checkout %s' % diffset.base_commit_id,
-            ]
+            new_script = []
+
+            if travis_config.get('git', {}).get('depth', True) is not False:
+                new_script.append('git fetch --unshallow origin')
+
+            new_script.append('git checkout %s' % diffset.base_commit_id)
 
             # Add parent diff if necessary
             parent_diff_data = self._get_parent_diff(diffset)
