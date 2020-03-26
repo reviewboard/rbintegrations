@@ -221,7 +221,7 @@ class TravisCIIntegration(Integration):
         plan = extra_data['repository_plan']
 
         if plan == 'public':
-            return '%s/%s' % (extra_data['hosting_account_username'],
+            return '%s/%s' % (repository.hosting_account.username,
                               extra_data['github_public_repo_name'])
         elif plan == 'public-org':
             return '%s/%s' % (extra_data['github_public_org_name'],
