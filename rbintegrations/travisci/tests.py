@@ -4,22 +4,115 @@ from __future__ import unicode_literals
 
 import json
 
+from django.core.urlresolvers import reverse
 from django.utils.six.moves.urllib.error import HTTPError
 from djblets.conditions import ConditionSet, Condition
 from reviewboard.hostingsvcs.models import HostingServiceAccount
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
+from reviewboard.reviews.models import StatusUpdate
 
 from rbintegrations.travisci.api import TravisAPI
 from rbintegrations.travisci.forms import TravisCIIntegrationConfigForm
 from rbintegrations.travisci.integration import TravisCIIntegration
+from rbintegrations.travisci.views import TravisCIWebHookView
 from rbintegrations.testing.testcases import IntegrationTestCase
 
 
-class TravisCIIntegrationTests(IntegrationTestCase):
-    """Tests for Travis CI."""
+class BaseTravisCITestCase(IntegrationTestCase):
+    """Base class for Travis CI tests."""
 
     integration_cls = TravisCIIntegration
     fixtures = ['test_scmtools', 'test_users']
+
+    def _create_repository(self, github=True):
+        """Create and return a repository for testing.
+
+        Args:
+            github (bool, optional):
+                Whether the repository should use the GitHub hosting service.
+
+        Returns:
+            reviewboard.scmtools.models.Repository:
+            A repository for use in unit tests.
+        """
+        if github:
+            account = HostingServiceAccount(service_name='github',
+                                            username='myuser')
+
+            def _http_post_authorize(self, *args, **kwargs):
+                return json.dumps({
+                    'id': 1,
+                    'url': 'https://api.github.com/authorizations/1',
+                    'scopes': ['user', 'repo'],
+                    'token': 'abc123',
+                    'note': '',
+                    'note_url': '',
+                    'updated_at': '2012-05-04T03:30:00Z',
+                    'created_at': '2012-05-04T03:30:00Z',
+                }).encode('utf-8'), {}
+
+            service = account.service
+            self.spy_on(service.client.http_post,
+                        call_fake=_http_post_authorize)
+
+            service.authorize('myuser', 'mypass', None)
+            self.assertTrue(account.is_authorized)
+
+            service.client.http_post.unspy()
+
+            repository = self.create_repository()
+            repository.hosting_account = account
+            repository.extra_data['repository_plan'] = 'public-org'
+            repository.extra_data['github_public_org_name'] = 'myorg'
+            repository.extra_data['github_public_org_repo_name'] = 'myrepo'
+            repository.save()
+            return repository
+        else:
+            return self.create_repository()
+
+    def _create_config(self, enterprise=False, with_local_site=False):
+        """Create an integration config.
+
+        Args:
+            enterprise (bool, optional):
+                Whether to use an enterprise endpoint or the default
+                open-source endpoint.
+
+            with_local_site (bool, optional):
+                Whether to limit the config to a local site.
+        """
+        choice = ReviewRequestRepositoriesChoice()
+
+        condition_set = ConditionSet(conditions=[
+            Condition(choice=choice,
+                      operator=choice.get_operator('any'))
+        ])
+
+        if with_local_site:
+            local_site = self.get_local_site(name=self.local_site_name)
+        else:
+            local_site = None
+
+        config = self.integration.create_config(name='Config 1',
+                                                enabled=True,
+                                                local_site=local_site)
+        config.set('conditions', condition_set.serialize())
+        config.set('travis_yml', 'script:\n    python ./tests/runtests.py')
+        config.set('branch_name', 'review-requests')
+
+        if enterprise:
+            config.set('travis_endpoint', TravisAPI.ENTERPRISE_ENDPOINT)
+            config.set('travis_custom_endpoint', 'https://travis.example.com/')
+        else:
+            config.set('travis_endpoint', TravisAPI.OPEN_SOURCE_ENDPOINT)
+
+        config.save()
+
+        return config
+
+
+class TravisCIIntegrationTests(BaseTravisCITestCase):
+    """Tests for Travis CI."""
 
     def test_build_new_review_request(self):
         """Testing TravisCIIntegration builds a new review request"""
@@ -204,88 +297,238 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(form.errors['travis_ci_token'],
                          ['Unable to authenticate with this API token.'])
 
-    def _create_repository(self, github=True):
-        """Create and return a repository for testing.
 
-        Args:
-            github (bool, optional):
-                Whether the repository should use the GitHub hosting service.
+class TravisCIWebHookTests(BaseTravisCITestCase):
+    """Tests for the Travis CI webhook handler."""
 
-        Returns:
-            reviewboard.scmtools.models.Repository:
-            A repository for use in unit tests.
-        """
-        if github:
-            account = HostingServiceAccount(service_name='github',
-                                            username='myuser')
+    def setUp(self):
+        super(TravisCIWebHookTests, self).setUp()
 
-            def _http_post_authorize(self, *args, **kwargs):
-                return json.dumps({
-                    'id': 1,
-                    'url': 'https://api.github.com/authorizations/1',
-                    'scopes': ['user', 'repo'],
-                    'token': 'abc123',
-                    'note': '',
-                    'note_url': '',
-                    'updated_at': '2012-05-04T03:30:00Z',
-                    'created_at': '2012-05-04T03:30:00Z',
-                }).encode('utf-8'), {}
+        self.repository = self._create_repository()
+        self.review_request = self.create_review_request(
+            repository=self.repository)
 
-            service = account.service
-            self.spy_on(service.client.http_post,
-                        call_fake=_http_post_authorize)
+        self.status_update = self.create_status_update(self.review_request)
 
-            service.authorize('myuser', 'mypass', None)
-            self.assertTrue(account.is_authorized)
+        self.config = self._create_config()
+        self.integration.enable_integration()
 
-            service.client.http_post.unspy()
+        self.webhook_url = reverse('travis-ci-webhook')
 
-            repository = self.create_repository()
-            repository.hosting_account = account
-            repository.extra_data['repository_plan'] = 'public-org'
-            repository.extra_data['github_public_org_name'] = 'myorg'
-            repository.extra_data['github_public_org_repo_name'] = 'myrepo'
-            repository.save()
-            return repository
-        else:
-            return self.create_repository()
+    def test_webhook_no_env(self):
+        """Testing TravisCIWebHookView with missing env"""
+        payload = json.dumps({})
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
 
-    def _create_config(self, enterprise=False, with_local_site=False):
-        """Create an integration config.
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Got event without an env in config.')
 
-        Args:
-            enterprise (bool, optional):
-                Whether to use an enterprise endpoint or the default
-                open-source endpoint.
+    def test_webhook_missing_ids(self):
+        """Testing TravisCIWebHookView with missing object IDs"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % self.config.pk,
+                        ],
+                    },
+                },
+            ],
+        })
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
 
-            with_local_site (bool, optional):
-                Whether to limit the config to a local site.
-        """
-        choice = ReviewRequestRepositoriesChoice()
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(
+            rsp.content,
+            b'Unable to find REVIEWBOARD_STATUS_UPDATE_ID in payload.')
 
-        condition_set = ConditionSet(conditions=[
-            Condition(choice=choice,
-                      operator=choice.get_operator('any'))
-        ])
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % self.status_update.pk,
+                        ],
+                    },
+                },
+            ],
+        })
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
 
-        if with_local_site:
-            local_site = self.get_local_site(name=self.local_site_name)
-        else:
-            local_site = None
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(
+            rsp.content,
+            b'Unable to find REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID in '
+            b'payload.')
 
-        config = self.integration.create_config(name='Config 1',
-                                                enabled=True,
-                                                local_site=local_site)
-        config.set('conditions', condition_set.serialize())
-        config.set('travis_yml', 'script:\n    python ./tests/runtests.py')
-        config.set('branch_name', 'review-requests')
+    def test_webhook_bad_integration_config(self):
+        """Testing TravisCIWebHookView with incorrect integration config ID"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % self.status_update.pk,
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % (self.config.pk + 1),
+                        ],
+                    },
+                },
+            ],
+        })
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
 
-        if enterprise:
-            config.set('travis_endpoint', TravisAPI.ENTERPRISE_ENDPOINT)
-            config.set('travis_custom_endpoint', 'https://travis.example.com/')
-        else:
-            config.set('travis_endpoint', TravisAPI.OPEN_SOURCE_ENDPOINT)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(
+            rsp.content,
+            b'Unable to find matching integration config ID %d.'
+            % (self.config.pk + 1))
 
-        config.save()
+    def test_webhook_bad_signature(self):
+        """Testing TravisCIWebHookView with bad HTTP_SIGNATURE"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % self.status_update.pk,
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % self.config.pk,
+                        ],
+                    },
+                },
+            ],
+        })
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
 
-        return config
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(
+            rsp.content,
+            b'Invalid Travis CI webhook signature for status update %d.'
+            % self.status_update.pk)
+
+    def test_webhook_bad_status_update(self):
+        """Testing TravisCIWebHookView with incorrect status update ID"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % (self.status_update.pk + 1),
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % self.config.pk,
+                        ],
+                    },
+                },
+            ],
+        })
+        self.spy_on(TravisCIWebHookView._validate_signature,
+                    owner=TravisCIWebHookView,
+                    call_fake=lambda self, request, integration_config: True)
+
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
+
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(
+            rsp.content,
+            b'Unable to find matching status update ID %d.'
+            % (self.status_update.pk + 1))
+
+    def test_webhook_build_pending(self):
+        """Testing TravisCIWebHookView build pending"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % self.status_update.pk,
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % self.config.pk,
+                        ],
+                    },
+                },
+            ],
+            'build_url': 'https://example.com/build',
+            'state': 'started',
+        })
+        self.spy_on(TravisCIWebHookView._validate_signature,
+                    owner=TravisCIWebHookView,
+                    call_fake=lambda self, request, integration_config: True)
+
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
+
+        self.assertEqual(rsp.status_code, 200)
+
+        self.status_update.refresh_from_db()
+        self.assertEqual(self.status_update.url, 'https://example.com/build')
+        self.assertEqual(self.status_update.state,
+                         StatusUpdate.PENDING)
+
+    def test_webhook_build_success(self):
+        """Testing TravisCIWebHookView build success"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % self.status_update.pk,
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % self.config.pk,
+                        ],
+                    },
+                },
+            ],
+            'build_url': 'https://example.com/build',
+            'state': 'passed',
+        })
+        self.spy_on(TravisCIWebHookView._validate_signature,
+                    owner=TravisCIWebHookView,
+                    call_fake=lambda self, request, integration_config: True)
+
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
+
+        self.assertEqual(rsp.status_code, 200)
+
+        self.status_update.refresh_from_db()
+        self.assertEqual(self.status_update.url, 'https://example.com/build')
+        self.assertEqual(self.status_update.state,
+                         StatusUpdate.DONE_SUCCESS)
+
+    def test_webhook_build_error(self):
+        """Testing TravisCIWebHookView build error"""
+        payload = json.dumps({
+            'matrix': [
+                {
+                    'config': {
+                        'env': [
+                            'REVIEWBOARD_STATUS_UPDATE_ID=%d'
+                            % self.status_update.pk,
+                            'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d'
+                            % self.config.pk,
+                        ],
+                    },
+                },
+            ],
+            'build_url': 'https://example.com/build',
+            'state': 'failed',
+        })
+        self.spy_on(TravisCIWebHookView._validate_signature,
+                    owner=TravisCIWebHookView,
+                    call_fake=lambda self, request, integration_config: True)
+
+        rsp = self.client.post(self.webhook_url, {'payload': payload})
+
+        self.assertEqual(rsp.status_code, 200)
+
+        self.status_update.refresh_from_db()
+        self.assertEqual(self.status_update.url, 'https://example.com/build')
+        self.assertEqual(self.status_update.state,
+                         StatusUpdate.DONE_FAILURE)
