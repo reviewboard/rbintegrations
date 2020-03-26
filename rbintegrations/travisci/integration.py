@@ -126,7 +126,8 @@ class TravisCIIntegration(Integration):
                 review_request=review_request,
                 change_description=changedesc)
 
-            travis_config = yaml.load(config.get('travis_yml'))
+            travis_config = yaml.load(config.get('travis_yml'),
+                                      Loader=yaml.SafeLoader)
 
             # Add set-up and patching to the start of the "script" section of
             # the config.
