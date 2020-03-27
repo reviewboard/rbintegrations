@@ -9,7 +9,13 @@ from django.utils.six.moves.urllib.error import HTTPError
 from django.utils.six.moves.urllib.parse import (quote, urlencode)
 from django.utils.six.moves.urllib.request import urlopen
 
-from reviewboard.hostingsvcs.service import HostingServiceHTTPRequest
+try:
+    # Review Board 4.0
+    from reviewboard.hostingsvcs.service import HostingServiceHTTPRequest
+except ImportError:
+    # Review Board 3.0
+    from reviewboard.hostingsvcs.service import URLRequest as \
+        HostingServiceHTTPRequest
 
 
 logger = logging.getLogger(__name__)
