@@ -156,9 +156,9 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
         self.assertTrue('git fetch --unshallow origin'
-                        in data['request']['config']['script'])
+                        in data['request']['config']['before_install'])
         self.assertTrue('git checkout %s' % diffset.base_commit_id
-                        in data['request']['config']['script'])
+                        in data['request']['config']['before_install'])
         self.assertEqual(data['request']['branch'], 'review-requests')
 
     def test_build_new_review_request_on_enterprise_travis(self):
@@ -205,7 +205,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
         self.assertTrue('git checkout %s' % diffset.base_commit_id
-                        in data['request']['config']['script'])
+                        in data['request']['config']['before_install'])
         self.assertEqual(data['request']['branch'], 'review-requests')
 
     def test_build_new_review_request_with_parent_diff(self):
@@ -254,11 +254,12 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
         self.assertTrue('git checkout %s' % diffset.base_commit_id
-                        in data['request']['config']['script'])
+                        in data['request']['config']['before_install'])
         self.assertEqual(data['request']['branch'], 'review-requests')
 
-        patch_count = len([cmd for cmd in data['request']['config']['script']
-                           if 'patch -p1' in cmd])
+        patch_count = len(
+            [cmd for cmd in data['request']['config']['before_install']
+             if 'patch -p1' in cmd])
 
         self.assertEqual(patch_count, 2)
 
@@ -312,7 +313,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
         self.assertFalse('git fetch --unshallow origin'
-                         in data['request']['config']['script'])
+                         in data['request']['config']['before_install'])
         self.assertEqual(data['request']['branch'], 'review-requests')
 
     def test_non_github_review_request(self):

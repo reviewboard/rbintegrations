@@ -129,32 +129,32 @@ class TravisCIIntegration(Integration):
             travis_config = yaml.load(config.get('travis_yml'),
                                       Loader=yaml.SafeLoader)
 
-            # Add set-up and patching to the start of the "script" section of
-            # the config.
-            new_script = []
+            # Add set-up and patching to the start of the "before_install"
+            # section of the config.
+            before_install = []
 
             if travis_config.get('git', {}).get('depth', True) is not False:
-                new_script.append('git fetch --unshallow origin')
+                before_install.append('git fetch --unshallow origin')
 
-            new_script.append('git checkout %s' % diffset.base_commit_id)
+            before_install.append('git checkout %s' % diffset.base_commit_id)
 
             # Add parent diff if necessary
             parent_diff_data = self._get_parent_diff(diffset)
 
             if parent_diff_data:
                 parent_diff_data = base64.b64encode(parent_diff_data)
-                new_script.append('echo %s | base64 --decode | patch -p1' %
-                                  parent_diff_data.decode('utf-8'))
+                before_install.append('echo %s | base64 --decode | patch -p1' %
+                                      parent_diff_data.decode('utf-8'))
 
-            new_script.append('echo %s | base64 --decode | patch -p1' %
+            before_install.append('echo %s | base64 --decode | patch -p1' %
                               diff_data.decode('utf-8'))
 
-            script = travis_config.get('script', [])
+            old_install = travis_config.get('before_install', [])
 
-            if not isinstance(script, list):
-                script = [script]
+            if not isinstance(old_install, list):
+                old_install = [old_install]
 
-            travis_config['script'] = new_script + script
+            travis_config['before_install'] = before_install + old_install
 
             # Set up webhook notifications.
             notifications = travis_config.get('notifications') or {}
