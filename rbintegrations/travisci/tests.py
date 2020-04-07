@@ -43,7 +43,8 @@ class TravisCIIntegrationTests(IntegrationTestCase):
             data['request'] = json.loads(body)['request']
             return '{}'
 
-        self.spy_on(TravisAPI._make_request, call_fake=_make_request)
+        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
+                    call_fake=_make_request)
 
         review_request.publish(review_request.submitter)
 
@@ -89,7 +90,8 @@ class TravisCIIntegrationTests(IntegrationTestCase):
             data['request'] = json.loads(body)['request']
             return '{}'
 
-        self.spy_on(TravisAPI._make_request, call_fake=_make_request)
+        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
+                    call_fake=_make_request)
 
         review_request.publish(review_request.submitter)
 
@@ -122,8 +124,7 @@ class TravisCIIntegrationTests(IntegrationTestCase):
         self._create_config()
         self.integration.enable_integration()
 
-        self.spy_on(TravisAPI._make_request,
-                    owner=TravisAPI,
+        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
                     call_original=False)
 
         review_request.publish(review_request.submitter)
@@ -228,7 +229,7 @@ class TravisCIIntegrationTests(IntegrationTestCase):
                     'note_url': '',
                     'updated_at': '2012-05-04T03:30:00Z',
                     'created_at': '2012-05-04T03:30:00Z',
-                }), {}
+                }).encode('utf-8'), {}
 
             service = account.service
             self.spy_on(service.client.http_post,
