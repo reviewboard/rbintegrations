@@ -41,16 +41,16 @@ class TravisCIWebHookView(View):
         payload = json.loads(request.POST['payload'])
 
         try:
-            global_env = payload['config']['global_env']
-        except KeyError:
-            error = 'Got event without a global_env in config.'
+            payload_env = payload['matrix'][0]['config']['env']
+        except (IndexError, KeyError):
+            error = 'Got event without an env in config.'
             logger.error('Travis CI webhook: %s', error, request=request)
             return HttpResponseBadRequest(error)
 
         integration_config_id = None
         status_update_id = None
 
-        for line in global_env:
+        for line in payload_env:
             key, value = line.split('=', 1)
 
             if key == 'REVIEWBOARD_STATUS_UPDATE_ID':
@@ -82,31 +82,39 @@ class TravisCIWebHookView(View):
             logger.error('Travis CI webhook: %s', error, request=request)
             return HttpResponseBadRequest(error)
 
-        if self._validate_signature(request, integration_config):
-            try:
-                status_update = StatusUpdate.objects.get(pk=status_update_id)
-            except StatusUpdate.DoesNotExist:
-                error = ('Unable to find matching status update ID %d.'
-                         % status_update_id)
-                logger.error('Travis CI webhook: %s', error, request=request)
-                return HttpResponseBadRequest(error)
+        if not self._validate_signature(request, integration_config):
+            error = ('Invalid Travis CI webhook signature for status '
+                     'update %d.'
+                     % status_update_id)
+            return HttpResponseBadRequest(error)
 
-            status_update.url = payload['build_url']
-            status_update.url_text = 'View Build'
+        try:
+            status_update = StatusUpdate.objects.get(pk=status_update_id)
+        except StatusUpdate.DoesNotExist:
+            error = ('Unable to find matching status update ID %d.'
+                     % status_update_id)
+            logger.error('Travis CI webhook: %s', error, request=request)
+            return HttpResponseBadRequest(error)
 
-            build_state = payload['state']
+        status_update.url = payload['build_url']
+        status_update.url_text = 'View Build'
 
-            if build_state == 'passed':
-                status_update.state = StatusUpdate.DONE_SUCCESS
-                status_update.description = 'build succeeded.'
-            elif build_state == 'started':
-                status_update.state = StatusUpdate.PENDING
-                status_update.description = 'building...'
-            elif build_state == 'failed':
-                status_update.state = StatusUpdate.DONE_FAILURE
-                status_update.description = 'build failed.'
+        build_state = payload['state']
 
-            status_update.save()
+        if build_state == 'passed':
+            status_update.state = StatusUpdate.DONE_SUCCESS
+            status_update.description = 'build succeeded.'
+        elif build_state == 'started':
+            status_update.state = StatusUpdate.PENDING
+            status_update.description = 'building...'
+        elif build_state in ('errored', 'failed'):
+            status_update.state = StatusUpdate.DONE_FAILURE
+            status_update.description = 'build failed.'
+        else:
+            logger.warning('Got unexpected Travis CI build state "%s"',
+                           build_state)
+
+        status_update.save()
 
         return HttpResponse()
 

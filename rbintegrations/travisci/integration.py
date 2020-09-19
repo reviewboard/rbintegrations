@@ -110,8 +110,7 @@ class TravisCIIntegration(Integration):
         user = self._get_or_create_user()
 
         scmtool = repository.get_scmtool()
-        diff_data = base64.b64encode(
-            scmtool.get_parser(b'').raw_diff(diffset))
+        diff_data = base64.b64encode(scmtool.get_parser(b'').raw_diff(diffset))
 
         commit_message = '%s\n\n%s' % (review_request.summary,
                                        review_request.description)
@@ -127,20 +126,35 @@ class TravisCIIntegration(Integration):
                 review_request=review_request,
                 change_description=changedesc)
 
-            travis_config = yaml.load(config.get('travis_yml'))
+            travis_config = yaml.load(config.get('travis_yml'),
+                                      Loader=yaml.SafeLoader)
 
-            # Add set-up and patching to the start of the "script" section of
-            # the config.
-            script = travis_config.get('script', [])
+            # Add set-up and patching to the start of the "before_install"
+            # section of the config.
+            before_install = []
 
-            if not isinstance(script, list):
-                script = [script]
+            if travis_config.get('git', {}).get('depth', True) is not False:
+                before_install.append('git fetch --unshallow origin')
 
-            travis_config['script'] = [
-                'git fetch --unshallow origin',
-                'git checkout %s' % diffset.base_commit_id,
-                'echo %s | base64 --decode | patch -p1' % diff_data,
-            ] + script
+            before_install.append('git checkout %s' % diffset.base_commit_id)
+
+            # Add parent diff if necessary
+            parent_diff_data = self._get_parent_diff(diffset)
+
+            if parent_diff_data:
+                parent_diff_data = base64.b64encode(parent_diff_data)
+                before_install.append('echo %s | base64 --decode | patch -p1' %
+                                      parent_diff_data.decode('utf-8'))
+
+            before_install.append('echo %s | base64 --decode | patch -p1' %
+                              diff_data.decode('utf-8'))
+
+            old_install = travis_config.get('before_install', [])
+
+            if not isinstance(old_install, list):
+                old_install = [old_install]
+
+            travis_config['before_install'] = before_install + old_install
 
             # Set up webhook notifications.
             notifications = travis_config.get('notifications') or {}
@@ -207,7 +221,7 @@ class TravisCIIntegration(Integration):
         plan = extra_data['repository_plan']
 
         if plan == 'public':
-            return '%s/%s' % (extra_data['hosting_account_username'],
+            return '%s/%s' % (repository.hosting_account.username,
                               extra_data['github_public_repo_name'])
         elif plan == 'public-org':
             return '%s/%s' % (extra_data['github_public_org_name'],
@@ -259,3 +273,27 @@ class TravisCIIntegration(Integration):
                     avatar_service.setup(user, self.icon_static_urls)
 
                 return user
+
+    def _get_parent_diff(self, diffset):
+        """Return the raw parent diff.
+
+        Args:
+            diffset (reviewboard.diffviewer.models.DiffSet):
+                The diffset to get the parent data for.
+
+        Returns:
+            bytes:
+            The raw parent diff data, if available. None if not.
+        """
+        data = []
+
+        for filediff in diffset.files.all():
+            parent_diff = filediff.parent_diff
+
+            if parent_diff:
+                data.append(parent_diff)
+
+        if data:
+            return b''.join(data)
+        else:
+            return None
