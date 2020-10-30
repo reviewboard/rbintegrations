@@ -424,65 +424,6 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         self.assertEqual(form.errors['travis_ci_token'],
                          ['Unable to authenticate with this API token.'])
 
-    def _create_repository(self, github=True):
-        """Create and return a repository for testing.
-
-        Args:
-            github (bool, optional):
-                Whether the repository should use the GitHub hosting service.
-
-        Returns:
-            reviewboard.scmtools.models.Repository:
-            A repository for use in unit tests.
-        """
-        if github:
-            account = HostingServiceAccount(service_name='github',
-                                            username='myuser')
-
-            def _http_post_authorize(self, *args, **kwargs):
-                return json.dumps({
-                    'id': 1,
-                    'url': 'https://api.github.com/authorizations/1',
-                    'scopes': ['user', 'repo'],
-                    'token': 'abc123',
-                    'note': '',
-                    'note_url': '',
-                    'updated_at': '2012-05-04T03:30:00Z',
-                    'created_at': '2012-05-04T03:30:00Z',
-                }).encode('utf-8'), {}
-
-            service = account.service
-            self.spy_on(service.client.http_post,
-                        owner=service.client,
-                        call_fake=_http_post_authorize)
-
-            service.authorize('myuser', 'mypass', None)
-            self.assertTrue(account.is_authorized)
-
-            service.client.http_post.unspy()
-
-            repository = self.create_repository()
-            repository.hosting_account = account
-            repository.extra_data['repository_plan'] = 'public-org'
-            repository.extra_data['github_public_org_name'] = 'myorg'
-            repository.extra_data['github_public_org_repo_name'] = 'myrepo'
-            repository.save()
-            return repository
-        else:
-            return self.create_repository()
-
-    def _create_config(self, enterprise=False, with_local_site=False):
-        """Create an integration config.
-
-        Args:
-            enterprise (bool, optional):
-                Whether to use an enterprise endpoint or the default
-                open-source endpoint.
-
-            with_local_site (bool, optional):
-                Whether to limit the config to a local site.
-        """
-        choice = ReviewRequestRepositoriesChoice()
 
 class TravisCIWebHookTests(BaseTravisCITestCase):
     """Tests for the Travis CI webhook handler."""
