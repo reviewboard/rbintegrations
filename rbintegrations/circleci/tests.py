@@ -12,6 +12,15 @@ from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
 from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.testing.testcases import IntegrationTestCase
 
+try:
+    # Review Board >= 4.0
+    from reviewboard.hostingsvcs.service import (HostingServiceHTTPRequest,
+                                                 HostingServiceHTTPResponse)
+except ImportError:
+    # Review Board < 4.0
+    HostingServiceHTTPRequest = None
+    HostingServiceHTTPResponse = None
+
 
 class CircleCIIntegrationTests(IntegrationTestCase):
     """Tests for CircleCI."""
@@ -161,10 +170,25 @@ class CircleCIIntegrationTests(IntegrationTestCase):
                 }).encode('utf-8'), {}
 
             # Review Board >= 3.0.18.
-            def _http_get_user(self, *args, **kwargs):
-                return b'{}', {
-                    b'X-OAuth-Scopes': b'admin:repo_hook, repo, user',
+            def _http_get_user(_self, url, *args, **kwargs):
+                self.assertEqual(url, 'https://api.github.com/user')
+
+                payload = b'{}'
+                headers = {
+                    str('X-OAuth-Scopes'): str('admin:repo_hook, repo, user'),
                 }
+
+                if HostingServiceHTTPResponse is not None:
+                    # Review Board >= 4.0
+                    return HostingServiceHTTPResponse(
+                        request=HostingServiceHTTPRequest(url=url),
+                        url=url,
+                        data=payload,
+                        headers=headers,
+                        status_code=200)
+                else:
+                    # Review Board < 4.0
+                    return payload, headers
 
             service = account.service
             self.spy_on(service.client.http_post,
