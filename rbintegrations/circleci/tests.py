@@ -147,6 +147,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
             account = HostingServiceAccount(service_name='github',
                                             username='myuser')
 
+            # Review Board <= 3.0.17.
             def _http_post_authorize(self, *args, **kwargs):
                 return json.dumps({
                     'id': 1,
@@ -159,14 +160,23 @@ class CircleCIIntegrationTests(IntegrationTestCase):
                     'created_at': '2012-05-04T03:30:00Z',
                 }), {}
 
+            # Review Board >= 3.0.18.
+            def _http_get_user(self, *args, **kwargs):
+                return b'{}', {
+                    b'X-OAuth-Scopes': b'admin:repo_hook, repo, user',
+                }
+
             service = account.service
             self.spy_on(service.client.http_post,
                         call_fake=_http_post_authorize)
+            self.spy_on(service.client.http_get,
+                        call_fake=_http_get_user)
 
             service.authorize('myuser', 'mypass', None)
             self.assertTrue(account.is_authorized)
 
             service.client.http_post.unspy()
+            service.client.http_get.unspy()
 
             repository = self.create_repository(
                 with_local_site=with_local_site)
