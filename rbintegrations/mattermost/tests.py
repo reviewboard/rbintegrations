@@ -364,13 +364,12 @@ class MattermostIntegrationTests(IntegrationTestCase):
         """
         review_request = self.create_review_request(
             create_repository=True,
+            id=12321,
             submitter=self.user,
             summary='Test Review Request',
             description='My description.',
             target_people=[self.user],
             publish=False)
-        review_request.id = 12321
-        review_request.save()
 
         self._create_config()
         self.integration.enable_integration()
@@ -427,13 +426,12 @@ class MattermostIntegrationTests(IntegrationTestCase):
         """
         review_request = self.create_review_request(
             create_repository=True,
+            id=10000,
             submitter=self.user,
             summary='Test Review Request',
             description='My description.',
             target_people=[self.user],
             publish=False)
-        review_request.id = 10000
-        review_request.save()
 
         self._create_config()
         self.integration.enable_integration()
