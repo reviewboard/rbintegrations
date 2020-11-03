@@ -30,7 +30,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                                         last_name='User')
 
     def test_notify_new_review_request(self):
-        """Testing Mattermost notifies on new review request"""
+        """Testing MattermostIntegration notifies on new review request"""
         review_request = self.create_review_request(
             create_repository=True,
             submitter=self.user,
@@ -1251,7 +1251,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                 'username': 'RB User',
                 'icon_url': self.integration.LOGO_URL,
                 'attachments': [{
-                    'color': 'success',
+                    'color': 'good',
                     'fallback': (
                         '#1: New review from Test User (Ship it!): '
                         'http://example.com/r/1/#review1'
@@ -1303,7 +1303,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                 'username': 'RB User',
                 'icon_url': self.integration.LOGO_URL,
                 'attachments': [{
-                    'color': 'success',
+                    'color': 'good',
                     'fallback': (
                         '#1: New review from Test User (Ship it!): '
                         'http://example.com/r/1/#review1'

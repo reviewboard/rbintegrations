@@ -560,7 +560,7 @@ class BaseChatIntegration(Integration):
                     'short': True,
                 }]
                 extra_text = ' (Ship it!)'
-                color = 'success'
+                color = 'good'
         elif open_issues:
             fields = [{
                 'title': 'Open Issues',

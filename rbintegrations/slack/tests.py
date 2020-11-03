@@ -1220,7 +1220,7 @@ class SlackIntegrationTests(IntegrationTestCase):
                 'username': 'RB User',
                 'icon_url': self.integration.LOGO_URL,
                 'attachments': [{
-                    'color': 'success',
+                    'color': 'good',
                     'fallback': (
                         '#1: New review from Test User (Ship it!): '
                         'http://example.com/r/1/#review1'
@@ -1271,7 +1271,7 @@ class SlackIntegrationTests(IntegrationTestCase):
                 'username': 'RB User',
                 'icon_url': self.integration.LOGO_URL,
                 'attachments': [{
-                    'color': 'success',
+                    'color': 'good',
                     'fallback': (
                         '#1: New review from Test User (Ship it!): '
                         'http://example.com/r/1/#review1'
