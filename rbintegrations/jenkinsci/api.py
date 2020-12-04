@@ -205,5 +205,13 @@ class JenkinsAPI(object):
 
         request.add_basic_auth(self.username, self.password)
 
-        response = request.open()
-        return response.data
+        if hasattr(request, 'open'):
+            # Review Board >= 4.0
+            response = request.open()
+            data = response.data
+        else:
+            # Review Board 3.x
+            response = urlopen(request)
+            data = response.read()
+
+        return data
