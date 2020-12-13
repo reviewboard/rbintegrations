@@ -39,31 +39,14 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self._create_config()
         self.integration.enable_integration()
 
-        data = {}
-
-        def _urlopen(request, **kwargs):
-            # We can't actually do any assertions in here, because they'll get
-            # swallowed by SignalHook's sandboxing. We therefore record the
-            # data we need and assert later.
-            data['url'] = request.get_full_url()
-            data['build_params'] = json.loads(request.data)['build_parameters']
-
-            class _Response(object):
-                def read(self):
-                    return json.dumps({
-                        'build_url': 'http://example.com/gh/org/project/35',
-                    })
-
-            return _Response()
-
-        self.spy_on(urlopen, call_fake=_urlopen)
+        data = self._spy_on_urlopen()
 
         review_request.publish(review_request.submitter)
 
         self.assertTrue(urlopen.spy.called)
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
-                         'myorg/myrepo/tree/review-requests?'
+                         'mypublicorg/mypublicorgrepo/tree/review-requests?'
                          'circle-token=None')
 
         self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
@@ -86,31 +69,14 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self._create_config(with_local_site=True)
         self.integration.enable_integration()
 
-        data = {}
-
-        def _urlopen(request, **kwargs):
-            # We can't actually do any assertions in here, because they'll get
-            # swallowed by SignalHook's sandboxing. We therefore record the
-            # data we need and assert later.
-            data['url'] = request.get_full_url()
-            data['build_params'] = json.loads(request.data)['build_parameters']
-
-            class _Response(object):
-                def read(self):
-                    return json.dumps({
-                        'build_url': 'http://example.com/gh/org/project/35',
-                    })
-
-            return _Response()
-
-        self.spy_on(urlopen, call_fake=_urlopen)
+        data = self._spy_on_urlopen()
 
         review_request.publish(review_request.submitter)
 
         self.assertTrue(urlopen.spy.called)
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
-                         'myorg/myrepo/tree/review-requests?'
+                         'mypublicorg/mypublicorgrepo/tree/review-requests?'
                          'circle-token=None')
 
         self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
@@ -141,12 +107,90 @@ class CircleCIIntegrationTests(IntegrationTestCase):
 
         self.assertFalse(urlopen.spy.called)
 
-    def _create_repository(self, github=True, with_local_site=False):
+    def test_build_new_review_request_with_public_github_repository(self):
+        """Testing CircleCIIntegration builds for a new review request with
+        a public GitHub repository"""
+        repository = self._create_repository(github=True,
+                                             repository_plan='public')
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        data = self._spy_on_urlopen()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertTrue(urlopen.spy.called)
+        self.assertEqual(data['url'],
+                         'https://circleci.com/api/v1.1/project/github/'
+                         'myuser/mypublicrepo/tree/review-requests?'
+                         'circle-token=None')
+
+    def test_build_new_review_request_with_private_github_repository(self):
+        """Testing CircleCIIntegration builds for a new review request with
+        a private GitHub repository"""
+        repository = self._create_repository(github=True,
+                                             repository_plan='private')
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        data = self._spy_on_urlopen()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertTrue(urlopen.spy.called)
+        self.assertEqual(data['url'],
+                         'https://circleci.com/api/v1.1/project/github/'
+                         'myuser/myprivaterepo/tree/review-requests?'
+                         'circle-token=None')
+
+    def test_build_new_review_request_with_private_org_github_repository(self):
+        """Testing CircleCIIntegration builds for a new review request with
+        a private organization GitHub repository"""
+        repository = self._create_repository(github=True,
+                                             repository_plan='private-org')
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        data = self._spy_on_urlopen()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertTrue(urlopen.spy.called)
+        self.assertEqual(data['url'],
+                         'https://circleci.com/api/v1.1/project/github/'
+                         'myprivateorg/myprivateorgrepo/tree/review-requests?'
+                         'circle-token=None')
+
+    def _create_repository(self,
+                           github=True,
+                           with_local_site=False,
+                           repository_plan='public-org'):
         """Create and return a repository for testing.
 
         Args:
             github (bool, optional):
                 Whether the repository should use the GitHub hosting service.
+
+            with_local_site (bool, optional):
+                Whether to limit the config to a local site.
+
+            repository_plan (unicode, optional):
+                The type of GitHub repository plan.
 
         Returns:
             reviewboard.scmtools.models.Repository:
@@ -205,9 +249,24 @@ class CircleCIIntegrationTests(IntegrationTestCase):
             repository = self.create_repository(
                 with_local_site=with_local_site)
             repository.hosting_account = account
-            repository.extra_data['repository_plan'] = 'public-org'
-            repository.extra_data['github_public_org_name'] = 'myorg'
-            repository.extra_data['github_public_org_repo_name'] = 'myrepo'
+            repository.extra_data['repository_plan'] = repository_plan
+
+            if repository_plan == 'public':
+                repository.extra_data['github_public_repo_name'] = \
+                    'mypublicrepo'
+            elif repository_plan == 'public-org':
+                repository.extra_data['github_public_org_name'] = 'mypublicorg'
+                repository.extra_data['github_public_org_repo_name'] = \
+                    'mypublicorgrepo'
+            elif repository_plan == 'private':
+                repository.extra_data['github_private_repo_name'] = \
+                    'myprivaterepo'
+            elif repository_plan == 'private-org':
+                repository.extra_data['github_private_org_name'] = \
+                    'myprivateorg'
+                repository.extra_data['github_private_org_repo_name'] = \
+                    'myprivateorgrepo'
+
             repository.save()
             return repository
         else:
@@ -240,3 +299,31 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         config.save()
 
         return config
+
+    def _spy_on_urlopen(self):
+        """Wrapper function for spying on the urlopen function.
+
+        Returns:
+            dict:
+            Faked response from CircleCI.
+        """
+        data = {}
+
+        def _urlopen(request, **kwargs):
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = request.get_full_url()
+            data['build_params'] = json.loads(request.data)['build_parameters']
+
+            class _Response(object):
+                def read(self):
+                    return json.dumps({
+                        'build_url': 'http://example.com/gh/org/project/35',
+                    })
+
+            return _Response()
+
+        self.spy_on(urlopen, call_fake=_urlopen)
+
+        return data
