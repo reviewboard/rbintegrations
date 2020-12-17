@@ -1,4 +1,4 @@
-.. default-intersphinx:: rb-dev
+.. default-intersphinx:: rb4.0
 
 
 =====================================
