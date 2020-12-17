@@ -192,6 +192,9 @@ class CircleCIIntegration(Integration):
         """Return the organization and repo name for the given repository.
 
         Args:
+            service_name (unicode):
+                The version control service name.
+
             repository (reviewboard.scmtools.models.Repository):
                 The repository.
 
@@ -205,13 +208,13 @@ class CircleCIIntegration(Integration):
 
         if service_name == 'github':
             if plan == 'public':
-                return (extra_data['hosting_account_username'],
+                return (repository.hosting_account.username,
                         extra_data['github_public_repo_name'])
             elif plan == 'public-org':
                 return (extra_data['github_public_org_name'],
                         extra_data['github_public_org_repo_name'])
             elif plan == 'private':
-                return (extra_data['hosting_account_username'],
+                return (repository.hosting_account.username,
                         extra_data['github_private_repo_name'])
             elif plan == 'private-org':
                 return (extra_data['github_private_org_name'],

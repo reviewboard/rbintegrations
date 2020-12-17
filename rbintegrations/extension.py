@@ -8,6 +8,7 @@ from reviewboard.urls import reviewable_url_names, review_request_url_names
 
 from rbintegrations.asana.integration import AsanaIntegration
 from rbintegrations.circleci.integration import CircleCIIntegration
+from rbintegrations.discord.integration import DiscordIntegration
 from rbintegrations.idonethis.integration import IDoneThisIntegration
 from rbintegrations.jenkinsci.integration import JenkinsCIIntegration
 from rbintegrations.mattermost.integration import MattermostIntegration
@@ -28,6 +29,7 @@ class RBIntegrationsExtension(Extension):
     integrations = [
         AsanaIntegration,
         CircleCIIntegration,
+        DiscordIntegration,
         IDoneThisIntegration,
         JenkinsCIIntegration,
         MattermostIntegration,

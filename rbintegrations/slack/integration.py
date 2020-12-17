@@ -11,6 +11,76 @@ from rbintegrations.basechat.forms import BaseChatIntegrationConfigForm
 from rbintegrations.basechat.integration import BaseChatIntegration
 
 
+def build_slack_message(integration, title, title_link, fallback_text, fields,
+                        pre_text, body, color, thumb_url, image_url):
+    """Build message using Slack webhook format.
+
+    This will build the payload data for HTTP requests to services such as
+    Slack, Mattermost and Discord.
+
+    Args:
+        integration (BaseChatIntegration):
+            The Integration.
+
+        title (unicode):
+            The title for the message.
+
+        title_link (unicode):
+            The link for the title of the message.
+
+        fallback_text (unicode):
+            The non-rich fallback text to display in the chat, for use in
+            IRC and other services.
+
+        fields (dict):
+            The fields comprising the rich message to display in chat.
+
+        pre_text (unicode):
+            Text to display before the rest of the message.
+
+        body (unicode):
+            The body of the message.
+
+        color (unicode):
+            A Slack color string or RGB hex value for the message.
+
+        thumb_url (unicode):
+            URL of an image to show on the side of the message.
+
+        image_url (unicode):
+            URL of an image to show in the message.
+
+    Returns:
+        dict:
+        The payload of the Slack message request.
+    """
+    if not color:
+        color = integration.DEFAULT_COLOR
+
+    attachment = {
+        'color': color or integration.DEFAULT_COLOR,
+        'fallback': fallback_text,
+        'title': title,
+        'title_link': title_link,
+        'text': body,
+        'pretext': pre_text,
+    }
+
+    if fields:
+        attachment['fields'] = fields
+
+    if thumb_url:
+        attachment['thumb_url'] = thumb_url
+
+    if image_url:
+        attachment['image_url'] = image_url
+
+    return {
+        'attachments': [attachment],
+        'icon_url': integration.LOGO_URL,
+    }
+
+
 def notify(integration, title, title_link, fallback_text, local_site,
            review_request, event_name, fields, pre_text, body, color,
            thumb_url, image_url):
@@ -35,9 +105,6 @@ def notify(integration, title, title_link, fallback_text, local_site,
             The non-rich fallback text to display in the chat, for use in
             IRC and other services.
 
-        fields (dict):
-            The fields comprising the rich message to display in chat.
-
         local_site (reviewboard.site.models.LocalSite):
             The Local Site for the review request or review emitting
             the message. Only integration configurations matching this
@@ -49,46 +116,34 @@ def notify(integration, title, title_link, fallback_text, local_site,
         event_name (unicode):
             The name of the event triggering this notification.
 
-        pre_text (unicode, optional):
+        fields (dict):
+            The fields comprising the rich message to display in chat.
+
+        pre_text (unicode):
             Text to display before the rest of the message.
 
-        body (unicode, optional):
+        body (unicode):
             The body of the message.
 
-        color (unicode, optional):
+        color (unicode):
             A Slack color string or RGB hex value for the message.
 
-        thumb_url (unicode, optional):
+        thumb_url (unicode):
             URL of an image to show on the side of the message.
 
-        image_url (unicode, optional):
+        image_url (unicode):
             URL of an image to show in the message.
     """
-    if not color:
-        color = integration.DEFAULT_COLOR
-
-    attachment_payload = {
-        'color': color or integration.DEFAULT_COLOR,
-        'fallback': fallback_text,
-        'title': title,
-        'title_link': title_link,
-        'text': body,
-        'pretext': pre_text,
-    }
-
-    if fields:
-        attachment_payload['fields'] = fields
-
-    if thumb_url:
-        attachment_payload['thumb_url'] = thumb_url
-
-    if image_url:
-        attachment_payload['image_url'] = image_url
-
-    common_payload = {
-        'icon_url': integration.LOGO_URL,
-        'attachments': [attachment_payload],
-    }
+    common_payload = build_slack_message(integration=integration,
+                                         title=title,
+                                         title_link=title_link,
+                                         fallback_text=fallback_text,
+                                         fields=fields,
+                                         pre_text=pre_text,
+                                         body=body,
+                                         color=color,
+                                         thumb_url=thumb_url,
+                                         image_url=image_url)
 
     # Send a notification to any configured channels.
     for config in integration.get_configs(local_site):

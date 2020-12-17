@@ -7,11 +7,15 @@ import logging
 from django import forms
 from django.utils import six
 from django.utils.six.moves.urllib.error import HTTPError, URLError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
 from reviewboard.webapi.models import WebAPIToken
+try:
+    from reviewboard.reviews.signals import status_update_request_run
+except ImportError:
+    status_update_request_run = None
 
 from rbintegrations.jenkinsci.api import JenkinsAPI
 from rbintegrations.jenkinsci.common import get_or_create_jenkins_user
@@ -40,8 +44,9 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
         help_text=_('User who has access to the above job.'))
 
     jenkins_password = forms.CharField(
-        label=_('Password'),
-        help_text=_("User's password or its API token."),
+        label=_('API Token / Password'),
+        help_text=_('The API token used for authentication. Older versions '
+                    'may require a user password instead.'),
         widget=forms.PasswordInput)
 
     jenkins_user_token = forms.CharField(
@@ -52,6 +57,13 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
                     'this API token will be updated upon saving.'),
         required=False,
         widget=forms.TextInput(attrs={'readonly': True}))
+
+    run_manually = forms.BooleanField(
+        label=_('Run builds manually'),
+        required=False,
+        help_text=_('Wait to run this service until manually started. This '
+                    'will add a "Run" button to the Jenkins entry.'),
+        initial=False)
 
     def __init__(self, *args, **kwargs):
         """Initialize the form.
@@ -76,6 +88,18 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
                 user, local_site=local_site, auto_generated=True)
 
         self.initial['jenkins_user_token'] = token.token
+
+    def load(self):
+        """Load the form."""
+        # Supporting APIs for these features were added in RB 3.0.19
+        if status_update_request_run is None:
+            self.disabled_fields = ['run_manually']
+            self.disabled_reasons = {
+                'run_manually': ugettext(
+                    'Requires Review Board 3.0.19 or newer.'),
+            }
+            self.fields['run_manually'].initial = False
+        super(IntegrationConfigForm, self).load()
 
     def clean(self):
         """Clean the form.
