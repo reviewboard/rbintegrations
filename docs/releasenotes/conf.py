@@ -359,7 +359,11 @@ else:
 # Add references for intersphinx and custom roles.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/2.7', None),
+    'python2': ('https://docs.python.org/2.7', None),
+    'python3': ('https://docs.python.org/3', None),
     'rb3.0': ('%s/docs/manual/3.0/' % rbwebsite_url, None),
+    'rb4.0': ('%s/docs/manual/4.0/' % rbwebsite_url, None),
+    'rb-dev': ('%s/docs/manual/dev/' % rbwebsite_url, None),
 }
 
 extlinks = {

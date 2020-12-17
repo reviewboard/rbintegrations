@@ -1,0 +1,97 @@
+.. default-intersphinx:: rb-dev
+
+
+=====================================
+Integrations 2.0 Beta 1 Release Notes
+=====================================
+
+**Release date**: TBD
+
+
+Compatibility
+=============
+
+Integrations 2.0 is compatible with both Review Board 3.x and 4.x.
+
+It supports Python 2.7 and 3.6 through 3.9.
+
+
+New Integrations
+================
+
+* :rbintegration:`Discord <discord>`
+
+  Discord is a chat system similar to Slack, but with a focus on communities,
+  from open source to gaming to general discussions.
+
+  Review Board can now post to Discord when review requests are posted or
+  updated, or whenever there's new discussions on the review request.
+
+  See the :ref:`documentation <integrations-discord>` for configuration
+  instructions.
+
+  Patch by Hailan Xu.
+
+* :rbintegration:`Jenkins <jenkins>`
+
+  Jenkins is a widely-used continuous integration, deployment, and automation
+  service. It's open source, self-hosted, and extensible with plugin support.
+
+  This integration works along with a Review Board plugin for Jenkins to
+  trigger builds when a review request is posted or updated.
+
+  See the :ref:`documentation <integrations-jenkins-ci>` for configuration
+  instructions.
+
+  Patches by James Shephard and Marcus Boay.
+
+
+Bug Fixes
+=========
+
+CircleCI
+--------
+
+* Fixed generating repository paths for user-owned GitHub repositories.
+
+  Patch by Marcus Boay.
+
+
+Mattermost
+----------
+
+* Fixed the color value sent to style "Ship It!" in chat messages.
+
+
+Slack
+-----
+
+* Fixed the color value sent to style "Ship It!" in chat messages.
+
+
+Travis CI
+---------
+
+* Fixed compatibility with changes to Travis CI's webhook payload format.
+
+  These were required for travis-ci.com, and may soon be required for
+  travis-ci.org.
+
+* Fixed compatibility with configurations using ``git: depth: False``.
+
+* Fixed providing and applying parent diffs.
+
+* Fixed generating repository paths for public user-owned GitHub repositories.
+
+* Changed the checkout and patching to run in the ``before_install`` instead
+  of ``script`` steps.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Hailan Xu
+* James Shephard
+* Marcus Boay
