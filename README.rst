@@ -32,6 +32,7 @@ Continuous Integration
 
 * `CircleCI <https://www.reviewboard.org/integrations/circleci/>`_
 * `Travis CI <https://www.reviewboard.org/integrations/travis-ci/>`_
+* `Jenkins <https://www.reviewboard.org/integrations/jenkins/>`_
 
 
 Task Tracking
