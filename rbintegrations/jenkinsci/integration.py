@@ -257,8 +257,7 @@ class JenkinsCIIntegration(Integration):
                 The review request for the change being built.
         """
         job_name = job_name.replace('{repository}', repository.name)
-
-        if repository.tool.name in ('Git',):
-            job_name = job_name.replace('{branch}', review_request.branch)
+        job_name = job_name.replace('{branch}', review_request.branch)
+        job_name = job_name.replace('/', '_')
 
         return job_name
