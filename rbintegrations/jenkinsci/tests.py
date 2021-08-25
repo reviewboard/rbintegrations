@@ -40,6 +40,10 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                     'value': review_request.display_id
                 },
                 {
+                    'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                    'value': review_request.branch
+                },
+                {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
                     'value': 1
                 },
@@ -67,6 +71,10 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                 {
                     'name': 'REVIEWBOARD_REVIEW_ID',
                     'value': review_request.display_id
+                },
+                {
+                    'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                    'value': review_request.branch
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
@@ -111,6 +119,10 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                     'value': review_request.display_id,
                 },
                 {
+                    'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                    'value': review_request.branch
+                },
+                {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
                     'value': 1,
                 },
@@ -139,6 +151,10 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                     {
                         'name': 'REVIEWBOARD_REVIEW_ID',
                         'value': review_request.display_id,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                        'value': review_request.branch
                     },
                     {
                         'name': 'REVIEWBOARD_DIFF_REVISION',
@@ -181,6 +197,10 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                     {
                         'name': 'REVIEWBOARD_REVIEW_ID',
                         'value': review_request.display_id
+                    },
+                    {
+                        'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                        'value': review_request.branch
                     },
                     {
                         'name': 'REVIEWBOARD_DIFF_REVISION',

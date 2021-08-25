@@ -63,8 +63,8 @@ class JenkinsAPI(object):
 
         Args:
             patch_info (dict):
-                Contains the review ID, review diff revision and the status
-                update ID.
+                Contains the review ID, review branch, review diff revision
+                and the status update ID.
 
         Raises:
             urllib2.URLError:
@@ -79,6 +79,10 @@ class JenkinsAPI(object):
                 {
                     'name': 'REVIEWBOARD_REVIEW_ID',
                     'value': patch_info['review_id']
+                },
+                {
+                    'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                    'value': patch_info['review_branch']
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',

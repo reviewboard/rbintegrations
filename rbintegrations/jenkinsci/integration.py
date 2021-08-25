@@ -101,6 +101,7 @@ class JenkinsCIIntegration(Integration):
 
         patch_info = {
             'review_id': review_request.display_id,
+            'review_branch': review_request.branch,
             'diff_revision': diffset.revision,
         }
 
@@ -206,6 +207,7 @@ class JenkinsCIIntegration(Integration):
 
         patch_info = {
             'review_id': review_request.display_id,
+            'review_branch': review_request.branch,
             'diff_revision': diffset.revision,
             'status_update_id': status_update.pk,
             'reviewboard_server': get_server_url(
