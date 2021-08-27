@@ -10,6 +10,7 @@ from djblets.conditions import ConditionSet, Condition
 from reviewboard.hostingsvcs.models import HostingServiceAccount
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
 from reviewboard.reviews.models import StatusUpdate
+from reviewboard.reviews.signals import status_update_request_run
 
 from rbintegrations.travisci.api import TravisAPI
 from rbintegrations.travisci.forms import TravisCIIntegrationConfigForm
@@ -33,12 +34,15 @@ class BaseTravisCITestCase(IntegrationTestCase):
     integration_cls = TravisCIIntegration
     fixtures = ['test_scmtools', 'test_users']
 
-    def _create_repository(self, github=True):
+    def _create_repository(self, github=True, repository_plan='public-org'):
         """Create and return a repository for testing.
 
         Args:
             github (bool, optional):
                 Whether the repository should use the GitHub hosting service.
+
+            repository_plan (unicode, optional):
+                The type of GitHub repository plan.
 
         Returns:
             reviewboard.scmtools.models.Repository:
@@ -96,15 +100,31 @@ class BaseTravisCITestCase(IntegrationTestCase):
 
             repository = self.create_repository()
             repository.hosting_account = account
-            repository.extra_data['repository_plan'] = 'public-org'
-            repository.extra_data['github_public_org_name'] = 'myorg'
-            repository.extra_data['github_public_org_repo_name'] = 'myrepo'
+            repository.extra_data['repository_plan'] = repository_plan
+
+            if repository_plan == 'public':
+                repository.extra_data['github_public_repo_name'] = \
+                    'mypublicrepo'
+            elif repository_plan == 'public-org':
+                repository.extra_data['github_public_org_name'] = 'mypublicorg'
+                repository.extra_data['github_public_org_repo_name'] = \
+                    'mypublicorgrepo'
+            elif repository_plan == 'private':
+                repository.extra_data['github_private_repo_name'] = \
+                    'myprivaterepo'
+            elif repository_plan == 'private-org':
+                repository.extra_data['github_private_org_name'] = \
+                    'myprivateorg'
+                repository.extra_data['github_private_org_repo_name'] = \
+                    'myprivateorgrepo'
+
             repository.save()
             return repository
         else:
             return self.create_repository()
 
-    def _create_config(self, enterprise=False, with_local_site=False):
+    def _create_config(self, enterprise=False, with_local_site=False,
+                       run_manually=False):
         """Create an integration config.
 
         Args:
@@ -133,6 +153,7 @@ class BaseTravisCITestCase(IntegrationTestCase):
         config.set('conditions', condition_set.serialize())
         config.set('travis_yml', 'script:\n    python ./tests/runtests.py')
         config.set('branch_name', 'review-requests')
+        config.set('run_manually', run_manually)
 
         if enterprise:
             config.set('travis_endpoint', TravisAPI.ENTERPRISE_ENDPOINT)
@@ -143,6 +164,29 @@ class BaseTravisCITestCase(IntegrationTestCase):
         config.save()
 
         return config
+
+    def _spy_on_make_request(self):
+        """Wrapper function for spying on the urlopen function.
+
+        Returns:
+            dict:
+            Faked response from TravisCI.
+        """
+        data = {}
+
+        def _make_request(api, url, body=None, method='GET', headers={},
+                          content_type=None):
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = url
+            data['request'] = json.loads(body)['request']
+            return '{}'
+
+        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
+                    call_fake=_make_request)
+
+        return data
 
 
 class TravisCIIntegrationTests(BaseTravisCITestCase):
@@ -159,19 +203,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         config = self._create_config()
         self.integration.enable_integration()
 
-        data = {}
-
-        def _make_request(api, url, body=None, method='GET', headers={},
-                          content_type=None):
-            # We can't actually do any assertions in here, because they'll get
-            # swallowed by SignalHook's sandboxing. We therefore record the
-            # data we need and assert later.
-            data['url'] = url
-            data['request'] = json.loads(body)['request']
-            return '{}'
-
-        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
-                    call_fake=_make_request)
+        data = self._spy_on_make_request()
 
         review_request.publish(review_request.submitter)
 
@@ -179,7 +211,8 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
 
         self.assertEqual(
             data['url'],
-            'https://api.travis-ci.org/repo/myorg%2Fmyrepo/requests')
+            'https://api.travis-ci.org/repo/mypublicorg%2Fmypublicorgrepo/'
+            'requests')
 
         self.assertEqual(
             data['request']['config']['env']['global'],
@@ -190,7 +223,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
 
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
-        self.assertTrue('git fetch --unshallow origin'
+        self.assertTrue('git fetch --unshallow origin || true'
                         in data['request']['config']['before_install'])
         self.assertTrue('git checkout %s' % diffset.base_commit_id
                         in data['request']['config']['before_install'])
@@ -209,19 +242,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         config = self._create_config(enterprise=True)
         self.integration.enable_integration()
 
-        data = {}
-
-        def _make_request(api, url, body=None, method='GET', headers={},
-                          content_type=None):
-            # We can't actually do any assertions in here, because they'll get
-            # swallowed by SignalHook's sandboxing. We therefore record the
-            # data we need and assert later.
-            data['url'] = url
-            data['request'] = json.loads(body)['request']
-            return '{}'
-
-        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
-                    call_fake=_make_request)
+        data = self._spy_on_make_request()
 
         review_request.publish(review_request.submitter)
 
@@ -229,7 +250,8 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
 
         self.assertEqual(
             data['url'],
-            'https://travis.example.com/api/repo/myorg%2Fmyrepo/requests')
+            'https://travis.example.com/api/repo/'
+            'mypublicorg%2Fmypublicorgrepo/requests')
 
         self.assertEqual(
             data['request']['config']['env']['global'],
@@ -264,19 +286,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         config = self._create_config(enterprise=True)
         self.integration.enable_integration()
 
-        data = {}
-
-        def _make_request(api, url, body=None, method='GET', headers={},
-                          content_type=None):
-            # We can't actually do any assertions in here, because they'll get
-            # swallowed by SignalHook's sandboxing. We therefore record the
-            # data we need and assert later.
-            data['url'] = url
-            data['request'] = json.loads(body)['request']
-            return '{}'
-
-        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
-                    call_fake=_make_request)
+        data = self._spy_on_make_request()
 
         review_request.publish(review_request.submitter)
 
@@ -284,7 +294,8 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
 
         self.assertEqual(
             data['url'],
-            'https://travis.example.com/api/repo/myorg%2Fmyrepo/requests')
+            'https://travis.example.com/api/repo/'
+            'mypublicorg%2Fmypublicorgrepo/requests')
 
         self.assertEqual(
             data['request']['config']['env']['global'],
@@ -323,19 +334,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         config.save()
         self.integration.enable_integration()
 
-        data = {}
-
-        def _make_request(api, url, body=None, method='GET', headers={},
-                          content_type=None):
-            # We can't actually do any assertions in here, because they'll get
-            # swallowed by SignalHook's sandboxing. We therefore record the
-            # data we need and assert later.
-            data['url'] = url
-            data['request'] = json.loads(body)['request']
-            return '{}'
-
-        self.spy_on(TravisAPI._make_request, owner=TravisAPI,
-                    call_fake=_make_request)
+        data = self._spy_on_make_request()
 
         review_request.publish(review_request.submitter)
 
@@ -343,7 +342,8 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
 
         self.assertEqual(
             data['url'],
-            'https://api.travis-ci.org/repo/myorg%2Fmyrepo/requests')
+            'https://api.travis-ci.org/repo/mypublicorg%2Fmypublicorgrepo/'
+            'requests')
 
         self.assertEqual(
             data['request']['config']['env']['global'],
@@ -353,7 +353,7 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
             ])
         self.assertEqual(data['request']['message'],
                          'Test Summary\n\nTest Description')
-        self.assertFalse('git fetch --unshallow origin'
+        self.assertFalse('git fetch --unshallow origin || true'
                          in data['request']['config']['before_install'])
         self.assertEqual(data['request']['branch'], 'review-requests')
 
@@ -447,6 +447,139 @@ class TravisCIIntegrationTests(BaseTravisCITestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['travis_ci_token'],
                          ['Unable to authenticate with this API token.'])
+
+    def test_manual_run_no_build_on_publish(self):
+        """Testing lack of TravisCIIntegration build when a new review
+        request is made with the run manually configuration
+        """
+        repository = self._create_repository()
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config(run_manually=True)
+        self.integration.enable_integration()
+
+        data = self._spy_on_make_request()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertFalse(TravisAPI._make_request.called)
+
+        self.assertEqual(data, {})
+
+    def test_build_manual_run(self):
+        """Testing TravisCIIntegration build via a manual trigger"""
+        repository = self._create_repository()
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        config = self._create_config()
+        self.integration.enable_integration()
+
+        status_update = \
+            self.create_status_update(service_id='travis-ci',
+                                      review_request=review_request)
+
+        data = self._spy_on_make_request()
+
+        status_update_request_run.send(sender=self.__class__,
+                                       status_update=status_update)
+
+        self.assertTrue(TravisAPI._make_request.called)
+
+        self.assertEqual(
+            data['url'],
+            'https://api.travis-ci.org/repo/'
+            'mypublicorg%2Fmypublicorgrepo/requests')
+
+        self.assertEqual(
+            data['request']['config']['env']['global'],
+            [
+                'REVIEWBOARD_STATUS_UPDATE_ID=1',
+                'REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID=%d' % config.pk,
+            ])
+
+        self.assertEqual(data['request']['message'],
+                         'Test Summary\n\nTest Description')
+        self.assertTrue('git fetch --unshallow origin || true'
+                        in data['request']['config']['before_install'])
+        self.assertTrue('git checkout %s' % diffset.base_commit_id
+                        in data['request']['config']['before_install'])
+        self.assertEqual(data['request']['branch'], 'review-requests')
+
+    def test_build_new_review_request_with_public_github_repository(self):
+        """Testing CircleCIIntegration builds for a new review request with
+        a public GitHub repository
+        """
+        repository = self._create_repository(repository_plan='public')
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        data = self._spy_on_make_request()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertTrue(TravisAPI._make_request.called)
+
+        self.assertEqual(
+            data['url'],
+            'https://api.travis-ci.org/repo/myuser%2Fmypublicrepo/requests')
+
+    def test_build_new_review_request_with_private_github_repository(self):
+        """Testing CircleCIIntegration builds for a new review request with
+        a public GitHub repository
+        """
+        repository = self._create_repository(repository_plan='private')
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        data = self._spy_on_make_request()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertTrue(TravisAPI._make_request.called)
+
+        self.assertEqual(
+            data['url'],
+            'https://api.travis-ci.org/repo/myuser%2Fmyprivaterepo/requests')
+
+    def test_build_new_review_request_with_private_org_github_repository(self):
+        """Testing CircleCIIntegration builds for a new review request with
+        a public GitHub repository
+        """
+        repository = self._create_repository(repository_plan='private-org')
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        data = self._spy_on_make_request()
+
+        review_request.publish(review_request.submitter)
+
+        self.assertTrue(TravisAPI._make_request.called)
+
+        self.assertEqual(
+            data['url'],
+            'https://api.travis-ci.org/repo/'
+            'myprivateorg%2Fmyprivateorgrepo/requests')
 
 
 class TravisCIWebHookTests(BaseTravisCITestCase):
