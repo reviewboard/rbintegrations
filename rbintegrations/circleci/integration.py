@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
@@ -14,6 +15,7 @@ from djblets.avatars.services import URLAvatarService
 from djblets.siteconfig.models import SiteConfiguration
 from reviewboard.admin.server import get_server_url
 from reviewboard.avatars import avatar_services
+from reviewboard.diffviewer.models import DiffSet
 from reviewboard.extensions.hooks import SignalHook
 from reviewboard.integrations import Integration
 from reviewboard.reviews.models.status_update import StatusUpdate
@@ -38,6 +40,14 @@ class CircleCIIntegration(Integration):
         """Initialize the integration hooks."""
         SignalHook(self, review_request_published,
                    self._on_review_request_published)
+
+        try:
+            from reviewboard.reviews.signals import status_update_request_run
+            SignalHook(self, status_update_request_run,
+                       self._on_status_update_request_run)
+        except ImportError:
+            # Running on Review Board 3.0.18 or older.
+            pass
 
     @cached_property
     def icon_static_urls(self):
@@ -75,20 +85,15 @@ class CircleCIIntegration(Integration):
             **kwargs (dict):
                 Additional keyword arguments.
         """
-        # Only build changes against GitHub or Bitbucket repositories.
-        repository = review_request.repository
+        repository, vcs_type, matching_configs = \
+            self._prepare_for_build(review_request)
 
-        if not repository or not repository.hosting_account:
+        if not bool(matching_configs):
             return
-
-        service_name = repository.hosting_account.service_name
-
-        if service_name not in ('github', 'bitbucket'):
-            return
-
-        diffset = review_request.get_latest_diffset()
 
         # Don't build any review requests that don't include diffs.
+        diffset = review_request.get_latest_diffset()
+
         if not diffset:
             return
 
@@ -101,15 +106,114 @@ class CircleCIIntegration(Integration):
                 'added' not in fields_changed['diff']):
                 return
 
-        matching_configs = [
-            config
-            for config in self.get_configs(review_request.local_site)
-            if config.match_conditions(form_cls=self.config_form_cls,
-                                       review_request=review_request)
-        ]
+        user = self._get_or_create_user()
 
-        if not matching_configs:
+        for config in matching_configs:
+            status_update = StatusUpdate.objects.create(
+                service_id='circle-ci',
+                user=user,
+                summary='CircleCI',
+                description='starting build...',
+                state=StatusUpdate.PENDING,
+                review_request=review_request,
+                change_description=changedesc)
+            status_update.extra_data['can_retry'] = True
+
+            if config.get('run_manually'):
+                status_update.description = 'waiting to run.'
+                status_update.state = StatusUpdate.NOT_YET_RUN
+                status_update.save()
+            else:
+                data = self._send_circleci_request(config, repository,
+                                                   vcs_type, diffset,
+                                                   review_request,
+                                                   status_update)
+
+                status_update.url = data['build_url']
+                status_update.url_text = 'View Build'
+                status_update.save()
+
+    def _on_status_update_request_run(self, sender, status_update, **kwargs):
+        """Handle a request to run or rerun a CircleCI build.
+
+        Args:
+            sender (object):
+                The sender of the signal.
+
+            status_update (reviewboard.reviews.models.StatusUpdate):
+                The status update.
+
+            **kwargs (dict):
+                Any additional keyword arguments.
+        """
+        service_id = status_update.service_id
+
+        if not service_id.startswith('circle-ci'):
+            # Ignore anything that's not CircleCI.
             return
+
+        review_request = status_update.review_request
+
+        repository, vcs_type, matching_configs = \
+            self._prepare_for_build(review_request)
+
+        diffset = None
+        changedesc = status_update.change_description
+
+        # If there's a change description associated with the status
+        # update, then use the diff from that. Otherwise, choose the first
+        # diffset on the review request.
+        try:
+            if changedesc and 'diff' in changedesc.fields_changed:
+                new_diff = changedesc.fields_changed['diff']['added'][0]
+                diffset = DiffSet.objects.get(pk=new_diff[2])
+            else:
+                diffset = DiffSet.objects.filter(
+                    history=review_request.diffset_history_id).earliest()
+        except DiffSet.DoesNotExist:
+            logging.error('Unable to determine diffset when running '
+                          'CircleCI tool for status update %d',
+                          status_update.pk)
+            return
+
+        assert len(matching_configs) == 1
+        config = matching_configs[0]
+
+        data = self._send_circleci_request(config, repository,
+                                           vcs_type, diffset,
+                                           review_request, status_update)
+
+        status_update.description = 'starting...'
+        status_update.state = StatusUpdate.PENDING
+        status_update.timestamp = datetime.now()
+        status_update.url = data['build_url']
+        status_update.url_text = 'View Build'
+        status_update.save()
+
+    def _prepare_for_build(self, review_request):
+        """Returns the required variables for the next step.
+
+        Args:
+            review_request (reviewboard.reviews.models.review_request.
+                            ReviewRequest):
+                The review request which was published.
+
+        Returns:
+            tuple of object, unicode and list.
+            A three-tuple consisting of the repository, the service name and
+            the matching configurations.
+        """
+        repository = None
+        vcs_type = None
+        matching_configs = None
+
+        # Only build changes against GitHub or Bitbucket repositories.
+        repository = review_request.repository
+
+        if not repository or not repository.hosting_account:
+            return (repository, vcs_type, matching_configs)
+
+        service_name = repository.hosting_account.service_name
 
         # This may look weird, but it's here for defensive purposes.
         # Currently, the possible values for CircleCI's "vcs-type" field in
@@ -124,69 +228,15 @@ class CircleCIIntegration(Integration):
                              'to CircleCI invocation: %s'
                              % service_name)
 
-        org_name, repo_name = self._get_repo_ids(service_name, repository)
+        # Don't build any review requests that don't have matching configs.
+        matching_configs = [
+            config
+            for config in self.get_configs(review_request.local_site)
+            if config.match_conditions(form_cls=self.config_form_cls,
+                                       review_request=review_request)
+        ]
 
-        user = self._get_or_create_user()
-
-        for config in matching_configs:
-            status_update = StatusUpdate.objects.create(
-                service_id='circle-ci',
-                user=user,
-                summary='CircleCI',
-                description='starting build...',
-                state=StatusUpdate.PENDING,
-                review_request=review_request,
-                change_description=changedesc)
-
-            url = ('https://circleci.com/api/v1.1/project/%s/%s/%s/tree/%s'
-                   '?circle-token=%s'
-                   % (vcs_type, org_name, repo_name,
-                      config.get('branch_name') or 'master',
-                      urlquote_plus(config.get('circle_api_token'))))
-
-            logger.info('Making CircleCI API request: %s', url)
-
-            local_site = config.local_site
-
-            try:
-                token = user.webapi_tokens.filter(local_site=local_site)[0]
-            except IndexError:
-                token = WebAPIToken.objects.generate_token(
-                    user, local_site=local_site, auto_generated=True)
-
-            body = {
-                'revision': diffset.base_commit_id,
-                'build_parameters': {
-                    'CIRCLE_JOB': 'reviewboard',
-                    'REVIEWBOARD_SERVER':
-                        get_server_url(local_site=config.local_site),
-                    'REVIEWBOARD_REVIEW_REQUEST': review_request.display_id,
-                    'REVIEWBOARD_DIFF_REVISION': diffset.revision,
-                    'REVIEWBOARD_API_TOKEN': token.token,
-                    'REVIEWBOARD_STATUS_UPDATE_ID': status_update.pk,
-                },
-            }
-
-            if config.local_site:
-                body['build_parameters']['REVIEWBOARD_LOCAL_SITE'] = \
-                    config.local_site.name
-
-            request = URLRequest(
-                url,
-                body=json.dumps(body),
-                headers={
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                method='POST')
-
-            u = urlopen(request)
-
-            data = json.loads(u.read())
-
-            status_update.url = data['build_url']
-            status_update.url_text = 'View Build'
-            status_update.save()
+        return (repository, vcs_type, matching_configs)
 
     def _get_repo_ids(self, service_name, repository):
         """Return the organization and repo name for the given repository.
@@ -274,3 +324,81 @@ class CircleCIIntegration(Integration):
                     avatar_service.setup(user, self.icon_static_urls)
 
                 return user
+
+    def _send_circleci_request(self, config, repository, vcs_type,
+                               diffset, review_request, status_update):
+        """Build and send CircleCI request.
+
+        Args:
+            config (reviewboard.integrations.models.IntegrationConfig):
+                Enabled integration configurations matching the query.
+
+            repository (reviewboard.scmtools.models):
+                The repository.
+
+            vcs_type (unicode):
+                The version control system type.
+
+            diffset (reviewboard.diffviewer.models.DiffSet):
+                The diffset.
+
+            review_request (reviewboard.reviews.models.review_request.
+                            ReviewRequest):
+                The review request which was published.
+
+            status_update (reviewboard.reviews.models.StatusUpdate):
+                The status update for the tool that should be run.
+
+        Returns:
+            dict:
+            Response from CircleCI.
+        """
+        org_name, repo_name = self._get_repo_ids(vcs_type, repository)
+
+        url = ('https://circleci.com/api/v1.1/project/%s/%s/%s/tree/%s'
+               '?circle-token=%s'
+               % (vcs_type, org_name, repo_name,
+                  config.get('branch_name') or 'master',
+                  urlquote_plus(config.get('circle_api_token'))))
+
+        logger.info('Making CircleCI API request: %s', url)
+
+        local_site = config.local_site
+
+        user = self._get_or_create_user()
+
+        try:
+            token = user.webapi_tokens.filter(local_site=local_site)[0]
+        except IndexError:
+            token = WebAPIToken.objects.generate_token(
+                user, local_site=local_site, auto_generated=True)
+
+        body = {
+            'revision': diffset.base_commit_id,
+            'build_parameters': {
+                'CIRCLE_JOB': 'reviewboard',
+                'REVIEWBOARD_SERVER':
+                    get_server_url(local_site=config.local_site),
+                'REVIEWBOARD_REVIEW_REQUEST': review_request.display_id,
+                'REVIEWBOARD_DIFF_REVISION': diffset.revision,
+                'REVIEWBOARD_API_TOKEN': token.token,
+                'REVIEWBOARD_STATUS_UPDATE_ID': status_update.pk,
+            },
+        }
+
+        if config.local_site:
+            body['build_parameters']['REVIEWBOARD_LOCAL_SITE'] = \
+                config.local_site.name
+
+        request = URLRequest(
+            url,
+            body=json.dumps(body),
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            method='POST')
+
+        u = urlopen(request)
+
+        return json.loads(u.read())

@@ -42,46 +42,41 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review request from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review request from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     @add_fixtures(['test_site'])
     def test_notify_new_review_request_with_local_site(self):
@@ -106,47 +101,42 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review request from Test User: '
-                        'http://example.com/s/local-site-1/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/s/local-site-1/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/s/local-site-1/users/test/'
-                        '|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review request from Test User: '
+                    'http://example.com/s/local-site-1/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/s/local-site-1/r/1/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/s/local-site-1/users/test/'
+                    '|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_request_with_diff(self):
         """Testing SlackIntegration notifies on new review request with diff"""
@@ -165,53 +155,48 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review request from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Diff',
-                            'value': (
-                                '<http://example.com/r/1/diff/1/|Revision 1>'
-                            ),
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review request from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Diff',
+                        'value': (
+                            '<http://example.com/r/1/diff/1/|Revision 1>'
+                        ),
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     @add_fixtures(['test_site'])
     def test_notify_new_review_request_with_local_site_and_diff(self):
@@ -237,55 +222,50 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review request from Test User: '
-                        'http://example.com/s/local-site-1/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Diff',
-                            'value': (
-                                '<http://example.com/s/local-site-1/r/1/'
-                                'diff/1/|Revision 1>'
-                            ),
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/s/local-site-1/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/s/local-site-1/users/test/'
-                        '|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review request from Test User: '
+                    'http://example.com/s/local-site-1/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Diff',
+                        'value': (
+                            '<http://example.com/s/local-site-1/r/1/'
+                            'diff/1/|Revision 1>'
+                        ),
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/s/local-site-1/r/1/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/s/local-site-1/users/test/'
+                    '|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_request_with_image_file_attachment(self):
         """Testing SlackIntegration notifies on new review request with
@@ -306,47 +286,42 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review request from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'image_url': attachment.get_absolute_url(),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review request from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'image_url': attachment.get_absolute_url(),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_request_with_fish_trophy(self):
         """Testing SlackIntegration notifies on new review request with
@@ -367,47 +342,42 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#12321: New review request from Test User: '
-                        'http://example.com/r/12321/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'thumb_url': self.integration.TROPHY_URLS['fish'],
-                    'title': '#12321: Test Review Request',
-                    'title_link': 'http://example.com/r/12321/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#12321: New review request from Test User: '
+                    'http://example.com/r/12321/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'thumb_url': self.integration.TROPHY_URLS['fish'],
+                'title': '#12321: Test Review Request',
+                'title_link': 'http://example.com/r/12321/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_request_with_milestone_trophy(self):
         """Testing SlackIntegration notifies on new review request with
@@ -428,47 +398,42 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#10000: New review request from Test User: '
-                        'http://example.com/r/10000/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'thumb_url': self.integration.TROPHY_URLS['milestone'],
-                    'title': '#10000: Test Review Request',
-                    'title_link': 'http://example.com/r/10000/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#10000: New review request from Test User: '
+                    'http://example.com/r/10000/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'thumb_url': self.integration.TROPHY_URLS['milestone'],
+                'title': '#10000: Test Review Request',
+                'title_link': 'http://example.com/r/10000/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_request_with_custom_trophy(self):
         """Testing SlackIntegration notifies on new review request with
@@ -505,46 +470,41 @@ class SlackIntegrationTests(IntegrationTestCase):
         finally:
             trophies_registry.unregister(MyTrophy)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review request from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': False,
-                            'title': 'Description',
-                            'value': 'My description.',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'New review request from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review request from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': False,
+                        'title': 'Description',
+                        'value': 'My description.',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': None,
+                'pretext': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_updated_review_request(self):
         """Testing SlackIntegration notifies on updated review request"""
@@ -568,41 +528,36 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New update from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: My new summary',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': '',
-                    'pretext': (
-                        'New update from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New update from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: My new summary',
+                'title_link': 'http://example.com/r/1/',
+                'text': '',
+                'pretext': (
+                    'New update from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_updated_review_request_with_change_description(self):
         """Testing SlackIntegration notifies on updated review request with
@@ -632,41 +587,36 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New update from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'title': '#1: My new summary',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': 'These are my changes.',
-                    'pretext': (
-                        'New update from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New update from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'title': '#1: My new summary',
+                'title_link': 'http://example.com/r/1/',
+                'text': 'These are my changes.',
+                'pretext': (
+                    'New update from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_updated_review_request_with_new_image_attachments(self):
         """Testing SlackIntegration notifies on updated review request with
@@ -693,42 +643,37 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.publish(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New update from Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'fields': [
-                        {
-                            'short': True,
-                            'title': 'Repository',
-                            'value': 'Test Repo',
-                        },
-                        {
-                            'short': True,
-                            'title': 'Branch',
-                            'value': 'my-branch',
-                        },
-                    ],
-                    'image_url': attachment.get_absolute_url(),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': '',
-                    'pretext': (
-                        'New update from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New update from Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'fields': [
+                    {
+                        'short': True,
+                        'title': 'Repository',
+                        'value': 'Test Repo',
+                    },
+                    {
+                        'short': True,
+                        'title': 'Branch',
+                        'value': 'my-branch',
+                    },
+                ],
+                'image_url': attachment.get_absolute_url(),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': '',
+                'pretext': (
+                    'New update from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_closed_review_request_as_submitted(self):
         """Testing SlackIntegration notifies on closing review request as
@@ -748,29 +693,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.close(review_request.SUBMITTED)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: Closed as completed by Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'Closed as completed by '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: Closed as completed by Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': None,
+                'pretext': (
+                    'Closed as completed by '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_closed_review_request_as_discarded(self):
         """Testing SlackIntegration notifies on closing review request as
@@ -790,29 +730,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.close(review_request.DISCARDED)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: Discarded by Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'Discarded by '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: Discarded by Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': None,
+                'pretext': (
+                    'Discarded by '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     @add_fixtures(['test_site'])
     def test_notify_closed_review_request_with_local_site(self):
@@ -837,30 +772,25 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.close(review_request.SUBMITTED)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: Closed as completed by Test User: '
-                        'http://example.com/s/local-site-1/r/1/'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/s/local-site-1/r/1/',
-                    'text': None,
-                    'pretext': (
-                        'Closed as completed by '
-                        '<http://example.com/s/local-site-1/users/test/'
-                        '|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: Closed as completed by Test User: '
+                    'http://example.com/s/local-site-1/r/1/'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/s/local-site-1/r/1/',
+                'text': None,
+                'pretext': (
+                    'Closed as completed by '
+                    '<http://example.com/s/local-site-1/users/test/'
+                    '|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_reopened_review_request(self):
         """Testing SlackIntegration notifies on reopened review request"""
@@ -879,29 +809,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.reopen(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: Reopened by Test User: '
-                        'http://example.com/r/1/'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/',
-                    'text': 'My description.',
-                    'pretext': (
-                        'Reopened by '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: Reopened by Test User: '
+                    'http://example.com/r/1/'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/',
+                'text': 'My description.',
+                'pretext': (
+                    'Reopened by '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     @add_fixtures(['test_site'])
     def test_notify_reopened_review_request_with_local_site(self):
@@ -927,30 +852,25 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review_request.reopen(self.user)
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: Reopened by Test User: '
-                        'http://example.com/s/local-site-1/r/1/'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/s/local-site-1/r/1/',
-                    'text': 'My description.',
-                    'pretext': (
-                        'Reopened by '
-                        '<http://example.com/s/local-site-1/users/test/'
-                        '|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: Reopened by Test User: '
+                    'http://example.com/s/local-site-1/r/1/'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/s/local-site-1/r/1/',
+                'text': 'My description.',
+                'pretext': (
+                    'Reopened by '
+                    '<http://example.com/s/local-site-1/users/test/'
+                    '|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_body_top(self):
         """Testing SlackIntegration notifies on new review with body_top"""
@@ -971,29 +891,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review from Test User: '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': 'This is my review.',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review from Test User: '
+                    'http://example.com/r/1/#review1'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'This is my review.',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     @add_fixtures(['test_site'])
     def test_notify_new_review_with_local_site(self):
@@ -1019,32 +934,27 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review from Test User: '
-                        'http://example.com/s/local-site-1/r/1/#review1'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': (
-                        'http://example.com/s/local-site-1/r/1/#review1'
-                    ),
-                    'text': 'This is my review.',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/s/local-site-1/users/test/'
-                        '|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review from Test User: '
+                    'http://example.com/s/local-site-1/r/1/#review1'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': (
+                    'http://example.com/s/local-site-1/r/1/#review1'
+                ),
+                'text': 'This is my review.',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/s/local-site-1/users/test/'
+                    '|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_comments(self):
         """Testing SlackIntegration notifies on new review with only comments
@@ -1065,29 +975,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New review from Test User: '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': 'My general comment.',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New review from Test User: '
+                    'http://example.com/r/1/#review1'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'My general comment.',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_one_open_issue(self):
         """Testing SlackIntegration notifies on new review with 1 open
@@ -1110,34 +1015,29 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': 'warning',
-                    'fallback': (
-                        '#1: New review from Test User (1 issue): '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'fields': [{
-                        'title': 'Open Issues',
-                        'value': ':warning: 1 issue',
-                        'short': True,
-                    }],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': 'My general comment.',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': 'warning',
+                'fallback': (
+                    '#1: New review from Test User (1 issue): '
+                    'http://example.com/r/1/#review1'
+                ),
+                'fields': [{
+                    'title': 'Open Issues',
+                    'value': ':warning: 1 issue',
+                    'short': True,
                 }],
-            })
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'My general comment.',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_open_issues(self):
         """Testing SlackIntegration notifies on new review with > 1 open
@@ -1162,34 +1062,29 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': 'warning',
-                    'fallback': (
-                        '#1: New review from Test User (2 issues): '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'fields': [{
-                        'title': 'Open Issues',
-                        'value': ':warning: 2 issues',
-                        'short': True,
-                    }],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': 'My general comment.',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': 'warning',
+                'fallback': (
+                    '#1: New review from Test User (2 issues): '
+                    'http://example.com/r/1/#review1'
+                ),
+                'fields': [{
+                    'title': 'Open Issues',
+                    'value': ':warning: 2 issues',
+                    'short': True,
                 }],
-            })
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'My general comment.',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_ship_it(self):
         """Testing SlackIntegration notifies on new review with Ship It!"""
@@ -1211,34 +1106,29 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': 'good',
-                    'fallback': (
-                        '#1: New review from Test User (Ship it!): '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'fields': [{
-                        'title': 'Ship it!',
-                        'value': ':white_check_mark:',
-                        'short': True,
-                    }],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': '',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': 'good',
+                'fallback': (
+                    '#1: New review from Test User (Ship it!): '
+                    'http://example.com/r/1/#review1'
+                ),
+                'fields': [{
+                    'title': 'Ship it!',
+                    'value': ':white_check_mark:',
+                    'short': True,
                 }],
-            })
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': '',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_ship_it_and_custom_body_top(self):
         """Testing SlackIntegration notifies on new review with Ship It and
@@ -1262,34 +1152,29 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': 'good',
-                    'fallback': (
-                        '#1: New review from Test User (Ship it!): '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'fields': [{
-                        'title': 'Ship it!',
-                        'value': ':white_check_mark:',
-                        'short': True,
-                    }],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': 'This is body_top.',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': 'good',
+                'fallback': (
+                    '#1: New review from Test User (Ship it!): '
+                    'http://example.com/r/1/#review1'
+                ),
+                'fields': [{
+                    'title': 'Ship it!',
+                    'value': ':white_check_mark:',
+                    'short': True,
                 }],
-            })
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'This is body_top.',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_ship_it_and_one_open_issue(self):
         """Testing SlackIntegration notifies on new review with Ship It! and
@@ -1313,35 +1198,30 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': 'warning',
-                    'fallback': (
-                        '#1: New review from Test User '
-                        '(Fix it, then Ship it!): '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'fields': [{
-                        'title': 'Fix it, then Ship it!',
-                        'value': ':warning: 1 issue',
-                        'short': True,
-                    }],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': '',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': 'warning',
+                'fallback': (
+                    '#1: New review from Test User '
+                    '(Fix it, then Ship it!): '
+                    'http://example.com/r/1/#review1'
+                ),
+                'fields': [{
+                    'title': 'Fix it, then Ship it!',
+                    'value': ':warning: 1 issue',
+                    'short': True,
                 }],
-            })
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': '',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_review_with_ship_it_and_open_issues(self):
         """Testing SlackIntegration notifies on new review with Ship It! and
@@ -1366,35 +1246,30 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         review.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': 'warning',
-                    'fallback': (
-                        '#1: New review from Test User '
-                        '(Fix it, then Ship it!): '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'fields': [{
-                        'title': 'Fix it, then Ship it!',
-                        'value': ':warning: 2 issues',
-                        'short': True,
-                    }],
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': '',
-                    'pretext': (
-                        'New review from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': 'warning',
+                'fallback': (
+                    '#1: New review from Test User '
+                    '(Fix it, then Ship it!): '
+                    'http://example.com/r/1/#review1'
+                ),
+                'fields': [{
+                    'title': 'Fix it, then Ship it!',
+                    'value': ':warning: 2 issues',
+                    'short': True,
                 }],
-            })
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': '',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_reply_with_body_top(self):
         """Testing SlackIntegration notifies on new reply with body_top"""
@@ -1422,29 +1297,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         reply.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New reply from Test User: '
-                        'http://example.com/r/1/#review2'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review2',
-                    'text': 'This is body_top.',
-                    'pretext': (
-                        'New reply from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New reply from Test User: '
+                    'http://example.com/r/1/#review2'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review2',
+                'text': 'This is body_top.',
+                'pretext': (
+                    'New reply from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     @add_fixtures(['test_site'])
     def test_notify_new_reply_with_local_site(self):
@@ -1477,32 +1347,27 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         reply.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New reply from Test User: '
-                        'http://example.com/s/local-site-1/r/1/#review2'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': (
-                        'http://example.com/s/local-site-1/r/1/#review2'
-                    ),
-                    'text': 'This is body_top.',
-                    'pretext': (
-                        'New reply from '
-                        '<http://example.com/s/local-site-1/users/test/'
-                        '|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New reply from Test User: '
+                    'http://example.com/s/local-site-1/r/1/#review2'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': (
+                    'http://example.com/s/local-site-1/r/1/#review2'
+                ),
+                'text': 'This is body_top.',
+                'pretext': (
+                    'New reply from '
+                    '<http://example.com/s/local-site-1/users/test/'
+                    '|Test User>'
+                ),
+            }],
+        })
 
     def test_notify_new_reply_with_comment(self):
         """Testing SlackIntegration notifies on new reply with comment"""
@@ -1528,29 +1393,24 @@ class SlackIntegrationTests(IntegrationTestCase):
         self.spy_on(self.integration.notify)
         reply.publish()
 
-        self.assertEqual(len(self.integration.notify.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 1)
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
-                'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
-                    'fallback': (
-                        '#1: New reply from Test User: '
-                        'http://example.com/r/1/#review2'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review2',
-                    'text': 'This is a comment.',
-                    'pretext': (
-                        'New reply from '
-                        '<http://example.com/users/test/|Test User>'
-                    ),
-                }],
-            })
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': self.integration.DEFAULT_COLOR,
+                'fallback': (
+                    '#1: New reply from Test User: '
+                    'http://example.com/r/1/#review2'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review2',
+                'text': 'This is a comment.',
+                'pretext': (
+                    'New reply from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
 
     def _create_config(self, with_local_site=False):
         choice = ReviewRequestRepositoriesChoice()
@@ -1574,3 +1434,31 @@ class SlackIntegrationTests(IntegrationTestCase):
         config.save()
 
         return config
+
+    def _check_notify_request(self, expected_payload):
+        """Check that a notify and HTTP request meets expected criteria.
+
+        This will ensure that only a single request was invoked, and that the
+        request information contains the appropriate headers, string types,
+        and payload content.
+
+        Args:
+            expected_payload (dict):
+                The expected payload sent to Slack.
+
+        Raises:
+            AssertionError:
+                One or more of the checks failed.
+        """
+        self.assertSpyCallCount(self.integration.notify, 1)
+        self.assertSpyCallCount(urlopen, 1)
+
+        request = urlopen.last_call.args[0]
+        body = request.data
+        headers = request.headers
+
+        self.assertIsInstance(body, bytes)
+        self.assertEqual(headers['Content-length'], len(body))
+        self.assertEqual(headers['Content-type'], str('application/json'))
+        self.assertEqual(json.loads(body.decode('utf-8')),
+                         expected_payload)

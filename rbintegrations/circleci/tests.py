@@ -8,6 +8,7 @@ from django.utils.six.moves.urllib.request import urlopen
 from djblets.conditions import ConditionSet, Condition
 from reviewboard.hostingsvcs.models import HostingServiceAccount
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
+from reviewboard.reviews.signals import status_update_request_run
 
 from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.testing.testcases import IntegrationTestCase
@@ -58,7 +59,8 @@ class CircleCIIntegrationTests(IntegrationTestCase):
 
     def test_build_new_review_request_with_local_site(self):
         """Testing CircleCIIntegration builds a new review request with a local
-        site"""
+        site
+        """
         repository = self._create_repository(with_local_site=True)
         review_request = self.create_review_request(repository=repository,
                                                     with_local_site=True)
@@ -89,6 +91,93 @@ class CircleCIIntegrationTests(IntegrationTestCase):
                          'http://example.com/s/%s/' % self.local_site_name)
         self.assertEqual(data['build_params']['REVIEWBOARD_LOCAL_SITE'],
                          self.local_site_name)
+
+    def test_manual_run_no_build_on_publish(self):
+        """Testing lack of CircleCIIntegration build when a new review
+        request is made with the run manually configuration
+        """
+        repository = self._create_repository()
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config(run_manually=True)
+        self.integration.enable_integration()
+
+        data = {}
+
+        def _urlopen(request, **kwargs):
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = request.get_full_url()
+            data['build_params'] = json.loads(request.data)['build_parameters']
+
+            class _Response(object):
+                def read(self):
+                    return json.dumps({
+                        'build_url': 'http://example.com/gh/org/project/35',
+                    })
+
+            return _Response()
+
+        self.spy_on(urlopen, call_fake=_urlopen)
+
+        review_request.publish(review_request.submitter)
+
+        self.assertFalse(urlopen.spy.called)
+        self.assertEqual(data, {})
+
+    def test_build_manual_run(self):
+        """Testing CircleCIIntegration build via a manual trigger"""
+        repository = self._create_repository()
+        review_request = self.create_review_request(repository=repository)
+        diffset = self.create_diffset(review_request=review_request)
+        diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'
+        diffset.save()
+
+        self._create_config(run_manually=True)
+        self.integration.enable_integration()
+
+        status_update = \
+            self.create_status_update(service_id='circle-ci',
+                                      review_request=review_request)
+
+        data = {}
+
+        def _urlopen(request, **kwargs):
+            # We can't actually do any assertions in here, because they'll get
+            # swallowed by SignalHook's sandboxing. We therefore record the
+            # data we need and assert later.
+            data['url'] = request.get_full_url()
+            data['build_params'] = json.loads(request.data)['build_parameters']
+
+            class _Response(object):
+                def read(self):
+                    return json.dumps({
+                        'build_url': 'http://example.com/gh/org/project/35',
+                    })
+
+            return _Response()
+
+        self.spy_on(urlopen, call_fake=_urlopen)
+
+        status_update_request_run.send(sender=self.__class__,
+                                       status_update=status_update)
+
+        self.assertTrue(urlopen.spy.called)
+        self.assertEqual(data['url'],
+                         'https://circleci.com/api/v1.1/project/github/'
+                         'mypublicorg/mypublicorgrepo/tree/review-requests?'
+                         'circle-token=None')
+
+        self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
+        self.assertIn('REVIEWBOARD_API_TOKEN', data['build_params'])
+        self.assertIn('REVIEWBOARD_DIFF_REVISION', data['build_params'])
+        self.assertIn('REVIEWBOARD_REVIEW_REQUEST', data['build_params'])
+        self.assertIn('REVIEWBOARD_SERVER', data['build_params'])
+        self.assertIn('REVIEWBOARD_STATUS_UPDATE_ID', data['build_params'])
 
     def test_non_github_review_request(self):
         """Testing CircleCIIntegration skipping a non-GitHub review request"""
@@ -272,12 +361,15 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         else:
             return self.create_repository()
 
-    def _create_config(self, with_local_site=False):
+    def _create_config(self, with_local_site=False, run_manually=False):
         """Create an integration config.
 
         Args:
-            with_local_site (bool):
+            with_local_site (bool, optional):
                 Whether to limit the config to a local site.
+
+            run_manually (bool, optional):
+                Whether to run CircleCIIntegration manually.
         """
         choice = ReviewRequestRepositoriesChoice()
 
@@ -296,6 +388,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
                                                 local_site=local_site)
         config.set('conditions', condition_set.serialize())
         config.set('branch_name', 'review-requests')
+        config.set('run_manually', run_manually)
         config.save()
 
         return config

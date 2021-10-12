@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
+from django.utils import six
 from django.utils.six.moves.urllib.error import HTTPError
 from django.utils.six.moves.urllib.parse import (quote, urlencode)
 from django.utils.six.moves.urllib.request import urlopen
@@ -23,10 +24,6 @@ logger = logging.getLogger(__name__)
 
 class JenkinsAPI(object):
     """Object for interacting with the Jenkins CI API."""
-
-    csrf_protection_enabled = True
-    crumb = None
-    crumb_request_field = None
 
     def __init__(self, endpoint, job_name, username, password):
         """Initialize the object.
@@ -48,6 +45,9 @@ class JenkinsAPI(object):
         self.job_name = job_name
         self.username = username
         self.password = password
+        self.csrf_protection_enabled = True
+        self.crumb = None
+        self.crumb_request_field = None
 
     def test_connection(self):
         """Test the connection to the Jenkins server.
@@ -63,8 +63,8 @@ class JenkinsAPI(object):
 
         Args:
             patch_info (dict):
-                Contains the review ID, review diff revision and the status
-                update ID.
+                Contains the review ID, review branch, review diff revision
+                and the status update ID.
 
         Raises:
             urllib2.URLError:
@@ -79,6 +79,10 @@ class JenkinsAPI(object):
                 {
                     'name': 'REVIEWBOARD_REVIEW_ID',
                     'value': patch_info['review_id']
+                },
+                {
+                    'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                    'value': patch_info['review_branch']
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
@@ -100,7 +104,7 @@ class JenkinsAPI(object):
             '%s/job/%s/build' % (self.endpoint,
                                  quote(self.job_name)),
             body=urlencode({
-                'json': json.dumps(data)
+                'json': json.dumps(data, sort_keys=True)
             }),
             content_type='application/x-www-form-urlencoded',
             method='POST'
@@ -197,14 +201,30 @@ class JenkinsAPI(object):
         if content_type:
             headers['Content-Type'] = content_type
 
+        if isinstance(body, six.text_type):
+            body = body.encode('utf-8')
+
         request = HostingServiceHTTPRequest(
             url,
             body=body,
             method=method,
             headers=headers)
-
         request.add_basic_auth(self.username, self.password)
 
+        return self._open_request(request)
+
+    def _open_request(self, request):
+        """Perform an HTTP request.
+
+        Args:
+            request (reviewboard.hostingsvcs.service.
+                     HostingServiceHTTPRequest):
+                The HTTP request object.
+
+        Returns:
+            bytes:
+            The response data.
+        """
         if hasattr(request, 'open'):
             # Review Board >= 4.0
             response = request.open()

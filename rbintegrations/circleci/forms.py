@@ -3,10 +3,14 @@
 from __future__ import unicode_literals
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
+try:
+    from reviewboard.reviews.signals import status_update_request_run
+except ImportError:
+    status_update_request_run = None
 
 
 class CircleCIIntegrationConfigForm(IntegrationConfigForm):
@@ -26,3 +30,23 @@ class CircleCIIntegrationConfigForm(IntegrationConfigForm):
         required=False,
         help_text=_('An optional branch name to use for review request '
                     'builds within the CircleCI user interface.'))
+
+    run_manually = forms.BooleanField(
+        label=_('Run builds manually'),
+        required=False,
+        help_text=_('Wait to run this service until manually started. This '
+                    'will add a "Run" button to the CircleCI entry.'),
+        initial=False)
+
+    def load(self):
+        """Load the form."""
+        # Supporting APIs for these features were added in RB 3.0.19.
+        if status_update_request_run is None:
+            self.disabled_fields = ['run_manually']
+            self.disabled_reasons = {
+                'run_manually': ugettext(
+                    'Requires Review Board 3.0.19 or newer.'),
+            }
+            self.fields['run_manually'].initial = False
+
+        super(IntegrationConfigForm, self).load()

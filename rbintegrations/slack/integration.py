@@ -168,7 +168,7 @@ def notify(integration, title, title_link, fallback_text, local_site,
                       event_name, review_request.pk, channel, webhook_url)
 
         try:
-            data = json.dumps(payload)
+            data = json.dumps(payload).encode('utf-8')
             headers = {
                 'Content-Type': 'application/json',
                 'Content-Length': len(data),

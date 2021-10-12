@@ -1,0 +1,24 @@
+.. default-intersphinx:: rb4.0
+
+
+================================
+Integration 2.0.1 Release Notes
+================================
+
+**Release date**: June 29, 2021
+
+
+Bug Fixes
+=========
+
+* Fixed sending messages to :rbintegration:`Slack <slack>` and
+  :rbintegration:`Mattermost <mattermost>` on Python 3.
+
+* Fixed triggering builds on :rbintegration:`Jenkins <jenkins>` on Python 3.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
