@@ -2,7 +2,7 @@
 
 
 ================================
-Integration 2.0.1 Release Notes
+Integrations 2.0.1 Release Notes
 ================================
 
 **Release date**: June 29, 2021

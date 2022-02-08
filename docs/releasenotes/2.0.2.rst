@@ -1,0 +1,84 @@
+.. default-intersphinx:: rb4.0
+
+
+================================
+Integrations 2.0.2 Release Notes
+================================
+
+**Release date**: TBD
+
+
+Packaging
+=========
+
+* The :pypi:`PyYAML` dependency is now capped on Python 2.7 to a version
+  range of ``>=3.12,<=5.999``.
+
+  This fixes a recent regression with installing on Python 2.7.
+
+
+New Features
+============
+
+Jenkins CI
+----------
+
+* Added a :envvar:`REVIEWBOARD_REVIEW_BRANCH` environment variable accessible
+  to builds.
+
+  This mirrors the :guilabel:`Branch` field on a review request. It can be
+  used to check out the correct branch or otherwise distinguish builds.
+
+  Patch by André Klitzing.
+
+* Added support for specifying ``{branch}`` in job names for all types of
+  repositories.
+
+  This was previously only an option for Git.
+
+  Patch by André Klitzing.
+
+
+CircleCI
+--------
+
+* Added the ability to manually run builds or retry failed builds.
+
+  This requires Review Board 3.0.19 or higher.
+
+  Patch by Marcus Boay.
+
+
+Travis CI
+---------
+
+* Added the ability to manually run builds or retry failed builds.
+
+  This requires Review Board 3.0.19 or higher.
+
+  Patch by Marcus Boay.
+
+
+Bug Fixes
+=========
+
+Jenkins CI
+----------
+
+* Any slash (``/``) characters in a job name are now converted to an
+  underscore (``_``).
+
+  Jenkins doesn't allow slashes in job names. This fixes job names that may
+  contain a slash when present in an expanded ``{repository}`` or
+  ``{branch}`` variable.
+
+  Patch by André Klitzing.
+
+
+Contributors
+============
+
+* André Klitzing
+* Christian Hammond
+* David Trowbridge
+* Marcus Boay
