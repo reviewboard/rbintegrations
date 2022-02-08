@@ -23,6 +23,7 @@ instructions.
 Chat
 ----
 
+* `Discord <https://www.reviewboard.org/integrations/discord/>`_
 * `Mattermost <https://www.reviewboard.org/integrations/mattermost/>`_
 * `Slack <https://www.reviewboard.org/integrations/slack/>`_
 

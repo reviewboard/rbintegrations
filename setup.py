@@ -27,12 +27,16 @@ setup(
     packages=find_packages(),
     install_requires=[
         'asana',
-        'PyYAML>=3.12',
+        'PyYAML>=3.12,<=5.999; python_version<"3.0"',
+        'PyYAML>=3.12; python_version>="3.0"',
     ],
     entry_points={
         'reviewboard.extensions':
             '%s = rbintegrations.extension:RBIntegrationsExtension' % PACKAGE,
     },
+    python_requires=(
+        '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*'
+    ),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -44,6 +48,12 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Communications :: Chat',
         'Topic :: Software Development :: Build Tools',
         'Topic :: Software Development :: Quality Assurance',
