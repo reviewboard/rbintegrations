@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from django.core.cache import cache
-from django.utils.six.moves.urllib.error import HTTPError, URLError
-from django.utils.six.moves.urllib.request import Request, urlopen
 from djblets.cache.backend import cache_memoize, make_cache_key
 from reviewboard.scmtools.crypto_utils import decrypt_password
 

@@ -3,10 +3,10 @@
 from __future__ import unicode_literals
 
 import logging
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 from django import forms
-from django.utils.six.moves.urllib.error import HTTPError, URLError
-from django.utils.six.moves.urllib.request import urlopen
 from django.utils.translation import ugettext, ugettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.accounts.forms.pages import AccountPageForm

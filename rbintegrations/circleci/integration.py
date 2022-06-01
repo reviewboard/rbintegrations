@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import json
 import logging
 from datetime import datetime
+from urllib.request import urlopen
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 from django.utils.functional import cached_property
 from django.utils.http import urlquote_plus
-from django.utils.six.moves.urllib.request import urlopen
 from djblets.avatars.services import URLAvatarService
 from djblets.siteconfig.models import SiteConfiguration
 from reviewboard.admin.server import get_server_url

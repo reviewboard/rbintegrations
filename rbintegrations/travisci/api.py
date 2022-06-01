@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 
 import logging
 import json
+from urllib.request import urlopen
 
 from django.utils.http import urlquote_plus
-from django.utils.six.moves.urllib.request import urlopen
 from django.utils.translation import ugettext_lazy as _
 
 from rbintegrations.util.urlrequest import URLRequest

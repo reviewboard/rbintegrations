@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 import json
+from urllib.request import urlopen
 
 from django.contrib.auth.models import User
-from django.utils.six.moves.urllib.request import urlopen
 from djblets.conditions import ConditionSet, Condition
 from djblets.testing.decorators import add_fixtures
 from reviewboard.accounts.trophies import TrophyType, trophies_registry

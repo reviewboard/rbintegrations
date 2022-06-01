@@ -3,12 +3,12 @@
 from __future__ import unicode_literals
 
 import json
+from urllib.error import HTTPError
+from urllib.parse import urlencode
 
 import kgb
 import reviewboard
 from django.utils.encoding import force_bytes
-from django.utils.six.moves.urllib.error import HTTPError
-from django.utils.six.moves.urllib.parse import urlencode
 from djblets.conditions import ConditionSet, Condition
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
 from reviewboard.reviews.signals import status_update_request_run

@@ -5,11 +5,11 @@ from __future__ import unicode_literals
 import json
 import logging
 import re
+from urllib.request import Request, urlopen
 
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.utils.html import format_html
-from django.utils.six.moves.urllib.request import Request, urlopen
 from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.integration import BaseChatIntegration

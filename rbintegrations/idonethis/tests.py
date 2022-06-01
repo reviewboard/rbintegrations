@@ -4,13 +4,13 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from io import StringIO
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import RequestFactory
-from django.utils.six.moves import cStringIO as StringIO
-from django.utils.six.moves.urllib.error import HTTPError, URLError
-from django.utils.six.moves.urllib.request import urlopen
 from djblets.cache.backend import cache_memoize, make_cache_key
 from djblets.conditions import ConditionSet, Condition
 from djblets.testing.decorators import add_fixtures

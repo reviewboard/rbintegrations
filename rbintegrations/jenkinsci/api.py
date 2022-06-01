@@ -4,11 +4,9 @@ from __future__ import unicode_literals
 
 import json
 import logging
-
-from django.utils import six
-from django.utils.six.moves.urllib.error import HTTPError
-from django.utils.six.moves.urllib.parse import (quote, urlencode)
-from django.utils.six.moves.urllib.request import urlopen
+from urllib.error import HTTPError
+from urllib.parse import (quote, urlencode)
+from urllib.request import urlopen
 
 try:
     # Review Board 4.0
@@ -201,7 +199,7 @@ class JenkinsAPI(object):
         if content_type:
             headers['Content-Type'] = content_type
 
-        if isinstance(body, six.text_type):
+        if isinstance(body, str):
             body = body.encode('utf-8')
 
         request = HostingServiceHTTPRequest(

@@ -8,8 +8,8 @@ from datetime import datetime
 
 import yaml
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.db import IntegrityError, transaction
+from django.urls import reverse
 from django.utils.functional import cached_property
 from djblets.avatars.services import URLAvatarService
 from djblets.siteconfig.models import SiteConfiguration

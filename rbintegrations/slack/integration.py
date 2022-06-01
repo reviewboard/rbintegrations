@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from urllib.request import Request, urlopen
 
 from django.utils.functional import cached_property
-from django.utils.six.moves.urllib.request import Request, urlopen
 from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.forms import BaseChatIntegrationConfigForm

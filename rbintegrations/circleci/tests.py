@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import json
+from urllib.request import urlopen
 
-from django.utils.six.moves.urllib.request import urlopen
 from djblets.conditions import ConditionSet, Condition
 from reviewboard.hostingsvcs.models import HostingServiceAccount
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice

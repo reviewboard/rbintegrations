@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 from django.utils.functional import cached_property
-from django.utils.six.moves.urllib.error import HTTPError, URLError
-from django.utils.six.moves.urllib.request import urlopen
 from django.utils.translation import ugettext_lazy as _
 from reviewboard.admin.server import build_server_url
 from reviewboard.extensions.hooks import AccountPagesHook, SignalHook

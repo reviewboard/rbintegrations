@@ -7,7 +7,6 @@ import logging
 
 import asana
 from django.http import HttpResponse
-from django.utils import six
 from django.views.generic import View
 
 from reviewboard.accounts.mixins import CheckLoginRequiredViewMixin
@@ -117,7 +116,7 @@ class AsanaWorkspaceListView(CheckLoginRequiredViewMixin,
         except Exception as e:
             results = {
                 'result': 'error',
-                'error': six.text_type(e)
+                'error': str(e),
             }
 
         return HttpResponse(json.dumps(results),

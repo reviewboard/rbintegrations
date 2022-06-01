@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import datetime
+from urllib.error import HTTPError
 
-from django.utils.six.moves.urllib.error import HTTPError
 from djblets.util.decorators import cached_property
 from reviewboard.admin.server import get_server_url
 from reviewboard.diffviewer.models import DiffSet

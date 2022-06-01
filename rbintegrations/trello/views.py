@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from django.http import HttpResponse
-from django.utils.six.moves.urllib.parse import urlencode
-from django.utils.six.moves.urllib.request import urlopen
 from django.views.generic import View
 
 from reviewboard.integrations.base import get_integration_manager

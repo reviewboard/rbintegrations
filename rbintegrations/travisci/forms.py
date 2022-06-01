@@ -3,10 +3,9 @@
 from __future__ import unicode_literals
 
 import logging
+from urllib.error import HTTPError, URLError
 
 from django import forms
-from django.utils import six
-from django.utils.six.moves.urllib.error import HTTPError, URLError
 from django.utils.translation import ugettext, ugettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from djblets.conditions.choices import ConditionChoices
@@ -187,7 +186,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
             api = TravisAPI(cleaned_data)
         except ValueError as e:
             self._errors['travis_endpoint'] = self.error_class(
-                [six.text_type(e)])
+                [str(e)])
 
         # First try fetching the "user" endpoint. We don't actually do anything
         # with the data returned by this, but it's a good check to see if the
@@ -198,7 +197,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
             if e.code == 403:
                 message = _('Unable to authenticate with this API token.')
             else:
-                message = six.text_type(e)
+                message = str(e)
 
             self._errors['travis_ci_token'] = self.error_class([message])
 

@@ -3,9 +3,9 @@
 from __future__ import unicode_literals
 
 import json
+from urllib.error import HTTPError
 
-from django.core.urlresolvers import reverse
-from django.utils.six.moves.urllib.error import HTTPError
+from django.urls import reverse
 from djblets.conditions import ConditionSet, Condition
 from reviewboard.hostingsvcs.models import HostingServiceAccount
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice

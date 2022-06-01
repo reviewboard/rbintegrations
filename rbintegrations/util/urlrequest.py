@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from django.utils.six.moves.urllib.request import Request as BaseURLRequest
+from urllib.request import Request as BaseURLRequest
 
 
 class URLRequest(BaseURLRequest):

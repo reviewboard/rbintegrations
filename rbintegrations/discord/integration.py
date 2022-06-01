@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from urllib.request import Request, urlopen
 
 from django.utils.functional import cached_property
-from django.utils.six.moves.urllib.request import Request, urlopen
 from django.utils.translation import ugettext_lazy as _
 
 from rbintegrations.basechat.integration import BaseChatIntegration

@@ -3,10 +3,9 @@
 from __future__ import unicode_literals
 
 import logging
+from urllib.error import HTTPError, URLError
 
 from django import forms
-from django.utils import six
-from django.utils.six.moves.urllib.error import HTTPError, URLError
 from django.utils.translation import ugettext, ugettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
@@ -131,7 +130,7 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
             elif e.code == 401:
                 message = _('Provided user credentials are incorrect.')
             else:
-                message = six.text_type(e)
+                message = str(e)
 
             self._errors['jenkins_username'] = self.error_class([message])
             self._errors['jenkins_password'] = self.error_class([message])
