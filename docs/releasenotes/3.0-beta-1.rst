@@ -5,7 +5,7 @@
 Integrations 3.0 Beta 1 Release Notes
 =====================================
 
-**Release date**: TBD
+**Release date**: July 14, 2022
 
 
 Compatibility
