@@ -8,7 +8,7 @@ from djblets.util.templatetags.djblets_utils import user_displayname
 from reviewboard.accounts.models import Trophy
 from reviewboard.admin.server import build_server_url
 from reviewboard.extensions.hooks import SignalHook
-from reviewboard.integrations import Integration
+from reviewboard.integrations.base import Integration
 from reviewboard.reviews.models import (BaseComment, Comment,
                                         FileAttachmentComment,
                                         GeneralComment,

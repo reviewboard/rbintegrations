@@ -11,7 +11,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from reviewboard.admin.server import build_server_url
 from reviewboard.extensions.hooks import AccountPagesHook, SignalHook
-from reviewboard.integrations import Integration
+from reviewboard.integrations.base import Integration
 from reviewboard.reviews.models import BaseComment, ReviewRequest
 from reviewboard.reviews.signals import (review_request_closed,
                                          review_request_published,

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.utils.functional import cached_property
 from reviewboard.extensions.hooks import ReviewRequestFieldsHook
-from reviewboard.integrations import Integration
+from reviewboard.integrations.base import Integration
 
 from rbintegrations.trello.fields import TrelloField
 from rbintegrations.trello.forms import TrelloIntegrationConfigForm

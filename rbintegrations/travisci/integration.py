@@ -17,7 +17,7 @@ from reviewboard.admin.server import build_server_url
 from reviewboard.avatars import avatar_services
 from reviewboard.diffviewer.models import DiffSet
 from reviewboard.extensions.hooks import SignalHook
-from reviewboard.integrations import Integration
+from reviewboard.integrations.base import Integration
 from reviewboard.reviews.models.status_update import StatusUpdate
 from reviewboard.reviews.signals import review_request_published
 

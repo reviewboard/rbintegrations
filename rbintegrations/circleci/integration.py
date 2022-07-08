@@ -5,19 +5,19 @@ from __future__ import unicode_literals
 import json
 import logging
 from datetime import datetime
+from urllib.parse import quote_plus
 from urllib.request import urlopen
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 from django.utils.functional import cached_property
-from django.utils.http import urlquote_plus
 from djblets.avatars.services import URLAvatarService
 from djblets.siteconfig.models import SiteConfiguration
 from reviewboard.admin.server import get_server_url
 from reviewboard.avatars import avatar_services
 from reviewboard.diffviewer.models import DiffSet
 from reviewboard.extensions.hooks import SignalHook
-from reviewboard.integrations import Integration
+from reviewboard.integrations.base import Integration
 from reviewboard.reviews.models.status_update import StatusUpdate
 from reviewboard.reviews.signals import review_request_published
 from reviewboard.webapi.models import WebAPIToken
@@ -354,12 +354,13 @@ class CircleCIIntegration(Integration):
             Response from CircleCI.
         """
         org_name, repo_name = self._get_repo_ids(vcs_type, repository)
+        api_token = config.get('circle_api_token', '')
 
         url = ('https://circleci.com/api/v1.1/project/%s/%s/%s/tree/%s'
                '?circle-token=%s'
                % (vcs_type, org_name, repo_name,
                   config.get('branch_name') or 'master',
-                  urlquote_plus(config.get('circle_api_token'))))
+                  quote_plus(api_token.encode('utf-8'))))
 
         logger.info('Making CircleCI API request: %s', url)
 
