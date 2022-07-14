@@ -1,0 +1,39 @@
+.. default-intersphinx:: rb-dev
+
+
+=====================================
+Integrations 3.0 Beta 1 Release Notes
+=====================================
+
+**Release date**: TBD
+
+
+Compatibility
+=============
+
+Integrations 3.0 is compatible with Review Board 5.x.
+
+It supports Python 3.7+.
+
+Support for older versions of Review Board and Python have been dropped.
+
+
+New Integrations
+================
+
+* :rbintegration:`Matrix <matrix>`
+
+  Matrix is an open source, secure, self-hosted, decentralized chat service
+  used by organizations of all kinds.
+
+  Review Board can talk to Matrix, notifying any given Matrix channel when
+  there are new review requests or updates to review, or new discussions on a
+  review request that you might want to pay attention to.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Ruonan Jia
