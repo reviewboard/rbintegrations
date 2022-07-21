@@ -1,20 +1,14 @@
 """The form for configuring the Jenkins CI integration."""
 
-from __future__ import unicode_literals
-
 import logging
 from urllib.error import HTTPError, URLError
 
 from django import forms
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
 from reviewboard.webapi.models import WebAPIToken
-try:
-    from reviewboard.reviews.signals import status_update_request_run
-except ImportError:
-    status_update_request_run = None
 
 from rbintegrations.jenkinsci.api import JenkinsAPI
 from rbintegrations.jenkinsci.common import get_or_create_jenkins_user
@@ -87,18 +81,6 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
                 user, local_site=local_site, auto_generated=True)
 
         self.initial['jenkins_user_token'] = token.token
-
-    def load(self):
-        """Load the form."""
-        # Supporting APIs for these features were added in RB 3.0.19
-        if status_update_request_run is None:
-            self.disabled_fields = ['run_manually']
-            self.disabled_reasons = {
-                'run_manually': ugettext(
-                    'Requires Review Board 3.0.19 or newer.'),
-            }
-            self.fields['run_manually'].initial = False
-        super(IntegrationConfigForm, self).load()
 
     def clean(self):
         """Clean the form.

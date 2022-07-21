@@ -1,7 +1,5 @@
 """Unit tests for the Discord integration."""
 
-from __future__ import unicode_literals
-
 import json
 from urllib.request import urlopen
 

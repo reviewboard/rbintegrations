@@ -1,7 +1,5 @@
 """Integration for building changes on Travis CI."""
 
-from __future__ import unicode_literals
-
 import base64
 import logging
 from datetime import datetime
@@ -19,7 +17,8 @@ from reviewboard.diffviewer.models import DiffSet
 from reviewboard.extensions.hooks import SignalHook
 from reviewboard.integrations.base import Integration
 from reviewboard.reviews.models.status_update import StatusUpdate
-from reviewboard.reviews.signals import review_request_published
+from reviewboard.reviews.signals import (review_request_published,
+                                         status_update_request_run)
 
 from rbintegrations.travisci.api import TravisAPI
 from rbintegrations.travisci.forms import TravisCIIntegrationConfigForm
@@ -39,14 +38,8 @@ class TravisCIIntegration(Integration):
         """Initialize the integration hooks."""
         SignalHook(self, review_request_published,
                    self._on_review_request_published)
-
-        try:
-            from reviewboard.reviews.signals import status_update_request_run
-            SignalHook(self, status_update_request_run,
-                       self._on_status_update_request_run)
-        except ImportError:
-            # Running on Review Board 3.0.18 or older.
-            pass
+        SignalHook(self, status_update_request_run,
+                   self._on_status_update_request_run)
 
     @cached_property
     def icon_static_urls(self):

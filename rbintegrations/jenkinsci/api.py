@@ -1,20 +1,12 @@
 """Utilities for interacting with the Jenkins CI API."""
 
-from __future__ import unicode_literals
-
 import json
 import logging
 from urllib.error import HTTPError
 from urllib.parse import (quote, urlencode)
 from urllib.request import urlopen
 
-try:
-    # Review Board 4.0
-    from reviewboard.hostingsvcs.service import HostingServiceHTTPRequest
-except ImportError:
-    # Review Board 3.0
-    from reviewboard.hostingsvcs.service import URLRequest as \
-        HostingServiceHTTPRequest
+from reviewboard.hostingsvcs.service import HostingServiceHTTPRequest
 
 
 logger = logging.getLogger(__name__)
@@ -223,13 +215,5 @@ class JenkinsAPI(object):
             bytes:
             The response data.
         """
-        if hasattr(request, 'open'):
-            # Review Board >= 4.0
-            response = request.open()
-            data = response.data
-        else:
-            # Review Board 3.x
-            response = urlopen(request)
-            data = response.read()
-
-        return data
+        response = request.open()
+        return response.data

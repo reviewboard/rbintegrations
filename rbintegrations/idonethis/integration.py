@@ -1,14 +1,12 @@
 """Integration with I Done This."""
 
-from __future__ import unicode_literals
-
 import json
 import logging
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from reviewboard.admin.server import build_server_url
 from reviewboard.extensions.hooks import AccountPagesHook, SignalHook
 from reviewboard.integrations.base import Integration

@@ -1,13 +1,11 @@
 """Utilities for interacting with the Travis CI API."""
 
-from __future__ import unicode_literals
-
 import logging
 import json
 from urllib.request import urlopen
 
 from django.utils.http import urlquote_plus
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from rbintegrations.util.urlrequest import URLRequest
 

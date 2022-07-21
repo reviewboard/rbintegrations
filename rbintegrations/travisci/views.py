@@ -1,7 +1,5 @@
 """Views for the Travis CI integration (webhook listener)."""
 
-from __future__ import unicode_literals
-
 import base64
 import json
 import logging

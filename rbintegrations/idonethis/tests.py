@@ -1,7 +1,5 @@
 """Unit tests for I Done This integration."""
 
-from __future__ import unicode_literals
-
 import json
 import logging
 from io import StringIO

@@ -1,7 +1,5 @@
 """Utility functions for I Done This integration."""
 
-from __future__ import unicode_literals
-
 import json
 import logging
 from urllib.error import HTTPError, URLError

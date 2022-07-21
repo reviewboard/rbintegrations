@@ -1,12 +1,10 @@
 """The form for configuring the Travis CI integration."""
 
-from __future__ import unicode_literals
-
 import logging
 from urllib.error import HTTPError, URLError
 
 from django import forms
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from djblets.conditions.choices import ConditionChoices
 from reviewboard.integrations.forms import IntegrationConfigForm
@@ -16,10 +14,6 @@ from reviewboard.reviews.conditions import (ReviewRequestConditionChoiceMixin,
                                             ReviewRequestRepositoryTypeChoice)
 from reviewboard.scmtools.conditions import RepositoriesChoice
 from reviewboard.scmtools.models import Repository
-try:
-    from reviewboard.reviews.signals import status_update_request_run
-except ImportError:
-    status_update_request_run = None
 
 from rbintegrations.travisci.api import TravisAPI
 
@@ -141,19 +135,6 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
         self.css_bundle_names = [travis_integration_config_bundle]
         self.js_bundle_names = [travis_integration_config_bundle]
 
-    def load(self):
-        """Load the form."""
-        # Supporting APIs for these features were added in RB 3.0.19.
-        if status_update_request_run is None:
-            self.disabled_fields = ['run_manually']
-            self.disabled_reasons = {
-                'run_manually': ugettext(
-                    'Requires Review Board 3.0.19 or newer.'),
-            }
-            self.fields['run_manually'].initial = False
-
-        super(IntegrationConfigForm, self).load()
-
     def clean(self):
         """Clean the form.
 
@@ -187,6 +168,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
         except ValueError as e:
             self._errors['travis_endpoint'] = self.error_class(
                 [str(e)])
+            return cleaned_data
 
         # First try fetching the "user" endpoint. We don't actually do anything
         # with the data returned by this, but it's a good check to see if the

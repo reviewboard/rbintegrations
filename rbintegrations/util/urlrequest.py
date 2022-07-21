@@ -1,7 +1,5 @@
 """URL Request utilities."""
 
-from __future__ import unicode_literals
-
 from urllib.request import Request as BaseURLRequest
 
 

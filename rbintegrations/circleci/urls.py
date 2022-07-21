@@ -1,11 +1,8 @@
-from __future__ import unicode_literals
-
-from django.conf.urls import url
+from django.urls import path
 
 from rbintegrations.circleci.views import CircleCIWebHookView
 
 
 urlpatterns = [
-    url(r'^webhook/$', CircleCIWebHookView.as_view(),
-        name='circle-ci-webhook'),
+    path('webhook/', CircleCIWebHookView.as_view(), name='circle-ci-webhook'),
 ]
