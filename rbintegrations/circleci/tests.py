@@ -48,7 +48,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
                          'mypublicorg/mypublicorgrepo/tree/review-requests?'
-                         'circle-token=')
+                         'circle-token=test-api-token')
 
         self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
         self.assertIn('REVIEWBOARD_API_TOKEN', data['build_params'])
@@ -79,7 +79,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
                          'mypublicorg/mypublicorgrepo/tree/review-requests?'
-                         'circle-token=')
+                         'circle-token=test-api-token')
 
         self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
         self.assertIn('REVIEWBOARD_API_TOKEN', data['build_params'])
@@ -170,7 +170,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
                          'mypublicorg/mypublicorgrepo/tree/review-requests?'
-                         'circle-token=')
+                         'circle-token=test-api-token')
 
         self.assertEqual(data['build_params']['CIRCLE_JOB'], 'reviewboard')
         self.assertIn('REVIEWBOARD_API_TOKEN', data['build_params'])
@@ -217,7 +217,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
                          'myuser/mypublicrepo/tree/review-requests?'
-                         'circle-token=')
+                         'circle-token=test-api-token')
 
     def test_build_new_review_request_with_private_github_repository(self):
         """Testing CircleCIIntegration builds for a new review request with
@@ -240,7 +240,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
                          'myuser/myprivaterepo/tree/review-requests?'
-                         'circle-token=')
+                         'circle-token=test-api-token')
 
     def test_build_new_review_request_with_private_org_github_repository(self):
         """Testing CircleCIIntegration builds for a new review request with
@@ -263,7 +263,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         self.assertEqual(data['url'],
                          'https://circleci.com/api/v1.1/project/github/'
                          'myprivateorg/myprivateorgrepo/tree/review-requests?'
-                         'circle-token=')
+                         'circle-token=test-api-token')
 
     def _create_repository(self,
                            github=True,
@@ -389,6 +389,7 @@ class CircleCIIntegrationTests(IntegrationTestCase):
         config.set('conditions', condition_set.serialize())
         config.set('branch_name', 'review-requests')
         config.set('run_manually', run_manually)
+        config.set('circle_api_token', 'test-api-token')
         config.save()
 
         return config

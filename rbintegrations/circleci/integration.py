@@ -124,13 +124,18 @@ class CircleCIIntegration(Integration):
                 status_update.state = StatusUpdate.NOT_YET_RUN
                 status_update.save()
             else:
-                data = self._send_circleci_request(config, repository,
-                                                   vcs_type, diffset,
-                                                   review_request,
-                                                   status_update)
+                try:
+                    data = self._send_circleci_request(config, repository,
+                                                       vcs_type, diffset,
+                                                       review_request,
+                                                       status_update)
 
-                status_update.url = data['build_url']
-                status_update.url_text = 'View Build'
+                    status_update.url = data['build_url']
+                    status_update.url_text = 'View Build'
+                except Exception as e:
+                    status_update.state = StatusUpdate.ERROR
+                    status_update.description = str(e)
+
                 status_update.save()
 
     def _on_status_update_request_run(self, sender, status_update, **kwargs):
@@ -179,15 +184,20 @@ class CircleCIIntegration(Integration):
         assert len(matching_configs) == 1
         config = matching_configs[0]
 
-        data = self._send_circleci_request(config, repository,
-                                           vcs_type, diffset,
-                                           review_request, status_update)
+        try:
+            data = self._send_circleci_request(config, repository,
+                                               vcs_type, diffset,
+                                               review_request, status_update)
 
-        status_update.description = 'starting...'
-        status_update.state = StatusUpdate.PENDING
-        status_update.timestamp = datetime.now()
-        status_update.url = data['build_url']
-        status_update.url_text = 'View Build'
+            status_update.description = 'starting...'
+            status_update.state = StatusUpdate.PENDING
+            status_update.timestamp = datetime.now()
+            status_update.url = data['build_url']
+            status_update.url_text = 'View Build'
+        except Exception as e:
+            status_update.state = StatusUpdate.ERROR
+            status_update.description = str(e)
+
         status_update.save()
 
     def _prepare_for_build(self, review_request):
@@ -286,6 +296,8 @@ class CircleCIIntegration(Integration):
                 raise ValueError('Unexpected plan for Bitbucket repository '
                                  '%d: %s'
                                  % (repository.pk, plan))
+        else:
+            raise ValueError('Unexpected service_name %s' % service_name)
 
     def _get_or_create_user(self):
         """Return a user to use for CircleCI.
@@ -354,7 +366,13 @@ class CircleCIIntegration(Integration):
             Response from CircleCI.
         """
         org_name, repo_name = self._get_repo_ids(vcs_type, repository)
-        api_token = config.get('circle_api_token', '')
+        api_token = config.get('circle_api_token')
+
+        if not api_token:
+            logger.error('Unable to make CircleCI API request for '
+                         'integration config %d: api_token is missing.',
+                         config.pk)
+            raise ValueError('missing API token.')
 
         url = ('https://circleci.com/api/v1.1/project/%s/%s/%s/tree/%s'
                '?circle-token=%s'
