@@ -1,7 +1,5 @@
 """Unit tests for the Trello integration."""
 
-from __future__ import unicode_literals
-
 from django.http import HttpResponse
 from reviewboard.site.urlresolvers import local_site_reverse
 

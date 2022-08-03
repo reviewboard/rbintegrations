@@ -1,7 +1,5 @@
 """Sphinx plugins for special links in the Release Notes."""
 
-from __future__ import unicode_literals
-
 from docutils import nodes, utils
 
 

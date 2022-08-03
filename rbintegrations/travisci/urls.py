@@ -1,11 +1,8 @@
-from __future__ import unicode_literals
-
-from django.conf.urls import url
+from django.urls import path
 
 from rbintegrations.travisci.views import TravisCIWebHookView
 
 
 urlpatterns = [
-    url(r'^webhook/$', TravisCIWebHookView.as_view(),
-        name='travis-ci-webhook'),
+    path('webhook/', TravisCIWebHookView.as_view(), name='travis-ci-webhook'),
 ]

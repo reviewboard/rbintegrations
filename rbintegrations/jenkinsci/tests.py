@@ -1,7 +1,5 @@
 """Unit tests for the Jenkins CI integration."""
 
-from __future__ import unicode_literals
-
 import json
 from urllib.error import HTTPError
 from urllib.parse import urlencode

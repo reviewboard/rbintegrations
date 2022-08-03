@@ -1,7 +1,5 @@
 """Integration for associating review requests with Trello cards."""
 
-from __future__ import unicode_literals
-
 from django.utils.functional import cached_property
 from reviewboard.extensions.hooks import ReviewRequestFieldsHook
 from reviewboard.integrations.base import Integration

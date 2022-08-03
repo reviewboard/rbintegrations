@@ -1,13 +1,11 @@
 """Forms for I Done This integration."""
 
-from __future__ import unicode_literals
-
 import logging
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 from django import forms
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.accounts.forms.pages import AccountPageForm
 from reviewboard.integrations.forms import IntegrationConfigForm
@@ -55,7 +53,7 @@ class IDoneThisIntegrationConfigForm(IntegrationConfigForm):
 
         if '/' in team_id:
             raise forms.ValidationError(
-                ugettext('Team ID cannot contain slashes.'))
+                gettext('Team ID cannot contain slashes.'))
 
         return team_id
 
@@ -147,8 +145,8 @@ class IDoneThisIntegrationAccountPageForm(AccountPageForm):
                           error_info)
 
             raise forms.ValidationError(
-                ugettext('Error validating the API Token. Make sure the token '
-                         'matches your I Done This Account Settings.'))
+                gettext('Error validating the API Token. Make sure the token '
+                        'matches your I Done This Account Settings.'))
 
         return api_token
 

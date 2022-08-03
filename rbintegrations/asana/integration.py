@@ -1,9 +1,7 @@
 """Integration for associating review requests with Asana tasks."""
 
-from __future__ import unicode_literals
-
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from reviewboard.extensions.hooks import ReviewRequestFieldsHook
 from reviewboard.integrations.base import Integration
 

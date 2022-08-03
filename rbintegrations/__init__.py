@@ -4,8 +4,6 @@ These variables and functions can be used to identify the version of
 the module. They're largely used for packaging purposes.
 """
 
-from __future__ import unicode_literals
-
 
 #: The version of RBIntegrations.
 #:

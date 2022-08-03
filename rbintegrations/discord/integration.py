@@ -1,13 +1,11 @@
 """Integration for Discord"""
 
-from __future__ import unicode_literals
-
 import json
 import logging
 from urllib.request import Request, urlopen
 
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from rbintegrations.basechat.integration import BaseChatIntegration
 from rbintegrations.discord.forms import DiscordIntegrationConfigForm

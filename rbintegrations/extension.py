@@ -1,7 +1,5 @@
-from __future__ import unicode_literals
-
-from django.conf.urls import include, url
-from django.utils.translation import ugettext_lazy as _
+from django.urls import include, path
+from django.utils.translation import gettext_lazy as _
 from reviewboard.extensions.base import Extension
 from reviewboard.extensions.hooks import IntegrationHook, URLHook
 from reviewboard.urls import reviewable_url_names, review_request_url_names
@@ -78,12 +76,12 @@ class RBIntegrationsExtension(Extension):
             IntegrationHook(self, integration_cls)
 
         URLHook(self, [
-            url(r'^rbintegrations/asana/',
-                include('rbintegrations.asana.urls')),
-            url(r'^rbintegrations/circle-ci/',
-                include('rbintegrations.circleci.urls')),
-            url(r'^rbintegrations/travis-ci/',
-                include('rbintegrations.travisci.urls')),
-            url(r'^rbintegrations/trello/',
-                include('rbintegrations.trello.urls')),
+            path('rbintegrations/asana/',
+                 include('rbintegrations.asana.urls')),
+            path('rbintegrations/circle-ci/',
+                 include('rbintegrations.circleci.urls')),
+            path('rbintegrations/travis-ci/',
+                 include('rbintegrations.travisci.urls')),
+            path('rbintegrations/trello/',
+                 include('rbintegrations.trello.urls')),
         ])

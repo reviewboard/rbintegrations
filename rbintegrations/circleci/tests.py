@@ -1,26 +1,17 @@
 """Unit tests for the CircleCI integration."""
 
-from __future__ import unicode_literals
-
 import json
 from urllib.request import urlopen
 
 from djblets.conditions import ConditionSet, Condition
 from reviewboard.hostingsvcs.models import HostingServiceAccount
+from reviewboard.hostingsvcs.service import (HostingServiceHTTPRequest,
+                                             HostingServiceHTTPResponse)
 from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
 from reviewboard.reviews.signals import status_update_request_run
 
 from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.testing.testcases import IntegrationTestCase
-
-try:
-    # Review Board >= 4.0
-    from reviewboard.hostingsvcs.service import (HostingServiceHTTPRequest,
-                                                 HostingServiceHTTPResponse)
-except ImportError:
-    # Review Board < 4.0
-    HostingServiceHTTPRequest = None
-    HostingServiceHTTPResponse = None
 
 
 class CircleCIIntegrationTests(IntegrationTestCase):
@@ -289,20 +280,6 @@ class CircleCIIntegrationTests(IntegrationTestCase):
             account = HostingServiceAccount(service_name='github',
                                             username='myuser')
 
-            # Review Board <= 3.0.17.
-            def _http_post_authorize(self, *args, **kwargs):
-                return json.dumps({
-                    'id': 1,
-                    'url': 'https://api.github.com/authorizations/1',
-                    'scopes': ['user', 'repo'],
-                    'token': 'abc123',
-                    'note': '',
-                    'note_url': '',
-                    'updated_at': '2012-05-04T03:30:00Z',
-                    'created_at': '2012-05-04T03:30:00Z',
-                }).encode('utf-8'), {}
-
-            # Review Board >= 3.0.18.
             def _http_get_user(_self, url, *args, **kwargs):
                 self.assertEqual(url, 'https://api.github.com/user')
 
@@ -311,28 +288,20 @@ class CircleCIIntegrationTests(IntegrationTestCase):
                     str('X-OAuth-Scopes'): str('admin:repo_hook, repo, user'),
                 }
 
-                if HostingServiceHTTPResponse is not None:
-                    # Review Board >= 4.0
-                    return HostingServiceHTTPResponse(
-                        request=HostingServiceHTTPRequest(url=url),
-                        url=url,
-                        data=payload,
-                        headers=headers,
-                        status_code=200)
-                else:
-                    # Review Board < 4.0
-                    return payload, headers
+                return HostingServiceHTTPResponse(
+                    request=HostingServiceHTTPRequest(url=url),
+                    url=url,
+                    data=payload,
+                    headers=headers,
+                    status_code=200)
 
             service = account.service
-            self.spy_on(service.client.http_post,
-                        call_fake=_http_post_authorize)
             self.spy_on(service.client.http_get,
                         call_fake=_http_get_user)
 
             service.authorize('myuser', 'mypass', None)
             self.assertTrue(account.is_authorized)
 
-            service.client.http_post.unspy()
             service.client.http_get.unspy()
 
             repository = self.create_repository(

@@ -1,7 +1,5 @@
 """Base test cases for rbintegrations."""
 
-from __future__ import unicode_literals
-
 from kgb import SpyAgency
 from reviewboard.extensions.testing import ExtensionTestCase
 from reviewboard.integrations.base import get_integration_manager

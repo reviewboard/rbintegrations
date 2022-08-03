@@ -1,20 +1,17 @@
 """URL definitions for the Trello integration."""
 
-from __future__ import unicode_literals
-
-from django.conf.urls import include, url
+from django.urls import include, path
 
 from rbintegrations.trello.views import TrelloCardSearchView
 
 
 localsite_urlpatterns = [
-    url(r'^card-search/(?P<review_request_id>\d+)/$',
-        TrelloCardSearchView.as_view(),
-        name='trello-card-search'),
+    path('card-search/<int:review_request_id>/',
+         TrelloCardSearchView.as_view(),
+         name='trello-card-search'),
 ]
 
 urlpatterns = [
-    url(r'^s/(?P<local_site_name>[\w\.-]+)/',
-        include(localsite_urlpatterns)),
+    path('s/<local_site_name>/', include(localsite_urlpatterns)),
 ]
 urlpatterns += localsite_urlpatterns
