@@ -1,11 +1,13 @@
 .. default-intersphinx:: rb5.0
 
 
-==============================
-Integrations 3.0 Release Notes
-==============================
+================================
+Integrations 3.0.1 Release Notes
+================================
 
 **Release date**: October 4, 2022
+
+This is a re-release of :doc:`3.0 <3.0>` with bug fixes that were missed.
 
 
 Compatibility
@@ -31,9 +33,20 @@ New Integrations
   review request that you might want to pay attention to.
 
 
+Bug Fixes
+=========
+
+CircleCI
+--------
+
+* Fixed bugs that could occur if an API token was empty or missing during
+  configuration.
+
+
 Contributors
 ============
 
 * Christian Hammond
 * David Trowbridge
 * Ruonan Jia
+
