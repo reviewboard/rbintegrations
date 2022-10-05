@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from reviewboard.extensions.packaging import setup
 from setuptools import find_packages
@@ -16,8 +16,9 @@ with open('README.rst', 'r') as fp:
 setup(
     name=PACKAGE,
     version=get_package_version(),
-    description=('A set of third-party service integrations for Review Board '
-                 '3.0+.'),
+    description=(
+        'A set of third-party service integrations for Review Board 5.0+.'
+    ),
     long_description=long_description,
     url='https://www.reviewboard.org/',
     author='Beanbag, Inc.',
@@ -27,16 +28,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         'asana',
-        'PyYAML>=3.12,<=5.999; python_version<"3.0"',
-        'PyYAML>=3.12; python_version>="3.0"',
+        'PyYAML>=3.12',
     ],
     entry_points={
         'reviewboard.extensions':
             '%s = rbintegrations.extension:RBIntegrationsExtension' % PACKAGE,
     },
-    python_requires=(
-        '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*'
-    ),
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -46,14 +44,12 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Communications :: Chat',
         'Topic :: Software Development :: Build Tools',
         'Topic :: Software Development :: Quality Assurance',
