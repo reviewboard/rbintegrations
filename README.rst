@@ -1,15 +1,15 @@
 Review Board Integrations
 =========================
 
-This extends `Review Board`_ 3.0+ with support for integrating with
+This extends `Review Board`_ 5.0+ with support for integrating with
 third-party services, like Slack or automated code review services.
 
 The latest supported version is automatically installed as part of Review
-Board 3.0+, but maintained and released separately, allowing administrators to
+Board 5.0+, but maintained and released separately, allowing administrators to
 get the latest and greatest integration support without having to update
 Review Board.
 
-.. _`Review Board`: https://www.reviewboard.org/
+.. _Review Board: https://www.reviewboard.org/
 
 
 Integrations
@@ -24,6 +24,7 @@ Chat
 ----
 
 * `Discord <https://www.reviewboard.org/integrations/discord/>`_
+* `Matrix <https://www.reviewboard.org/integrations/matrix/>`_
 * `Mattermost <https://www.reviewboard.org/integrations/mattermost/>`_
 * `Slack <https://www.reviewboard.org/integrations/slack/>`_
 
@@ -131,8 +132,8 @@ Related Projects
 * Djblets_ -
   Our pack of Django utilities for datagrids, API, extensions, integrations,
   and more. Used by Review Board.
-* ReviewBot_ -
+* `Review Bot`_ -
   Pluggable, automated code review for Review Board.
 
 .. _Djblets: https://github.com/djblets/djblets/
-.. _ReviewBot: https://github.com/reviewboard/ReviewBot/
+.. _Review Bot: https://github.com/reviewboard/ReviewBot/
