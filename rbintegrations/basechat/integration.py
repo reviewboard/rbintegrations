@@ -127,13 +127,13 @@ class BaseChatIntegration(Integration):
         review_url = build_server_url(review.get_absolute_url())
         fallback_text = '#%s: %s: %s' % (review_request.display_id,
                                          fallback_text, review_url)
+        body = ''
 
-        if review.body_top:
+        # Prefer showing the body, unless it's just a repeat of a "Ship It!".
+        # Otherwise, we'll aim for a comment, or body_bottom.
+        if (review.body_top and
+            (not review.ship_it or review.body_top != 'Ship It!')):
             body = review.body_top
-
-            # This is silly to show twice.
-            if review.ship_it and body == 'Ship It!':
-                body = ''
         else:
             if not first_comment:
                 for comment_cls in (Comment, FileAttachmentComment,
@@ -150,6 +150,8 @@ class BaseChatIntegration(Integration):
 
             if first_comment:
                 body = first_comment.text
+            else:
+                body = review.body_bottom
 
         self.notify(title=self.get_review_request_title(review_request),
                     title_link=review_url,

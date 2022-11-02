@@ -11,7 +11,7 @@ the module. They're largely used for packaging purposes.
 #:
 #: (Major, Minor, Micro, Patch, alpha/beta/rc/final, Release Number, Released)
 #:
-VERSION = (3, 0, 2, 0, 'alpha', 0, False)
+VERSION = (3, 0, 3, 0, 'alpha', 0, False)
 
 
 def get_version_string():
