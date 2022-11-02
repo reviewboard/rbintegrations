@@ -1129,7 +1129,8 @@ class MattermostIntegrationTests(IntegrationTestCase):
                                     user=self.user,
                                     ship_it=True,
                                     body_top='Ship It!')
-        self.create_general_comment(review)
+        self.create_general_comment(review,
+                                    text='My comment')
 
         self._create_config()
         self.integration.enable_integration()
@@ -1154,7 +1155,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                 }],
                 'title': '#1: Test Review Request',
                 'title_link': 'http://example.com/r/1/#review1',
-                'text': '',
+                'text': 'My comment',
                 'pretext': (
                     'New review from '
                     '<http://example.com/users/test/|Test User>'
@@ -1223,7 +1224,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
                                     user=self.user,
                                     ship_it=True,
                                     body_top='Ship It!')
-        self.create_general_comment(review, issue_opened=True)
+        self.create_general_comment(review,
+                                    text='My comment',
+                                    issue_opened=True)
 
         self._create_config()
         self.integration.enable_integration()
@@ -1249,7 +1252,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                 }],
                 'title': '#1: Test Review Request',
                 'title_link': 'http://example.com/r/1/#review1',
-                'text': '',
+                'text': 'My comment',
                 'pretext': (
                     'New review from '
                     '<http://example.com/users/test/|Test User>'
@@ -1271,8 +1274,12 @@ class MattermostIntegrationTests(IntegrationTestCase):
                                     user=self.user,
                                     ship_it=True,
                                     body_top='Ship It!')
-        self.create_general_comment(review, issue_opened=True)
-        self.create_general_comment(review, issue_opened=True)
+        self.create_general_comment(review,
+                                    text='My comment 1',
+                                    issue_opened=True)
+        self.create_general_comment(review,
+                                    text='My comment 2',
+                                    issue_opened=True)
 
         self._create_config()
         self.integration.enable_integration()
@@ -1296,6 +1303,84 @@ class MattermostIntegrationTests(IntegrationTestCase):
                     'value': ':warning: 2 issues',
                     'short': True,
                 }],
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'My comment 1',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
+
+    def test_notify_with_body_bottom(self):
+        """Testing MattermostIntegration notifies on new review with
+        body_bottom
+        """
+        review_request = self.create_review_request(
+            create_repository=True,
+            summary='Test Review Request',
+            publish=True)
+
+        review = self.create_review(review_request,
+                                    user=self.user,
+                                    body_top='',
+                                    body_bottom='Test')
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        self.spy_on(urlopen, call_original=False)
+        self.spy_on(self.integration.notify)
+        review.publish()
+
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': '#efcc96',
+                'fallback': (
+                    '#1: New review from Test User: '
+                    'http://example.com/r/1/#review1'
+                ),
+                'title': '#1: Test Review Request',
+                'title_link': 'http://example.com/r/1/#review1',
+                'text': 'Test',
+                'pretext': (
+                    'New review from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            }],
+        })
+
+    def test_notify_with_empty_review(self):
+        """Testing MattermostIntegration does not notify on empty review"""
+        review_request = self.create_review_request(
+            create_repository=True,
+            summary='Test Review Request',
+            publish=True)
+
+        review = self.create_review(review_request,
+                                    user=self.user,
+                                    body_top='',
+                                    body_bottom='')
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        self.spy_on(urlopen, call_original=False)
+        self.spy_on(self.integration.notify)
+        review.publish()
+
+        self._check_notify_request({
+            'username': 'RB User',
+            'icon_url': self.integration.LOGO_URL,
+            'attachments': [{
+                'color': '#efcc96',
+                'fallback': (
+                    '#1: New review from Test User: '
+                    'http://example.com/r/1/#review1'
+                ),
                 'title': '#1: Test Review Request',
                 'title_link': 'http://example.com/r/1/#review1',
                 'text': '',
