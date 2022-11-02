@@ -2,7 +2,7 @@
 
 
 ================================
-Integrations 2.0.3 Release Notes
+Integrations 3.0.2 Release Notes
 ================================
 
 **Release date**: November 1, 2022
