@@ -11,6 +11,7 @@ Integrations Release Notes
 .. toctree::
    :maxdepth: 1
 
+   3.0.2
    3.0.1
    3.0
    3.0-beta-1
