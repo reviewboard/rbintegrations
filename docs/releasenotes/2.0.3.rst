@@ -1,0 +1,27 @@
+.. default-intersphinx:: rb4.0
+
+
+================================
+Integrations 2.0.3 Release Notes
+================================
+
+**Release date**: TBD
+
+
+Bug Fixes
+=========
+
+* Fixed a (harmless) crash when attempting to publish empty reviews to
+  :rbintegration:`Discord <discord>`, :rbintegration:`Slack <slack>`, or
+  :rbintegration:`Mattermost <mattermost>`.
+
+  This would cause a crash report in the log file, but otherwise had no
+  impact on Review Board or the chat service.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
