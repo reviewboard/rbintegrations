@@ -1,0 +1,20 @@
+.. default-intersphinx:: rb4.0
+
+
+================================
+Integrations 2.0.4 Release Notes
+================================
+
+**Release date**: TBD
+
+
+Packaging
+=========
+
+* Capped the :pypi:`asana` dependency to <= 2.x on Python 2.7.
+
+
+Contributors
+============
+
+* Christian Hammond

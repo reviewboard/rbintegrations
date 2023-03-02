@@ -26,7 +26,8 @@ setup(
     maintainer_email='support@beanbaginc.com',
     packages=find_packages(),
     install_requires=[
-        'asana',
+        'asana<=2.0.999; python_version<="3.0"',
+        'asana>=3.0; python_version>="3.0"',
         'PyYAML>=3.12,<=5.999; python_version<"3.0"',
         'PyYAML>=3.12; python_version>="3.0"',
     ],
