@@ -4,14 +4,12 @@ import logging
 from urllib.error import HTTPError, URLError
 
 from django import forms
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
-from reviewboard.webapi.models import WebAPIToken
 
 from rbintegrations.jenkinsci.api import JenkinsAPI
-from rbintegrations.jenkinsci.common import get_or_create_jenkins_user
 
 
 logger = logging.getLogger(__name__)
@@ -58,7 +56,7 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
                     'will add a "Run" button to the Jenkins entry.'),
         initial=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize the form.
 
         Args:
@@ -68,17 +66,15 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
             **kwargs (dict):
                 Keyword arguments for the form.
         """
-        super(JenkinsCIIntegrationConfigForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        user = get_or_create_jenkins_user()
+        integration = self.integration
         local_site = self.fields['local_site'].initial
+        user = integration.get_or_create_user()
 
-        # Fetch the user's API token using the current local site
-        try:
-            token = user.webapi_tokens.filter(local_site=local_site)[0]
-        except IndexError:
-            token = WebAPIToken.objects.generate_token(
-                user, local_site=local_site, auto_generated=True)
+        token = integration.get_or_create_api_token(
+            user=user,
+            local_site=local_site)
 
         self.initial['jenkins_user_token'] = token.token
 
@@ -97,10 +93,10 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
             # Form validation has already failed.
             return cleaned_data
 
-        api = JenkinsAPI(cleaned_data.get('jenkins_endpoint'),
-                         cleaned_data.get('jenkins_job_name'),
-                         cleaned_data.get('jenkins_username'),
-                         cleaned_data.get('jenkins_password'))
+        api = JenkinsAPI(endpoint=cleaned_data.get('jenkins_endpoint'),
+                         job_name=cleaned_data.get('jenkins_job_name'),
+                         username=cleaned_data.get('jenkins_username'),
+                         password=cleaned_data.get('jenkins_password'))
 
         try:
             # Tests a simple endpoint to ensure the user credentials are
