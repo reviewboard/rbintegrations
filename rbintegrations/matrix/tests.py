@@ -804,7 +804,7 @@ class MatrixIntegrationTests(IntegrationTestCase):
                     'http://example.com/r/1/#review1</strong><p>'
                     '#1: Test Review Request</p><strong><font '
                     'color="good">Ship it!</font></strong>'
-                    '<p>✅</p>',
+                    '<p>✅</p><blockquote>My comment</blockquote>',
                 'format': 'org.matrix.custom.html'
             }
         )
@@ -883,7 +883,8 @@ class MatrixIntegrationTests(IntegrationTestCase):
                     'http://example.com/r/1/#review1'
                     '</strong><p>#1: Test Review Request</p><strong><font '
                     'color="warning">Fix it, then Ship it!'
-                    '</font></strong><p>⚠ 1 issue</p>',
+                    '</font></strong><p>⚠ 1 issue</p>'
+                    '<blockquote>My comment</blockquote>',
                 'format': 'org.matrix.custom.html'
             })
 
@@ -926,7 +927,8 @@ class MatrixIntegrationTests(IntegrationTestCase):
                     '<p>#1: Test Review '
                     'Request</p><strong><font '
                     'color="warning">Fix it, then Ship '
-                    'it!</font></strong><p>⚠ 2 issues</p>',
+                    'it!</font></strong><p>⚠ 2 issues</p>'
+                    '<blockquote>My comment</blockquote>',
                 'format': 'org.matrix.custom.html'
             }
         )
