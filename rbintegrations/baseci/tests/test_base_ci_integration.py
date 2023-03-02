@@ -733,6 +733,8 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         diffsets = info['diffsets']
         review_request = info['review_request']
 
+        assert config
+
         self.assertSpyCalled(integration.start_build)
         call_kwargs = integration.start_build.last_call.kwargs
         prep_data = call_kwargs['prep_data']
@@ -760,6 +762,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'change_description': None,
                 'description': 'starting build...',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -780,6 +783,8 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         config = info['config']
         diffsets = info['diffsets']
         review_request = info['review_request']
+
+        assert config
 
         self.assertSpyCalled(integration.start_build)
         call_kwargs = integration.start_build.last_call.kwargs
@@ -808,6 +813,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'change_description': prep_data.changedesc,
                 'description': 'starting build...',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -915,6 +921,8 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         diffsets = info['diffsets']
         review_request = info['review_request']
 
+        assert config
+
         self.assertSpyNotCalled(integration.start_build)
 
         # Check the status update created on publish.
@@ -928,6 +936,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'change_description': None,
                 'description': 'waiting to run.',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -956,6 +965,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'change_description': None,
                 'description': 'starting build...',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -985,6 +995,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'change_description': None,
                 'description': 'starting build...',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -1005,6 +1016,8 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         diffsets = info['diffsets']
         review_request = info['review_request']
 
+        assert config
+
         self.assertSpyNotCalled(integration.start_build)
 
         user = integration.get_or_create_user()
@@ -1021,6 +1034,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'waiting to run.',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -1065,6 +1079,123 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'change_description': changedesc,
                 'description': 'starting build...',
                 'extra_data': {
+                    '__integration_config_id': config.pk,
+                    'can_retry': True,
+                },
+                'review_request': review_request,
+                'service_id': 'my-ci',
+                'state': StatusUpdate.PENDING,
+                'summary': 'My CI',
+                'user': prep_data.user,
+            })
+
+    @add_fixtures(['test_scmtools'])
+    def test_manual_run_with_multiple_configs(self) -> None:
+        """Testing BaseCIIntegration._on_status_update_request_run with
+        multiple matching configs in database
+        """
+        integration = self.integration
+        integration_id = integration.integration_id
+
+        config1 = self._create_config(name='bad-config-1',
+                                      integration_id=integration_id,
+                                      with_manual_run=True)
+
+        info = self._setup_run_test(with_manual_run=True)
+        config2 = info['config']
+        diffsets = info['diffsets']
+        review_request = info['review_request']
+
+        assert config2
+
+        self._create_config(name='bad-config-2',
+                            integration_id=integration_id,
+                            with_manual_run=True)
+
+        self.assertSpyNotCalled(integration.start_build)
+
+        # Check the status updates created on publish.
+        #
+        # There should be only 2, since we did a publish after config1 and
+        # config2 were published but before config3.
+        status_updates = list(StatusUpdate.objects.all())
+
+        self.assertEqual(len(status_updates), 2)
+        self.assertEqual(status_updates[0].integration_config, config1)
+        self.assertEqual(status_updates[1].integration_config, config2)
+
+        # We want to test against the middle status update (the "good" one).
+        status_update = status_updates[1]
+
+        user = integration.get_or_create_user()
+
+        self.assertIsNotNone(status_update.pk)
+        self.assertAttrsEqual(
+            status_update,
+            {
+                'change_description': None,
+                'description': 'waiting to run.',
+                'extra_data': {
+                    '__integration_config_id': config2.pk,
+                    'can_retry': True,
+                },
+                'review_request': review_request,
+                'service_id': 'my-ci',
+                'state': StatusUpdate.NOT_YET_RUN,
+                'summary': 'My CI',
+                'user': user,
+            })
+
+        # Perform the manual run.
+        status_update.run()
+
+        self.assertSpyCalled(integration.start_build)
+        call_kwargs = integration.start_build.last_call.kwargs
+        prep_data = call_kwargs['prep_data']
+
+        self.assertEqual(call_kwargs['status_update'], status_update)
+        self.assertEqual(call_kwargs['config'], config2)
+
+        status_update = call_kwargs['status_update']
+
+        self.assertIsNotNone(status_update.pk)
+        self.assertAttrsEqual(
+            status_update,
+            {
+                'change_description': None,
+                'description': 'starting build...',
+                'extra_data': {
+                    '__integration_config_id': config2.pk,
+                    'can_retry': True,
+                },
+                'review_request': review_request,
+                'service_id': 'my-ci',
+                'state': StatusUpdate.PENDING,
+                'summary': 'My CI',
+                'user': user,
+            })
+
+        self.assertAttrsEqual(
+            prep_data,
+            {
+                'changedesc': None,
+                'configs': [config2],
+                'diffset': diffsets[0],
+                'extra_state': {
+                    'my_state': 123,
+                },
+                'review_request': review_request,
+            })
+        self.assertEqual(prep_data.user.username, 'test-ci-user')
+
+        self.assertIsNotNone(status_update.pk)
+        self.assertAttrsEqual(
+            status_update,
+            {
+                'change_description': None,
+                'description': 'starting build...',
+                'extra_data': {
+                    '__integration_config_id': config2.pk,
                     'can_retry': True,
                 },
                 'review_request': review_request,
@@ -1152,6 +1283,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             with_manual_run=True,
             spy_op=kgb.SpyOpRaise(Exception('oh no.')))
         config = info['config']
+        assert config
 
         self.assertSpyNotCalled(integration.start_build)
 

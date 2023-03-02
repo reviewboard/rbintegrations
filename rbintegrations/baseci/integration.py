@@ -640,24 +640,42 @@ class BaseCIIntegration(Integration):
         status_update_service_id = self.status_update_service_id
         status_update_name = self.name
 
+        has_create_for_integration = hasattr(StatusUpdate.objects,
+                                             'create_for_integration')
+
         for config in matching_configs:
             run_manually = config.get('run_manually')
 
-            status_update = StatusUpdate(
-                service_id=status_update_service_id,
-                user=user,
-                summary=status_update_name,
-                review_request=review_request,
-                change_description=changedesc,
-                extra_data={
-                    'can_retry': True,
-                })
-
-            # These will both save the StatusUpdate.
-            if run_manually:
-                self.set_waiting(status_update)
+            if has_create_for_integration:
+                # Review Board >= 5.0.3
+                status_update = StatusUpdate.objects.create_for_integration(
+                    self,
+                    config=config,
+                    service_id=status_update_service_id,
+                    user=user,
+                    summary=status_update_name,
+                    review_request=review_request,
+                    change_description=changedesc,
+                    can_retry=True,
+                    starting_description='starting build...')
             else:
-                self.set_starting(status_update)
+                # Review Board <= 5.0.2
+                status_update = StatusUpdate(
+                    service_id=status_update_service_id,
+                    user=user,
+                    summary=status_update_name,
+                    review_request=review_request,
+                    change_description=changedesc,
+                    extra_data={
+                        '__integration_config_id': config.pk,
+                        'can_retry': True,
+                    })
+
+                # These will both save the StatusUpdate.
+                if run_manually:
+                    self.set_waiting(status_update)
+                else:
+                    self.set_starting(status_update)
 
             if not run_manually:
                 self._run_start_build(prep_data=prep_data,
@@ -668,6 +686,7 @@ class BaseCIIntegration(Integration):
         self,
         sender: Type[StatusUpdate],
         status_update: StatusUpdate,
+        config: Optional[IntegrationConfig] = None,
         **kwargs,
     ) -> None:
         """Handle a request to run or rerun a build.
@@ -693,10 +712,28 @@ class BaseCIIntegration(Integration):
         review_request: ReviewRequest = status_update.review_request
         changedesc = status_update.change_description
 
-        matching_configs = self.get_matching_configs(review_request)
+        if config is None:
+            # This is a StatusUpdate created with Review Board < 5.0.3 or
+            # rbintegrations < 3.1.
+            #
+            # We may have an __integration_config_id. This will only be
+            # present if running Review Board < 5.0.3 with an upgraded
+            # rbintegrations >= 3.1. If so, we can try to filter it.
+            matching_configs = self.get_matching_configs(review_request)
+            config_id = status_update.extra_data.get('__integration_config_id')
 
-        if not matching_configs:
-            return
+            if config_id is not None:
+                matching_configs = [
+                    _config
+                    for _config in matching_configs
+                    if _config.pk == config_id
+                ]
+
+            if not matching_configs:
+                return
+        else:
+            # This is a StatusUpdate created with Review Board >= 5.0.3.
+            matching_configs = [config]
 
         # If there's a change description associated with the status
         # update, then use the diff from that. Otherwise, choose the first
@@ -715,9 +752,9 @@ class BaseCIIntegration(Integration):
                     .earliest()
                 )
         except DiffSet.DoesNotExist:
-            logging.error('Unable to determine diffset when running '
-                          '%s for status update %d',
-                          self.name, status_update.pk)
+            logger.error('Unable to determine diffset when running '
+                         '%s for status update %d',
+                         self.name, status_update.pk)
             return
 
         if diffset is None:
@@ -733,7 +770,13 @@ class BaseCIIntegration(Integration):
         if not self.prepare_builds(prep_data):
             return
 
-        assert len(prep_data.configs) == 1
+        if len(prep_data.configs) != 1:
+            logger.error('Unable to determine the right configuration when '
+                         'running %s for status update %d (%d configurations '
+                         'found).',
+                         self.name, status_update.pk, len(prep_data.configs))
+            return
+
         config = prep_data.configs[0]
 
         self.set_starting(status_update)
