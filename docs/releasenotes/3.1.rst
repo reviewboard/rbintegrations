@@ -5,7 +5,7 @@
 Integrations 3.1 Release Notes
 ==============================
 
-**Release date**: TBD
+**Release date**: March 7, 2023
 
 
 Extensions
