@@ -1,0 +1,41 @@
+.. default-intersphinx:: rb5.0
+
+
+==============================
+Integrations 3.1 Release Notes
+==============================
+
+**Release date**: March 7, 2023
+
+
+Extensions
+==========
+
+* Added a new :py:mod:`rbintegrations.baseci` module, for developing custom
+  CI integrations.
+
+  This module can be used to easily build new integrations interfacing with
+  other CI solutions. See the `source code and inline documentation
+  <https://github.com/reviewboard/rbintegrations/tree/master/rbintegrations/baseci>`_
+  for information.
+
+
+Bug Fixes
+=========
+
+* Fixed performing manual :term:`CI` runs when there are multiple
+  configurations for the same integration.
+
+  When using multiple Jenkins, Travis-CI, or CircleCI integrations for
+  :ref:`automated code review <using-automated-code-review>` in Manual Run
+  mode, the wrong configuration could be used when clicking :guilabel:`Run`.
+
+  This is now fixed for all CI integrations.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
