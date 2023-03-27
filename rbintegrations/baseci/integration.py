@@ -18,6 +18,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from djblets.avatars.services import URLAvatarService
+from djblets.secrets.token_generators import token_generator_registry
 from djblets.siteconfig.models import SiteConfiguration
 from reviewboard.admin.server import get_server_url
 from reviewboard.avatars import avatar_services
@@ -142,10 +143,14 @@ class BuildPrepData:
         try:
             return user.webapi_tokens.filter(local_site=local_site)[0]
         except IndexError:
+            token_generator = token_generator_registry.get_default()
+
             return WebAPIToken.objects.generate_token(
                 user,
                 local_site=local_site,
-                auto_generated=True)
+                auto_generated=True,
+                token_generator_id=token_generator.token_generator_id,
+                token_info={'token_type': 'rbp'})
 
 
 class BaseCIIntegration(Integration):
@@ -314,10 +319,14 @@ class BaseCIIntegration(Integration):
         try:
             return user.webapi_tokens.filter(local_site=local_site)[0]
         except IndexError:
+            token_generator = token_generator_registry.get_default()
+
             return WebAPIToken.objects.generate_token(
                 user,
                 local_site=local_site,
-                auto_generated=True)
+                auto_generated=True,
+                token_generator_id=token_generator.token_generator_id,
+                token_info={'token_type': 'rbp'})
 
     def get_or_create_user(self) -> User:
         """Return or create a bot user for this integration.
