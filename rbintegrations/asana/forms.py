@@ -23,7 +23,7 @@ class AsanaIntegrationConfigForm(IntegrationConfigForm):
         min_length=34,
         max_length=34,
         widget=forms.widgets.TextInput(attrs={
-            'size': 40,
+            'size': 60,
         }))
 
     asana_workspace = forms.ChoiceField(label=_('Asana Workspace'),
