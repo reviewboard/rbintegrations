@@ -13,3 +13,6 @@
 build
 dist
 _build
+
+# Log created during unit tests
+reviewboard.log

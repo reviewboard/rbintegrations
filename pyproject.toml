@@ -1,0 +1,23 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "reviewboard.settings"
+django_debug_mode = false
+
+python_files = ["tests.py", "test_*.py"]
+python_classes = ["*Tests"]
+python_functions = ["test_*"]
+pythonpath = "."
+testpaths = [
+    "rbintegrations",
+]
+
+env = [
+    "RB_RUNNING_TESTS=1",
+    "RBSSH_STORAGE_BACKEND=reviewboard.ssh.storage.FileSSHStorage",
+]
+
+addopts = ["--reuse-db"]
+
+required_plugins = [
+    "pytest-django",
+    "pytest-env",
+]
