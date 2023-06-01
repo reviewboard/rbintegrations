@@ -42,7 +42,8 @@ class TravisCIWebHookView(View):
             payload_env = payload['matrix'][0]['config']['env']
         except (IndexError, KeyError):
             error = 'Got event without an env in config.'
-            logger.error('Travis CI webhook: %s', error, request=request)
+            logger.error('Travis CI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         integration_config_id = None
@@ -58,18 +59,21 @@ class TravisCIWebHookView(View):
 
         if status_update_id is None:
             error = 'Unable to find REVIEWBOARD_STATUS_UPDATE_ID in payload.'
-            logger.error('Travis CI webhook: %s', error, request=request)
+            logger.error('Travis CI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         if integration_config_id is None:
             error = ('Unable to find REVIEWBOARD_TRAVIS_INTEGRATION_CONFIG_ID '
                      'in payload.')
-            logger.error('Travis CI webhook: %s', error, request=request)
+            logger.error('Travis CI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         logger.debug('Got Travis CI webhook event for Integration Config %d '
                      '(status update %d)',
-                     integration_config_id, status_update_id, request=request)
+                     integration_config_id, status_update_id,
+                     extra={'request': request})
 
         try:
             integration_config = IntegrationConfig.objects.get(
@@ -77,7 +81,8 @@ class TravisCIWebHookView(View):
         except IntegrationConfig.DoesNotExist:
             error = ('Unable to find matching integration config ID %d.'
                      % integration_config_id)
-            logger.error('Travis CI webhook: %s', error, request=request)
+            logger.error('Travis CI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         if not self._validate_signature(request, integration_config):
@@ -91,7 +96,8 @@ class TravisCIWebHookView(View):
         except StatusUpdate.DoesNotExist:
             error = ('Unable to find matching status update ID %d.'
                      % status_update_id)
-            logger.error('Travis CI webhook: %s', error, request=request)
+            logger.error('Travis CI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         status_update.url = payload['build_url']
@@ -141,7 +147,8 @@ class TravisCIWebHookView(View):
         except Exception as e:
             logger.error('Failed to fetch config information from Travis CI '
                          'server at %s: %s',
-                         api.endpoint, e, request=request)
+                         api.endpoint, e,
+                         extra={'request': request})
             return False
 
         try:
@@ -162,10 +169,10 @@ class TravisCIWebHookView(View):
             return True
         except cryptography.exceptions.InvalidSignature:
             logger.error('Unable to verify signature for Travis CI webhook.',
-                         request=request)
+                         extra={'request': request})
             return False
         except Exception as e:
             logger.exception('Unexpected error while verifying Travis CI '
                              'signature: %s',
-                             e, request=request)
+                             e, extra={'request': request})
             return False

@@ -210,7 +210,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
             logger.exception('Unexpected error when trying to lint Travis CI '
                              'config: %s',
                              e,
-                             request=self.request)
+                             extra={'request': self.request})
             self._errors['travis_endpoint'] = self.error_class([
                 _('Unable to communicate with Travis CI server.')
             ])
@@ -218,7 +218,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
             logger.exception('Unexpected error when trying to lint Travis CI '
                              'config: %s',
                              e,
-                             request=self.request)
+                             extra={'request': self.request})
             self._errors['travis_endpoint'] = self.error_class([e])
 
         return cleaned_data

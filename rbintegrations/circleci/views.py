@@ -61,7 +61,8 @@ class CircleCIWebHookView(View):
             build_parameters = payload['payload']['build_parameters']
         except KeyError:
             error = 'Unable to find build_parameters in payload.'
-            logger.error('CircleCI webhook: %s', error, request=request)
+            logger.error('CircleCI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         try:
@@ -83,14 +84,15 @@ class CircleCIWebHookView(View):
         logger.debug('Got CircleCI webhook event for review request %d%s '
                      '(status update %d)',
                      review_request_id, local_site_log, status_update_id,
-                     request=request)
+                     extra={'request': request})
 
         try:
             status_update = StatusUpdate.objects.get(pk=status_update_id)
         except StatusUpdate.DoesNotExist:
             error = ('Unable to find matching status update ID %d'
                      % status_update_id)
-            logger.error('CircleCI webhook: %s', error, request=request)
+            logger.error('CircleCI webhook: %s', error,
+                         extra={'request': request})
             return HttpResponseBadRequest(error)
 
         status = payload['payload']['status']
