@@ -2,9 +2,9 @@
 
 import logging
 import json
+from urllib.parse import quote_plus
 from urllib.request import urlopen
 
-from django.utils.http import urlquote_plus
 from django.utils.translation import gettext_lazy as _
 
 from rbintegrations.util.urlrequest import URLRequest
@@ -154,7 +154,7 @@ class TravisAPI(object):
 
         data = self._make_request(
             '%s/repo/%s/requests' % (self.endpoint,
-                                     urlquote_plus(repo_slug)),
+                                     quote_plus(repo_slug)),
             body=json.dumps(request_data),
             method='POST',
             content_type='application/json')
