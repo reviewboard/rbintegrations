@@ -20,6 +20,7 @@ setup(
         'A set of third-party service integrations for Review Board 5.0+.'
     ),
     long_description=long_description,
+    long_description_content_type='text/x-rst',
     url='https://www.reviewboard.org/',
     author='Beanbag, Inc.',
     author_email='support@beanbaginc.com',
