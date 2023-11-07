@@ -15,22 +15,21 @@ class TrelloIntegrationConfigForm(IntegrationConfigForm):
 
     trello_api_key = forms.CharField(
         label=_('Trello API Key'),
-        help_text=_('Your Trello API key. This can be found on '
-                    '<a href="https://trello.com/app-key">Trello Developer '
-                    'API Keys</a>.'),
-        min_length=32,
-        max_length=32,
+        help_text=_('Your Trello API key. This can be created by registering '
+                    'an application in the <a '
+                    'href="https://trello.com/power-ups/admin/">Trello '
+                    'Power-Up Admin Portal</a>.'),
         widget=forms.widgets.TextInput(attrs={
             'size': 40,
         }))
 
     trello_api_token = forms.CharField(
         label=_('Trello API Token'),
-        help_text=_('An access token for the Trello API. To create this, go '
-                    'to <a href="https://trello.com/app-key">Trello Developer '
-                    'API Keys</a> and select "manually generate a Token".'),
-        min_length=64,
-        max_length=64,
+        help_text=_('An access token for the Trello API. To create this, '
+                    'after creating a Power-Up in the <a '
+                    'href="https://trello.com/power-ups/admin/">Trello '
+                    'Power-Up Admin Portal</a>, select "manually generate a '
+                    'Token".'),
         widget=forms.widgets.TextInput(attrs={
             'size': 40,
         }))

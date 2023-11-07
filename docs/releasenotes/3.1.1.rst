@@ -1,0 +1,26 @@
+.. default-intersphinx:: rb5.0
+
+
+================================
+Integrations 3.1.1 Release Notes
+================================
+
+**Release date**: TBD
+
+
+Bug Fixes
+=========
+
+* Fixed compatibility with modern :rbintegration:`Asana <asana>` API
+  tokens.
+
+* Fixed compatibility with modern :rbintegration:`Trello <trello>` API
+  tokens.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
