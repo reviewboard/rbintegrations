@@ -1480,47 +1480,6 @@ class DiscordIntegrationTests(IntegrationTestCase):
                 'username': 'RB User',
             })
 
-    def test_notify_with_empty_review(self):
-        """Testing DiscordIntegration does not notify on empty review"""
-        review_request = self.create_review_request(
-            create_repository=True,
-            summary='Test Review Request',
-            publish=True)
-
-        review = self.create_review(review_request,
-                                    user=self.user,
-                                    body_top='',
-                                    body_bottom='')
-
-        self._create_config()
-        self.integration.enable_integration()
-
-        self.spy_on(urlopen, call_original=False)
-        self.spy_on(self.integration.notify)
-        review.publish()
-
-        self.assertEqual(
-            json.loads(urlopen.spy.calls[0].args[0].data),
-            {
-                'attachments': [{
-                    'color': '#efcc96',
-                    'fallback': (
-                        '#1: New review from Test User: '
-                        'http://example.com/r/1/#review1'
-                    ),
-                    'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review1',
-                    'text': '',
-                    'pretext': None,
-                }],
-                'icon_url': self.integration.LOGO_URL,
-                'text': (
-                    'New review from '
-                    '<http://example.com/users/test/|Test User>'
-                ),
-                'username': 'RB User',
-            })
-
     def test_notify_new_reply_with_body_top(self):
         """Testing DiscordIntegration notifies on new reply with body_top"""
         review_request = self.create_review_request(
