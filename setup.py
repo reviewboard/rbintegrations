@@ -35,7 +35,7 @@ setup(
         'reviewboard.extensions':
             '%s = rbintegrations.extension:RBIntegrationsExtension' % PACKAGE,
     },
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
