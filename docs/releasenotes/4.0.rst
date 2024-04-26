@@ -1,0 +1,87 @@
+.. default-intersphinx:: rb7.0
+
+==============================
+Integrations 4.0 Release Notes
+==============================
+
+**Release date**: TBD
+
+
+Compatibility
+=============
+
+Integrations 4.0 is compatible with Review Board 7.x.
+
+It supports Python 3.8 - 3.12.
+
+Support for Python 3.7 has been dropped.
+
+
+New Integrations
+================
+
+* :rbintegration:`Microsoft Teams <msteams>`
+
+  Microsoft Teams is a team collaboration application, offering workspace
+  chat.
+
+  Review Board can integrate with Microsoft Teams to post notifications
+  whenever review requests and reviews are published. You can have multiple
+  different Microsoft Teams configurations to deliver notifications to
+  different channels (or even different teams).
+
+
+Updated Integrations
+====================
+
+* :rbintegration:`Jenkins <jenkins>`
+
+  Updated compatibility for slash normalization in newer versions of Jenkins.
+
+  For a while, Jenkins disallowed using slashes in job names, and required
+  normalizing them to underscores. In newer versions, slashes are required.
+
+  The jenkins integration now provides separate template variables for
+  ``{branch_name}`` and ``{noslash_branch_name}``, and for
+  ``{repository_name}`` and ``{noslash_repository_name}``.
+
+  Existing configurations may require manual changes, as slashes appearing in a
+  job name outside of a variable are no longer converted to underscores.
+
+* :rbintegration:`Discord <discord>`
+
+  The Discord integration has been updated to truncate long field values in
+  messages in order to avoid hitting character length limits with the Discord
+  server.
+
+* Added guided help to the :rbintegration:`CircleCI <circleci>` and
+  :rbintegration:`Jenkins <jenkins>` configuration forms.
+
+* Added configurable timeouts to all CI integration backends.
+
+  If a build on :rbintegration:`CircleCI <circleci>`, :rbintegration:`Jenkins
+  <jenkins>`, or :rbintegration:`Travis CI <travis-ci>` failed without
+  notifying Review Board, the status update would just show that it was waiting
+  forever. These integrations now allow you to specify an optional timeout
+  value, after which the build will be marked as failed and allow users to
+  trigger a retry.
+
+
+Bug Fixes
+=========
+
+* Fixed :rbintegration:`Travis CI <travis-ci>` configuration UI to properly
+  limit repositories to GitHub.
+
+  Travis CI only works with GitHub repositories. A regression had made it
+  so the configuration UI would allow administrators to select non-GitHub
+  repositories, which would then fail to run.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Hailan Xu
+* Michelle Aubin

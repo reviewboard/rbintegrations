@@ -5,6 +5,15 @@ Integrations Release Notes
 ==========================
 
 
+4.0 Releases
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   4.0
+
+
 3.0 Releases
 ============
 
