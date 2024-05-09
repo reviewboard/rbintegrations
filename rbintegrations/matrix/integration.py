@@ -1,8 +1,11 @@
 """Integration for Matrix chat."""
 
+from __future__ import annotations
+
 import json
 import logging
 import re
+from typing import MutableMapping, Optional, Sequence, TYPE_CHECKING
 from urllib.request import Request, urlopen
 
 from django.utils.translation import gettext_lazy as _
@@ -12,6 +15,12 @@ from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.integration import BaseChatIntegration
 from rbintegrations.matrix.forms import MatrixIntegrationConfigForm
+
+if TYPE_CHECKING:
+    from djblets.util.typing import JSONDict
+    from rbintegrations.basechat.integration import FieldsDict
+    from reviewboard.reviews.models import ReviewRequest
+    from reviewboard.site.models import LocalSite
 
 
 logger = logging.getLogger(__name__)
@@ -38,41 +47,45 @@ class MatrixIntegration(BaseChatIntegration):
 
     config_form_cls = MatrixIntegrationConfigForm
 
-    DEFAULT_COLOR = '#efcc96'
-    ASSETS_BASE_URL = \
+    assets_base_url = (
         'https://static.reviewboard.org/integration-assets/matrix'
-    ASSETS_TIMESTAMP = '?20201203-2346'
-    LOGO_URL = '%s/reviewboard.png?%s' % (ASSETS_BASE_URL, ASSETS_TIMESTAMP)
-    VALID_IMAGE_URL_EXTS = ('.png', '.bmp', '.gif', '.jpg', '.jpeg')
+    )
 
-    TROPHY_URLS = {
-        'fish': '%s/fish-trophy.png?%s' % (ASSETS_BASE_URL, ASSETS_TIMESTAMP),
-        'milestone': '%s/milestone-trophy.png?%s' % (ASSETS_BASE_URL,
-                                                     ASSETS_TIMESTAMP),
-    }
-
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the integration."""
         super(MatrixIntegration, self).initialize()
 
         self._SHORTCODE_PATTERN = re.compile(r':[a-z_]+:')
 
-    def notify(self, title, title_link, fallback_text, local_site,
-               review_request, event_name=None, fields={}, pre_text=None,
-               body=None, color=None, thumb_url=None, image_url=None):
+    def notify(
+        self,
+        *,
+        title: str,
+        title_link: str,
+        fallback_text: str,
+        local_site: Optional[LocalSite],
+        review_request: ReviewRequest,
+        event_name: Optional[str] = None,
+        fields: Sequence[FieldsDict] = [],
+        pre_text: Optional[str] = None,
+        body: Optional[str] = None,
+        color: Optional[str] = None,
+        thumb_url: Optional[str] = None,
+        image_url: Optional[str] = None,
+    ) -> None:
         """Send a notification to Matrix.
 
         This will post the given message to any Matrix rooms configured to
         receive it.
 
         Args:
-            title (unicode):
+            title (str):
                 The title for the message.
 
-            title_link (unicode):
+            title_link (str):
                 The link for the title of the message.
 
-            fallback_text (unicode):
+            fallback_text (str):
                 The non-rich fallback text to display in the chat, for use in
                 IRC and other services.
 
@@ -84,34 +97,35 @@ class MatrixIntegration(BaseChatIntegration):
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request the notification is bound to.
 
-            event_name (unicode, optional):
+            event_name (str, optional):
                 The name of the event triggering this notification.
 
-            fields (dict, optional):
+            fields (list of rbintegrations.basechat.integration.FieldsDict,
+                    optional):
                 The fields comprising the rich message to display in chat.
 
-            pre_text (unicode, optional):
+            pre_text (str, optional):
                 Text to display before the rest of the message.
 
-            body (unicode, optional):
+            body (str, optional):
                 The body of the message.
 
-            color (unicode, optional):
-                A Matrix color string or RGB hex value for the message.
+            color (str, optional):
+                A color string or RGB hex value for the message.
 
-            thumb_url (unicode, optional):
+            thumb_url (str, optional):
                 URL of an image to show on the side of the message.
 
-            image_url (unicode, optional):
+            image_url (str, optional):
                 URL of an image to show in the message.
         """
-        message = []
+        message: list[str] = []
         message.append(
             format_html('<strong>{}</strong><p>{}</p>',
                         fallback_text, title))
 
         if not color:
-            color = self.DEFAULT_COLOR
+            color = self.default_color
 
         if fields:
             for field in fields:
@@ -123,7 +137,7 @@ class MatrixIntegration(BaseChatIntegration):
         if body:
             message.append(format_html('<blockquote>{}</blockquote>', body))
 
-        payload = {
+        payload: JSONDict = {
             'body': '',
             'msgtype': 'm.text',
             'formatted_body': ''.join(message),
@@ -151,8 +165,8 @@ class MatrixIntegration(BaseChatIntegration):
                     '%s/_matrix/client/r0/rooms/%s/send/'
                     'm.room.message?access_token=%s'
                     % (server, room_id, access_token))
-                headers = {
-                    'Content-Length': len(data),
+                headers: MutableMapping[str, str] = {
+                    'Content-Length': str(len(data)),
                     'Content-Type': 'application/json',
                 }
 
@@ -160,15 +174,18 @@ class MatrixIntegration(BaseChatIntegration):
             except Exception as e:
                 logger.exception('Failed to send notification: %s', e)
 
-    def replace_shortcode(self, s):
+    def replace_shortcode(
+        self,
+        s: str,
+    ) -> str:
         """Replaces supported shortcodes in a string with their unicodes.
 
         Args:
-            s (unicode):
+            s (str):
                 The text that may contain shortcodes.
 
         Returns:
-            unicode:
+            str:
             The text with all supported shortcodes replaced by their
             equivalent Unicode characters.
         """
@@ -179,21 +196,26 @@ class MatrixIntegration(BaseChatIntegration):
         return self._SHORTCODE_PATTERN.sub(
             lambda x: emoji_unicode[x.group()], s)
 
-    def format_link(self, path, text):
+    def format_link(
+        self,
+        *,
+        path: str,
+        text: str,
+    ) -> str:
         """Format the given URL and text to be shown in a Matrix message.
 
         This will combine together the parts of the URL (method, domain, path)
         and format it using Matrix's URL syntax.
 
         Args:
-            path (unicode):
+            path (str):
                 The path on the Review Board server.
 
-            text (unicode):
+            text (str):
                 The text for the link.
 
         Returns:
-            unicode:
+            str:
             The link for use in Matrix.
         """
         text = text.replace('&', '&amp;')
@@ -202,8 +224,10 @@ class MatrixIntegration(BaseChatIntegration):
 
         return '%s | %s' % (build_server_url(path), text)
 
+    # NOTE: Python hasn't yet figured out how typing should work for things
+    #       that can be a plain attribute or a property, so we ignore.
     @cached_property
-    def icon_static_urls(self):
+    def icon_static_urls(self) -> dict[str, str]:  # type: ignore
         """Return the icons used for the integration.
 
         Returns:
@@ -213,6 +237,8 @@ class MatrixIntegration(BaseChatIntegration):
         from rbintegrations.extension import RBIntegrationsExtension
 
         extension = RBIntegrationsExtension.instance
+
+        assert extension is not None
 
         return {
             '1x': extension.get_static_url('images/matrix/icon.png'),
