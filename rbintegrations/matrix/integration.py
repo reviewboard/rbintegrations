@@ -224,8 +224,8 @@ class MatrixIntegration(BaseChatIntegration):
 
         return '%s | %s' % (build_server_url(path), text)
 
-    # NOTE: Python hasn't yet figured out how typing should work for things
-    #       that can be a plain attribute or a property, so we ignore.
+    # NOTE: It's technically type-unsafe to replace an attribute with a
+    #       property, but this works for us practically.
     @cached_property
     def icon_static_urls(self) -> dict[str, str]:  # type: ignore
         """Return the icons used for the integration.

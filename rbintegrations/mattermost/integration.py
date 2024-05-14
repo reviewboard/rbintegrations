@@ -139,8 +139,8 @@ class MattermostIntegration(BaseChatIntegration):
         """
         return format_link(path=path, text=text)
 
-    # NOTE: Python hasn't yet figured out how typing should work for things
-    #       that can be a plain attribute or a property, so we ignore.
+    # NOTE: It's technically type-unsafe to replace an attribute with a
+    #       property, but this works for us practically.
     @cached_property
     def icon_static_urls(self) -> dict[str, str]:  # type: ignore
         """The icons used for the integration.
