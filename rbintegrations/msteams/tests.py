@@ -254,6 +254,50 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
             ],
         )
 
+    def test_notify_new_review_request_with_invalid_file_attachment(
+        self,
+    ) -> None:
+        """Testing MSTeamsIntegration doesn't include an image url
+        for a review request that has a file attachment with an invalid
+        file extension
+        """
+        review_request = self.create_review_request(
+            create_repository=True,
+            submitter=self.user,
+            summary='Test Review Request',
+            description='My description.',
+            target_people=[self.user],
+            publish=False)
+        self.create_file_attachment(
+            review_request,
+            mimetype='text/plain',
+            orig_filename='foo.txt')
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        review_request.publish(self.user)
+
+        self._check_notify_request(
+            pre_text='New review request from '
+                     '[Test User](http://example.com/users/test/)',
+            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            fields=[
+                {
+                    'title': 'Description',
+                    'value': 'My description.',
+                },
+                {
+                    'title': 'Repository',
+                    'value': 'Test Repo',
+                },
+                {
+                    'title': 'Branch',
+                    'value': 'my-branch',
+                },
+            ],
+        )
+
     def test_notify_new_review_request_with_fish_trophy(self) -> None:
         """Testing MSTeamsIntegration notifies on new review request
         with fish trophy

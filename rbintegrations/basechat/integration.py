@@ -629,27 +629,26 @@ class BaseChatIntegration(Integration):
         if changedesc:
             # Only show new files added in this change.
             try:
-                new_files = changedesc.fields_changed['files']['added']
+                new_files_pks = [
+                    file[2]
+                    for file in changedesc.fields_changed['files']['added']
+                    if len(file) >= 3
+                ]
             except KeyError:
-                new_files = []
+                new_files_pks = []
 
-            for file_info in new_files:
-                if (len(file_info) >= 3 and
-                    file_info[1].endswith(valid_image_url_exts)):
-                    # This one wins. Show it.
-                    attachment = get_object_or_none(
-                        review_request.file_attachments,
-                        pk=file_info[2])
-                    break
+            file_attachments = review_request.file_attachments.filter(
+                pk__in=new_files_pks)
         else:
-            # This is a new review request, so show the first valid image
-            # we can find.
-            for attachment in review_request.file_attachments.all():
-                if attachment.filename.endswith(valid_image_url_exts):
-                    # This one wins. Show it.
-                    break
-            else:
-                attachment = None
+            # This is a new review request, so show any valid image.
+            file_attachments = review_request.file_attachments.all()
+
+        for attachment in file_attachments:
+            if attachment.filename.endswith(valid_image_url_exts):
+                # This one wins. Show it.
+                break
+        else:
+            attachment = None
 
         if attachment:
             image_url = attachment.get_absolute_url()
