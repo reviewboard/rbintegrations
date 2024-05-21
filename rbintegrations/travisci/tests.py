@@ -13,7 +13,8 @@ from reviewboard.reviews.models import StatusUpdate
 from reviewboard.reviews.signals import status_update_request_run
 
 from rbintegrations.travisci.api import TravisAPI
-from rbintegrations.travisci.forms import TravisCIIntegrationConfigForm
+from rbintegrations.travisci.forms import (GitHubRepositoriesChoice,
+                                           TravisCIIntegrationConfigForm)
 from rbintegrations.travisci.integration import TravisCIIntegration
 from rbintegrations.travisci.views import TravisCIWebHookView
 from rbintegrations.testing.testcases import IntegrationTestCase
@@ -156,6 +157,98 @@ class BaseTravisCITestCase(IntegrationTestCase):
                     call_fake=_make_request)
 
         return data
+
+
+class GitHubRepositoriesChoiceTests(BaseTravisCITestCase):
+    """Unit tests for GitHubRepositoriesChoice.
+
+    Version Added:
+        4.0
+    """
+
+    def test_get_queryset(self) -> None:
+        """Testing GitHubRepositoriesChoice.get_queryset"""
+        local_site = self.create_local_site()
+
+        github_account1 = HostingServiceAccount.objects.create(
+            service_name='github',
+            username='myuser1')
+        github_account2 = HostingServiceAccount.objects.create(
+            service_name='github',
+            username='myuser2')
+        github_account3 = HostingServiceAccount.objects.create(
+            service_name='github',
+            username='myuser2',
+            local_site=local_site)
+
+        # These should match.
+        repo1 = self.create_repository(name='repo1',
+                                       hosting_account=github_account1)
+        repo2 = self.create_repository(name='repo2',
+                                       hosting_account=github_account2)
+
+        # These should not match.
+        self.create_repository(name='repo3',
+                               tool_name='Git')
+        self.create_repository(name='repo4',
+                               hosting_account=github_account3,
+                               local_site=local_site)
+
+        choice = GitHubRepositoriesChoice()
+        choice.extra_state.update({
+            'local_site': None,
+            'matching': True,
+        })
+
+        self.assertQuerySetEqual(
+            choice.get_queryset().order_by('pk'),
+            [repo1, repo2])
+
+    def test_get_queryset_with_local_site(self) -> None:
+        """Testing GitHubRepositoriesChoice.get_queryset with Local Site"""
+        good_local_site = self.create_local_site(name='good-site')
+        bad_local_site = self.create_local_site(name='bad-site')
+
+        github_account1 = HostingServiceAccount.objects.create(
+            service_name='github',
+            username='myuser1',
+            local_site=good_local_site)
+        github_account2 = HostingServiceAccount.objects.create(
+            service_name='github',
+            username='myuser2',
+            local_site=good_local_site)
+        github_account3 = HostingServiceAccount.objects.create(
+            service_name='github',
+            username='myuser2',
+            local_site=bad_local_site)
+
+        # These should match.
+        repo1 = self.create_repository(name='repo1',
+                                       hosting_account=github_account1,
+                                       local_site=good_local_site)
+        repo2 = self.create_repository(name='repo2',
+                                       hosting_account=github_account2,
+                                       local_site=good_local_site)
+
+        # These should not match.
+        self.create_repository(name='repo3',
+                               tool_name='Git')
+        self.create_repository(name='repo4',
+                               tool_name='Git',
+                               local_site=good_local_site)
+        self.create_repository(name='repo5',
+                               hosting_account=github_account3,
+                               local_site=bad_local_site)
+
+        choice = GitHubRepositoriesChoice()
+        choice.extra_state.update({
+            'local_site': good_local_site,
+            'matching': True,
+        })
+
+        self.assertQuerySetEqual(
+            choice.get_queryset().order_by('pk'),
+            [repo1, repo2])
 
 
 class TravisCIIntegrationTests(BaseTravisCITestCase):

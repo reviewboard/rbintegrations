@@ -1,7 +1,10 @@
 """The form for configuring the Travis CI integration."""
 
+from __future__ import annotations
+
 import logging
 from urllib.error import HTTPError, URLError
+from typing import TYPE_CHECKING
 
 from django import forms
 from django.utils.translation import gettext, gettext_lazy as _
@@ -17,6 +20,9 @@ from reviewboard.scmtools.models import Repository
 
 from rbintegrations.travisci.api import TravisAPI
 
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +35,19 @@ class GitHubRepositoriesChoice(ReviewRequestConditionChoiceMixin,
     but limits the queryset to only be GitHub repositories.
     """
 
-    queryset = Repository.objects.filter(
-        hosting_account__service_name='github')
+    def get_queryset(self) -> QuerySet[Repository]:
+        """Return the queryset used to look up repository choices.
+
+        This will limit the results to GitHub repositories.
+
+        Returns:
+            django.db.models.query.QuerySet:
+            The queryset for repositories.
+        """
+        return (
+            super().get_queryset()
+            .filter(hosting_account__service_name='github')
+        )
 
     def get_match_value(self, review_request, **kwargs):
         """Return the repository used for matching.
