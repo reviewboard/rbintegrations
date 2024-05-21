@@ -251,11 +251,12 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
                     "listed here will be used instead of the contents of the "
                     "repository's <code>.travis.yml</code> file. Note that "
                     "this should not contain any secret environment "
-                    "variables.\n"
+                    "variables."
+                    "\n"
                     "It's also recommended to create a special branch head "
                     "in the GitHub repository to use for these builds, so "
-                    "they don't appear to be happening on "
-                    "<code>master</code>. This branch can contain anything "
+                    "they don't appear to be happening on your main "
+                    "development branch. This branch can contain anything "
                     "(or even be empty), since the code will come from the "
                     "review request."
                 ),
@@ -263,6 +264,8 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
                 'classes': ('wide',)
             }),
             (_('When To Build'), {
-                'fields': ('run_manually',),
+                'fields': (
+                    'run_manually',
+                ),
             }),
         )

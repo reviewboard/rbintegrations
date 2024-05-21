@@ -119,3 +119,56 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
             return cleaned_data
 
         return cleaned_data
+
+    class Meta:
+        fieldsets = (
+            (_('What To Build'), {
+                'description': _(
+                    'You can choose which review requests to build using this '
+                    'configuration by setting conditions here. At a minimum, '
+                    'this should include the specific repository to use '
+                    'this configuration for.'
+                ),
+                'fields': (
+                    'conditions',
+                ),
+            }),
+            (_('Where To Build'), {
+                'description': _(
+                    'Configure the address and authentication credentials '
+                    'for the Jenkins server handling your builds.'
+                ),
+                'fields': (
+                    'jenkins_endpoint',
+                    'jenkins_username',
+                    'jenkins_password',
+                ),
+            }),
+            (_('How To Build'), {
+                'description': _(
+                    "Builds performed on the code in review requests will use "
+                    "a completely separate configuration from commits which "
+                    "are pushed to the GitHub repository. The configuration "
+                    "listed here will be used instead of the contents of the "
+                    "repository's <code>.travis.yml</code> file. Note that "
+                    "this should not contain any secret environment "
+                    "variables."
+                    "\n"
+                    "It's also recommended to create a special branch head "
+                    "in the GitHub repository to use for these builds, so "
+                    "they don't appear to be happening on your main "
+                    "development branch. This branch can contain anything "
+                    "(or even be empty), since the code will come from the "
+                    "review request."
+                ),
+                'fields': (
+                    'jenkins_job_name',
+                    'jenkins_user_token',
+                ),
+            }),
+            (_('When To Build'), {
+                'fields': (
+                    'run_manually',
+                ),
+            }),
+        )
