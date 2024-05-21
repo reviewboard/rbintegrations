@@ -62,6 +62,7 @@ class CircleCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
             (_('When To Build'), {
                 'fields': (
                     'run_manually',
+                    'timeout',
                 ),
             }),
         )

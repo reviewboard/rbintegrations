@@ -654,6 +654,7 @@ class BaseCIIntegration(Integration):
 
         for config in matching_configs:
             run_manually = config.get('run_manually')
+            timeout_secs = config.get('timeout')
 
             if has_create_for_integration:
                 # Review Board >= 5.0.3
@@ -666,6 +667,7 @@ class BaseCIIntegration(Integration):
                     review_request=review_request,
                     change_description=changedesc,
                     can_retry=True,
+                    timeout=timeout_secs,
                     starting_description='starting build...')
             else:
                 # Review Board <= 5.0.2
