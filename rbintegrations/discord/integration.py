@@ -6,6 +6,7 @@ import json
 import logging
 from typing import MutableMapping, Optional, Sequence, TYPE_CHECKING
 from urllib.request import Request, urlopen
+from uuid import uuid4
 
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -153,7 +154,17 @@ class DiscordIntegration(BaseChatIntegration):
                 }
                 urlopen(Request(webhook_url, data, headers))
             except Exception as e:
-                logger.exception('Failed to send notification: %s', e)
+                error_id = str(uuid4())
+                fp = getattr(e, 'fp', None)
+
+                logger.exception('[%s] Failed to send notification: %s',
+                                 error_id, e)
+                logger.debug('[%s] Discord message payload = %r',
+                             error_id, payload)
+
+                if fp is not None:
+                    logger.debug('[%s] Discord error response = %r',
+                                 error_id, fp.read())
 
     def format_link(
         self,
@@ -178,6 +189,31 @@ class DiscordIntegration(BaseChatIntegration):
             The link for use in Slack.
         """
         return format_link(path=path, text=text)
+
+    def format_field_text(
+        self,
+        text: str,
+    ) -> str:
+        """Format the field text, providing any normalization required.
+
+        This will limit the text of any Discord field to 1024 characters.
+        Failing to do so results in errors posting messages.
+
+        Version Added:
+            4.0
+
+        Args:
+            text (str):
+                The text for the field.
+
+        Returns:
+            str:
+            The formatted or normalized text.
+        """
+        if len(text) > 1024:
+            text = '%s...' % text[:1021]
+
+        return text
 
     # NOTE: It's technically type-unsafe to replace an attribute with a
     #       property, but this works for us practically.

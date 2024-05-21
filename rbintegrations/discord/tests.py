@@ -561,6 +561,64 @@ class DiscordIntegrationTests(IntegrationTestCase):
                 ),
             })
 
+    def test_notify_new_review_request_with_long_text(self) -> None:
+        """Testing DiscordIntegration.notify with long text on a field"""
+        review_request = self.create_review_request(
+            create_repository=True,
+            submitter=self.user,
+            summary='Test Review Request',
+            description='X' * 2000,
+            target_people=[self.user],
+            publish=False)
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        self.spy_on(urlopen, call_original=False)
+        self.spy_on(self.integration.notify)
+        review_request.publish(self.user)
+
+        self.assertSpyCallCount(self.integration.notify, 1)
+        self.assertSpyCallCount(urlopen, 1)
+        self.assertEqual(
+            json.loads(urlopen.spy.calls[0].args[0].data),
+            {
+                'username': 'RB User',
+                'icon_url': self.integration.logo_url,
+                'attachments': [{
+                    'color': self.integration.default_color,
+                    'fallback': (
+                        '#1: New review request from Test User: '
+                        'http://example.com/r/1/'
+                    ),
+                    'fields': [
+                        {
+                            'short': False,
+                            'title': 'Description',
+                            'value': '%s...' % ('X' * 1021),
+                        },
+                        {
+                            'short': True,
+                            'title': 'Repository',
+                            'value': 'Test Repo',
+                        },
+                        {
+                            'short': True,
+                            'title': 'Branch',
+                            'value': 'my-branch',
+                        },
+                    ],
+                    'title': '#1: Test Review Request',
+                    'title_link': 'http://example.com/r/1/',
+                    'text': None,
+                    'pretext': None,
+                }],
+                'text': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            })
+
     def test_notify_updated_review_request(self):
         """Testing DiscordIntegration notifies on updated review request"""
         review_request = self.create_review_request(

@@ -380,6 +380,28 @@ class BaseChatIntegration(Integration):
         raise NotImplementedError(
             '%s must implement format_link' % type(self).__name__)
 
+    def format_field_text(
+        self,
+        text: str,
+    ) -> str:
+        """Format the field text, providing any normalization required.
+
+        This can be used by subclasses to make any changes before sending the
+        text off to the Slack-compatible endpoint.
+
+        Version Added:
+            4.0
+
+        Args:
+            text (str):
+                The text for the field.
+
+        Returns:
+            str:
+            The formatted or normalized text.
+        """
+        return text
+
     @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
     def get_user_text_url(
         self,
@@ -585,7 +607,7 @@ class BaseChatIntegration(Integration):
             fields.append({
                 'short': False,
                 'title': 'Description',
-                'value': review_request.description,
+                'value': self.format_field_text(review_request.description),
             })
 
         # Link to the diff in the update, if any.
@@ -603,22 +625,24 @@ class BaseChatIntegration(Integration):
             fields.append({
                 'short': True,
                 'title': 'Diff',
-                'value': self.format_link(path=diff_url,
-                                          text=f'Revision {diffset.revision}'),
+                'value': self.format_field_text(
+                    self.format_link(path=diff_url,
+                                     text=f'Revision {diffset.revision}')),
             })
 
         if review_request.repository:
             fields.append({
                 'short': True,
                 'title': 'Repository',
-                'value': review_request.repository.name,
+                'value': self.format_field_text(
+                    review_request.repository.name),
             })
 
         if review_request.branch:
             fields.append({
                 'short': True,
                 'title': 'Branch',
-                'value': review_request.branch,
+                'value': self.format_field_text(review_request.branch),
             })
 
         # See if there are any new interesting file attachments to show.
@@ -771,7 +795,8 @@ class BaseChatIntegration(Integration):
             if open_issues:
                 fields = [{
                     'title': 'Fix it, then Ship it!',
-                    'value': f'{warning_emoji} {issue_text}',
+                    'value': self.format_field_text(
+                        f'{warning_emoji} {issue_text}'),
                     'short': True,
                 }]
                 extra_text = ' (Fix it, then Ship it!)'
@@ -779,7 +804,7 @@ class BaseChatIntegration(Integration):
             else:
                 fields = [{
                     'title': 'Ship it!',
-                    'value': checkmark_emoji,
+                    'value': self.format_field_text(checkmark_emoji),
                     'short': True,
                 }]
                 extra_text = ' (Ship it!)'
@@ -787,7 +812,8 @@ class BaseChatIntegration(Integration):
         elif open_issues:
             fields = [{
                 'title': 'Open Issues',
-                'value': f'{warning_emoji} {issue_text}',
+                'value': self.format_field_text(
+                    f'{warning_emoji} {issue_text}'),
                 'short': True,
             }]
             extra_text = f' ({issue_text})'
