@@ -2,16 +2,14 @@
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
 
+from rbintegrations.baseci.forms import BaseCIIntegrationConfigForm
 
-class CircleCIIntegrationConfigForm(IntegrationConfigForm):
+
+class CircleCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
     """Form for configuring Circle CI."""
-
-    conditions = ConditionsField(ReviewRequestConditionChoices,
-                                 label=_('Conditions'))
 
     circle_api_token = forms.CharField(
         label=_('API Token'),
@@ -25,14 +23,7 @@ class CircleCIIntegrationConfigForm(IntegrationConfigForm):
         help_text=_('An optional branch name to use for review request '
                     'builds within the CircleCI user interface.'))
 
-    run_manually = forms.BooleanField(
-        label=_('Run builds manually'),
-        required=False,
-        help_text=_('Wait to run this service until manually started. This '
-                    'will add a "Run" button to the CircleCI entry.'),
-        initial=False)
-
-    class Meta:
+    class Meta(BaseCIIntegrationConfigForm.Meta):
         fieldsets = (
             (_('What To Build'), {
                 'description': _(

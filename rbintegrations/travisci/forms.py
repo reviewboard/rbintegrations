@@ -7,7 +7,7 @@ from urllib.error import HTTPError, URLError
 from typing import TYPE_CHECKING
 
 from django import forms
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from djblets.conditions.choices import ConditionChoices
 from reviewboard.integrations.forms import IntegrationConfigForm
@@ -18,6 +18,7 @@ from reviewboard.reviews.conditions import (ReviewRequestConditionChoiceMixin,
 from reviewboard.scmtools.conditions import RepositoriesChoice
 from reviewboard.scmtools.models import Repository
 
+from rbintegrations.baseci.forms import BaseCIIntegrationConfigForm
 from rbintegrations.travisci.api import TravisAPI
 
 if TYPE_CHECKING:
@@ -86,14 +87,12 @@ class GitHubOnlyConditionChoices(ConditionChoices):
     )
 
 
-class TravisCIIntegrationConfigForm(IntegrationConfigForm):
+class TravisCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
     """Form for configuring Travis CI."""
 
     conditions = ConditionsField(
         GitHubOnlyConditionChoices,
-        label=_('Conditions'),
-        help_text=_('You can choose which review requests will be built using '
-                    'this Travis CI configuration.'))
+        label=_('Conditions'))
 
     travis_endpoint = forms.ChoiceField(
         label=_('Travis CI'),
@@ -124,13 +123,6 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
         required=False,
         help_text=_('An optional branch name to use for review request '
                     'builds within the Travis CI user interface.'))
-
-    run_manually = forms.BooleanField(
-        label=_('Run builds manually'),
-        required=False,
-        help_text=_('Wait to run this service until manually started. This '
-                    'will add a "Run" button to the Travis CI entry.'),
-        initial=False)
 
     def __init__(self, *args, **kwargs):
         """Initialize the form.
@@ -240,7 +232,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
 
         return cleaned_data
 
-    class Meta:
+    class Meta(BaseCIIntegrationConfigForm.Meta):
         fieldsets = (
             (_('What To Build'), {
                 'description': _(

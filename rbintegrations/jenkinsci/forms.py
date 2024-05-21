@@ -5,21 +5,18 @@ from urllib.error import HTTPError, URLError
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import ReviewRequestConditionChoices
 
+from rbintegrations.baseci.forms import BaseCIIntegrationConfigForm
 from rbintegrations.jenkinsci.api import JenkinsAPI
 
 
 logger = logging.getLogger(__name__)
 
 
-class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
-    """Form for configuring Jenkins CI"""
-
-    conditions = ConditionsField(ReviewRequestConditionChoices,
-                                 label=_('Conditions'))
+class JenkinsCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
+    """Form for configuring Jenkins CI."""
 
     jenkins_endpoint = forms.URLField(
         label=_('Server'),
@@ -48,13 +45,6 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
                     'this API token will be updated upon saving.'),
         required=False,
         widget=forms.TextInput(attrs={'readonly': True}))
-
-    run_manually = forms.BooleanField(
-        label=_('Run builds manually'),
-        required=False,
-        help_text=_('Wait to run this service until manually started. This '
-                    'will add a "Run" button to the Jenkins entry.'),
-        initial=False)
 
     def __init__(self, *args, **kwargs) -> None:
         """Initialize the form.
@@ -120,7 +110,7 @@ class JenkinsCIIntegrationConfigForm(IntegrationConfigForm):
 
         return cleaned_data
 
-    class Meta:
+    class Meta(BaseCIIntegrationConfigForm.Meta):
         fieldsets = (
             (_('What To Build'), {
                 'description': _(
