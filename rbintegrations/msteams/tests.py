@@ -64,7 +64,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             fields=[
                 {
                     'title': 'Description',
@@ -106,7 +106,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/s/local-site-1/r/1/)',
             fields=[
                 {
@@ -144,7 +144,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             fields=[
                 {
                     'title': 'Description',
@@ -190,7 +190,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/s/local-site-1/r/1/)',
             fields=[
                 {
@@ -236,7 +236,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             image_url=attachment.get_absolute_url(),
             fields=[
                 {
@@ -281,7 +281,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             fields=[
                 {
                     'title': 'Description',
@@ -319,7 +319,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#12321: Test Review Request]'
+            title='[#12321: Test Review Request]'
                   '(http://example.com/r/12321/)',
             thumb_url=self.integration.trophy_urls['fish'],
             fields=[
@@ -358,7 +358,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#10000: Test Review Request]'
+            title='[#10000: Test Review Request]'
                   '(http://example.com/r/10000/)',
             thumb_url=self.integration.trophy_urls['milestone'],
             fields=[
@@ -411,7 +411,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             fields=[
                 {
                     'title': 'Description',
@@ -452,7 +452,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New update from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: My new summary](http://example.com/r/1/)',
+            title='[#1: My new summary](http://example.com/r/1/)',
             fields=[
                 {
                     'title': 'Repository',
@@ -496,7 +496,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New update from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: My new summary](http://example.com/r/1/)',
+            title='[#1: My new summary](http://example.com/r/1/)',
             body='These are my changes.',
             fields=[
                 {
@@ -538,7 +538,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New update from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             image_url=attachment.get_absolute_url(),
             fields=[
                 {
@@ -571,7 +571,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='Closed as completed by '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
         )
 
     def test_notify_closed_review_request_as_discarded(self) -> None:
@@ -593,7 +593,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='Discarded by '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
         )
 
     @add_fixtures(['test_site'])
@@ -620,7 +620,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='Closed as completed by [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/s/local-site-1/r/1/)',
         )
 
@@ -644,7 +644,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='Reopened by '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request](http://example.com/r/1/)',
+            title='[#1: Test Review Request](http://example.com/r/1/)',
             body='My description.',
         )
 
@@ -673,7 +673,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='Reopened by [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/s/local-site-1/r/1/)',
             body='My description.',
         )
@@ -700,7 +700,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='This is my review.'
         )
@@ -732,7 +732,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/s/local-site-1/r/1/#review1)',
             body='This is my review.'
         )
@@ -758,7 +758,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='My general comment.'
         )
@@ -785,7 +785,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='My general comment.',
             fields=[
@@ -820,7 +820,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='My general comment 1.',
             fields=[
@@ -853,7 +853,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='Test Body Bottom',
             fields=[
@@ -887,7 +887,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='This is body_top.',
             fields=[
@@ -921,7 +921,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='My comment',
             fields=[
@@ -958,7 +958,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New review from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review1)',
             body='My general comment 1.',
             fields=[
@@ -998,7 +998,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New reply from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review2)',
             body='This is body_top.',
         )
@@ -1037,7 +1037,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New reply from [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/s/local-site-1/r/1/#review2)',
             body='This is body_top.',
         )
@@ -1069,7 +1069,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         self._check_notify_request(
             pre_text='New reply from '
                      '[Test User](http://example.com/users/test/)',
-            title='[\\#1: Test Review Request]'
+            title='[#1: Test Review Request]'
                   '(http://example.com/r/1/#review2)',
             body='This is a comment.',
         )
@@ -1099,8 +1099,8 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
                 'WebHook URL has not been configured.')
 
     def test_notify_new_review_request_escaped_markdown(self) -> None:
-        """Testing MSIntegration escapes markdown characters in its
-        notification
+        """Testing MSIntegration escapes []() characters when needed
+        in its notification
         """
         review_request = self.create_review_request(
             create_repository=True,
@@ -1125,7 +1125,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
             pre_text='New review request from '
                      '[Test User](http://example.com/users/test?'
                      'val=%29&foo=%281%29)',
-            title='[\\#1: Test\\](Foo)](http://example.com/r/1/)',
+            title='[#1: Test\\](Foo)](http://example.com/r/1/)',
             fields=[
                 {
                     'title': 'Description',

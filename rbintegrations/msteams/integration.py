@@ -14,7 +14,6 @@ from urllib.request import Request, urlopen
 
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from djblets.markdown import markdown_escape
 from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.integration import BaseChatIntegration
@@ -297,8 +296,12 @@ class MSTeamsIntegration(BaseChatIntegration):
             lambda m: escape_map[m.group(0)],
             path)
 
+        # We only care about escaping brackets in the text, since those
+        # are the only things that can break the Markdown link.
+        text = re.sub(r'([\[\]])', r'\\\1', text)
+
         return (
-            f'[{markdown_escape(text)}]'
+            f'[{text}]'
             f'({build_server_url(path)})'
         )
 
