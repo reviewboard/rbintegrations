@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Dict, TYPE_CHECKING
 from urllib.error import HTTPError
 
@@ -150,9 +151,33 @@ class JenkinsCIIntegration(BaseCIIntegration):
     ) -> str:
         """Replace variables in the Jenkins job name.
 
-        This will replace ``{repository}`` with the repository name,
-        ``{branch}`` with the review request branch, and replace all ``/``
-        with ``_``.
+        This will replace the following variables:
+
+        ``{branch_name}``:
+            The unmodified branch name.
+
+        ``{repository_name}``:
+            The unmodified configured repository name.
+
+        ``{noslash_branch_name}``:
+            The branch name with slashes replaced with underscores.
+
+        ``{noslash_repository_name}``:
+            The configured repository name with slashes replaced with
+            underscores.
+
+        ``{branch}``:
+            Legacy equivalent to ``{noslash_branch_name}``.
+
+        ``{repository_name}``:
+            Legacy equivalent to ``{noslash_repository_name}``.
+
+        Version Changed:
+            4.0:
+            * Added support for ``{branch_name}``, ``{repository_name}``,
+              ``{noslash_branch_name}``, and ``{noslash_repository_name}``.
+            * The job name itself is no longer normalized, just specific
+              variables within it.
 
         Args:
             job_name (str):
@@ -169,9 +194,26 @@ class JenkinsCIIntegration(BaseCIIntegration):
             str:
             The resulting job name.
         """
-        return (
-            job_name
-            .replace('{repository}', repository.name)
-            .replace('{branch}', review_request.branch)
-            .replace('/', '_')
-        )
+        branch = review_request.branch
+        repo_name = repository.name
+        noslash_branch = branch.replace('/', '_')
+        noslash_repo_name = repo_name.replace('/', '_')
+
+        var_map: dict[str, str] = {
+            # Plain variables
+            'branch_name': branch,
+            'repository_name': repo_name,
+
+            # No-slash variations
+            'noslash_branch_name': noslash_branch,
+            'noslash_repository_name': noslash_repo_name,
+
+            # Legacy variables
+            'branch': noslash_branch,
+            'repository': noslash_repo_name,
+        }
+
+        return re.sub(
+            r'\{(%s)\}' % '|'.join(var_map.keys()),
+            lambda m: var_map[m.group(1)],
+            job_name)

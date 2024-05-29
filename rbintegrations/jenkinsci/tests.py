@@ -1,8 +1,11 @@
 """Unit tests for the Jenkins CI integration."""
 
+from __future__ import annotations
+
 import json
 from urllib.error import HTTPError
 from urllib.parse import urlencode
+from typing import Optional, TYPE_CHECKING
 
 import kgb
 import reviewboard
@@ -14,6 +17,9 @@ from reviewboard.reviews.signals import status_update_request_run
 from rbintegrations.jenkinsci.api import JenkinsAPI
 from rbintegrations.jenkinsci.integration import JenkinsCIIntegration
 from rbintegrations.testing.testcases import IntegrationTestCase
+
+if TYPE_CHECKING:
+    from reviewboard.reviews.models import ReviewRequest
 
 
 class JenkinsCIIntegrationTests(IntegrationTestCase):
@@ -176,37 +182,119 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
 
         self._check_build_requests(expect_open_request=False)
 
-    def test_job_name_variables_replaced(self):
-        """Testing that JenkinsCIIntegration correctly replaces variables in a
-        job name
+    def test_job_name_variables(self) -> None:
+        """Testing that JenkinsCIIntegration correctly replaces variables in
+        a job name
         """
         review_request = self._setup_build_requests(
-            job_name='{repository}_{branch}_1')
+            job_name='{repository_name}/{branch_name}/1',
+            branch='my/branch')
         review_request.publish(review_request.submitter)
 
         self._check_build_requests(
-            url='http://localhost:8000/job/Test%20Repo_my-branch_1/build',
+            url=(
+                'http://localhost:8000/job/'
+                'Test%20Repo/Name/my/branch/1/build'
+            ),
             payload={
                 'parameter': [
                     {
                         'name': 'REVIEWBOARD_SERVER',
-                        'value': 'http://example.com/'
+                        'value': 'http://example.com/',
                     },
                     {
                         'name': 'REVIEWBOARD_REVIEW_ID',
-                        'value': review_request.display_id
+                        'value': review_request.display_id,
                     },
                     {
                         'name': 'REVIEWBOARD_REVIEW_BRANCH',
-                        'value': review_request.branch
+                        'value': review_request.branch,
                     },
                     {
                         'name': 'REVIEWBOARD_DIFF_REVISION',
-                        'value': 1
+                        'value': 1,
                     },
                     {
                         'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
-                        'value': 1
+                        'value': 1,
+                    }
+                ]
+            })
+
+    def test_job_name_variables_replaced_noslash(self) -> None:
+        """Testing that JenkinsCIIntegration correctly replaces
+        noslash-variant variables in a job name
+        """
+        review_request = self._setup_build_requests(
+            job_name='{noslash_repository_name}/{noslash_branch_name}/1',
+            branch='my/branch')
+        review_request.publish(review_request.submitter)
+
+        self._check_build_requests(
+            url=(
+                'http://localhost:8000/job/'
+                'Test%20Repo_Name/my_branch/1/build'
+            ),
+            payload={
+                'parameter': [
+                    {
+                        'name': 'REVIEWBOARD_SERVER',
+                        'value': 'http://example.com/',
+                    },
+                    {
+                        'name': 'REVIEWBOARD_REVIEW_ID',
+                        'value': review_request.display_id,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                        'value': review_request.branch,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_DIFF_REVISION',
+                        'value': 1,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
+                        'value': 1,
+                    }
+                ]
+            })
+
+    def test_job_name_variables_replaced_legacy(self) -> None:
+        """Testing that JenkinsCIIntegration correctly replaces legacy
+        variables in a job name
+        """
+        review_request = self._setup_build_requests(
+            job_name='{repository}/{branch}/1',
+            branch='my/branch')
+        review_request.publish(review_request.submitter)
+
+        self._check_build_requests(
+            url=(
+                'http://localhost:8000/job/'
+                'Test%20Repo_Name/my_branch/1/build'
+            ),
+            payload={
+                'parameter': [
+                    {
+                        'name': 'REVIEWBOARD_SERVER',
+                        'value': 'http://example.com/',
+                    },
+                    {
+                        'name': 'REVIEWBOARD_REVIEW_ID',
+                        'value': review_request.display_id,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_REVIEW_BRANCH',
+                        'value': review_request.branch,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_DIFF_REVISION',
+                        'value': 1,
+                    },
+                    {
+                        'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
+                        'value': 1,
                     }
                 ]
             })
@@ -255,8 +343,15 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
 
         return config
 
-    def _setup_build_requests(self, with_local_site=False, run_manually=False,
-                              job_name=None, csrf_error=None):
+    def _setup_build_requests(
+        self,
+        *,
+        with_local_site: bool = False,
+        run_manually: bool = False,
+        job_name: Optional[str] = None,
+        branch: Optional[str] = 'my-branch',
+        csrf_error: Optional[Exception] = None,
+    ) -> ReviewRequest:
         """Set up state for build-related tests.
 
         This will set up a repository, review request, integration
@@ -270,8 +365,11 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                 Whether to create the integration configuration with
                 ``run_manually`` set.
 
-            job_name (unicode, optional):
+            job_name (str, optional):
                 An explicit name or pattern to give the job.
+
+            branch (str, optional):
+                An optional branch name for the review request.
 
             csrf_error (Exception, optional):
                 An optional exception to raise for the CSRF request.
@@ -283,10 +381,13 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
             reviewboard.reviews.models.ReviewRequest:
             The created review request.
         """
-        repository = self.create_repository(with_local_site=with_local_site)
+        repository = self.create_repository(
+            name='Test Repo/Name',
+            with_local_site=with_local_site)
         review_request = self.create_review_request(
             repository=repository,
-            with_local_site=with_local_site)
+            with_local_site=with_local_site,
+            branch=branch)
 
         diffset = self.create_diffset(review_request=review_request)
         diffset.base_commit_id = '8fd69d70f07b57c21ad8733c1c04ae604d21493f'

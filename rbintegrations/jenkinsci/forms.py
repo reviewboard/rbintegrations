@@ -24,8 +24,14 @@ class JenkinsCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
 
     jenkins_job_name = forms.CharField(
         label=_('Job Name'),
-        help_text=_('Job name. This can include the following variables: '
-                    '{repository}, {branch}.'))
+        help_text=_(
+            'Job name. This can include the following variables: '
+            '{branch_name} (the branch name), '
+            '{repository_name} (the repository name), '
+            '{noslash_branch_name} (the branch name with slashes converted to '
+            'underscores), and {noslash_repository_name} (the repository name '
+            'with slashes converted to underscores).'
+        ))
 
     jenkins_username = forms.CharField(
         label=_('Username'),
