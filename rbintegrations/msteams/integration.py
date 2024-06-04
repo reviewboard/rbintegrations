@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import MutableMapping, Optional, Sequence, TYPE_CHECKING
+from typing import ClassVar, MutableMapping, Optional, Sequence, TYPE_CHECKING
 from urllib.request import Request, urlopen
 
 from django.utils.functional import cached_property
@@ -54,6 +54,10 @@ class MSTeamsIntegration(BaseChatIntegration):
     config_form_cls = MSTeamsIntegrationConfigForm
 
     use_emoji_shortcode = False
+
+    assets_base_url: ClassVar[str] = (
+        'https://static.reviewboard.org/integration-assets/msteams'
+    )
 
     def notify(
         self,

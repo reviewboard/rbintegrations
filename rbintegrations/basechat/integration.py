@@ -6,6 +6,7 @@ import logging
 from typing import (ClassVar, Optional, Sequence, TYPE_CHECKING, Tuple,
                     TypedDict)
 
+from django.utils.functional import cached_property
 from djblets.db.query import get_object_or_none
 from djblets.util.templatetags.djblets_utils import user_displayname
 from housekeeping.functions import deprecate_non_keyword_only_args
@@ -83,31 +84,13 @@ class BaseChatIntegration(Integration):
     #:
     #: Type:
     #:     str
-    assets_timestamp: ClassVar[str] = '?20240418-1205'
+    assets_timestamp: ClassVar[str] = '?20240501-1234'
 
     #: The default color to style the chat message.
     #:
     #: Type:
     #:     str
     default_color: ClassVar[str] = '#efcc96'
-
-    #: The URL of the Review Board logo to use in chat messages.
-    #:
-    #: Type:
-    #:     str
-    logo_url: ClassVar[str] = (
-        f'{assets_base_url}/reviewboard.png{assets_timestamp}'
-    )
-
-    #: URLs of trophy icons to use in chat messages.
-    #:
-    #: Type:
-    #:     dict
-    trophy_urls: ClassVar[dict[str, str]] = {
-        'fish': f'{assets_base_url}/fish-trophy.png{assets_timestamp}',
-        'milestone':
-            f'{assets_base_url}/milestone-trophy.png{assets_timestamp}',
-    }
 
     #: Whether to use shortcodes to represent emojis instead of unicode blocks.
     #:
@@ -136,6 +119,37 @@ class BaseChatIntegration(Integration):
     #:     djblets.integrations.forms.IntegrationConfigForm
     config_form_cls: ClassVar[type[IntegrationConfigForm]] = \
         BaseChatIntegrationConfigForm
+
+    @cached_property
+    def logo_url(self) -> str:
+        """The URL of the Review Board logo to use in chat messages.
+
+        Version Changed:
+            4.0:
+            This is now a read-only property. Subclasses that want to
+            override this must override the property instead of the
+            attribute.
+        """
+        return f'{self.assets_base_url}/reviewboard.png{self.assets_timestamp}'
+
+    @cached_property
+    def trophy_urls(self) -> dict[str, str]:
+        """URLs to the trophy images to use in chat messages.
+
+        Version Changed:
+            4.0:
+            This is now a read-only property. Subclasses that want to
+            override this must override the property instead of the
+            attribute.
+        """
+        assets_base_url = self.assets_base_url
+        assets_timestamp = self.assets_timestamp
+
+        return {
+            'fish': f'{assets_base_url}/fish-trophy.png{assets_timestamp}',
+            'milestone':
+                f'{assets_base_url}/milestone-trophy.png{assets_timestamp}',
+        }
 
     def initialize(self) -> None:
         """Initialize the integration hooks."""
