@@ -362,6 +362,7 @@ intersphinx_mapping = {
     'rb3.0': ('%s/docs/manual/3.0/' % rbwebsite_url, None),
     'rb4.0': ('%s/docs/manual/4.0/' % rbwebsite_url, None),
     'rb5.0': ('%s/docs/manual/5.0/' % rbwebsite_url, None),
+    'rb7.0': ('%s/docs/manual/7.x/' % rbwebsite_url, None),
     'rb-dev': ('%s/docs/manual/dev/' % rbwebsite_url, None),
 }
 

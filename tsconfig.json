@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "backbone": [
+        "node_modules/@beanbag/spina/lib/@types/backbone"
+      ],
+      "djblets/*": [
+        "node_modules/@beanbag/djblets/static/djblets/js/*"
+      ],
+      "reviewboard/*": [
+        "node_modules/@beanbag/reviewboard/static/rb/js/*"
+      ]
+    }
+  },
+  "extends": "@beanbag/reviewboard/packaging/js/tsconfig.base",
+  "include": [
+    "rbintegrations/static/*",
+    "rbintegrations/static/**/*"
+  ]
+}

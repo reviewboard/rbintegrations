@@ -10,9 +10,11 @@
 .noseids
 
 # Build-related directories
+.npm-workspaces
+_build
 build
 dist
-_build
+node_modules
 
 # Log created during unit tests
 reviewboard.log

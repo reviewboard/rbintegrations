@@ -1,0 +1,3 @@
+{
+  "extends": "@beanbag/reviewboard/packaging/js/babel.base.config.json"
+}

@@ -1,4 +1,9 @@
+"""Unit tests for the Slack integration."""
+
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING
 from urllib.request import urlopen
 
 from django.contrib.auth.models import User
@@ -11,20 +16,24 @@ from reviewboard.reviews.models import ReviewRequestDraft
 from rbintegrations.slack.integration import SlackIntegration
 from rbintegrations.testing.testcases import IntegrationTestCase
 
+if TYPE_CHECKING:
+    from djblets.integrations.models import BaseIntegrationConfig
+    from djblets.util.typing import JSONDict
+
 
 class SlackIntegrationTests(IntegrationTestCase):
     integration_cls = SlackIntegration
 
     fixtures = ['test_scmtools', 'test_users']
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(SlackIntegrationTests, self).setUp()
 
         self.user = User.objects.create(username='test',
                                         first_name='Test',
                                         last_name='User')
 
-    def test_notify_new_review_request(self):
+    def test_notify_new_review_request(self) -> None:
         """Testing SlackIntegration notifies on new review request"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -42,9 +51,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -77,7 +86,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         })
 
     @add_fixtures(['test_site'])
-    def test_notify_new_review_request_with_local_site(self):
+    def test_notify_new_review_request_with_local_site(self) -> None:
         """Testing SlackIntegration notifies on new review request with
         local site
         """
@@ -101,9 +110,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -136,7 +145,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_request_with_diff(self):
+    def test_notify_new_review_request_with_diff(self) -> None:
         """Testing SlackIntegration notifies on new review request with diff"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -155,9 +164,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -197,7 +206,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         })
 
     @add_fixtures(['test_site'])
-    def test_notify_new_review_request_with_local_site_and_diff(self):
+    def test_notify_new_review_request_with_local_site_and_diff(self) -> None:
         """Testing SlackIntegration notifies on new review request with local
         site and diff
         """
@@ -222,9 +231,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -265,7 +274,9 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_request_with_image_file_attachment(self):
+    def test_notify_new_review_request_with_image_file_attachment(
+        self,
+    ) -> None:
         """Testing SlackIntegration notifies on new review request with
         image file attachment
         """
@@ -286,9 +297,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -321,7 +332,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_request_with_fish_trophy(self):
+    def test_notify_new_review_request_with_fish_trophy(self) -> None:
         """Testing SlackIntegration notifies on new review request with
         fish trophy
         """
@@ -342,9 +353,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#12321: New review request from Test User: '
                     'http://example.com/r/12321/'
@@ -366,7 +377,7 @@ class SlackIntegrationTests(IntegrationTestCase):
                         'value': 'my-branch',
                     },
                 ],
-                'thumb_url': self.integration.TROPHY_URLS['fish'],
+                'thumb_url': self.integration.trophy_urls['fish'],
                 'title': '#12321: Test Review Request',
                 'title_link': 'http://example.com/r/12321/',
                 'text': None,
@@ -377,7 +388,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_request_with_milestone_trophy(self):
+    def test_notify_new_review_request_with_milestone_trophy(self) -> None:
         """Testing SlackIntegration notifies on new review request with
         milestone trophy
         """
@@ -398,9 +409,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#10000: New review request from Test User: '
                     'http://example.com/r/10000/'
@@ -422,7 +433,7 @@ class SlackIntegrationTests(IntegrationTestCase):
                         'value': 'my-branch',
                     },
                 ],
-                'thumb_url': self.integration.TROPHY_URLS['milestone'],
+                'thumb_url': self.integration.trophy_urls['milestone'],
                 'title': '#10000: Test Review Request',
                 'title_link': 'http://example.com/r/10000/',
                 'text': None,
@@ -433,7 +444,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_request_with_custom_trophy(self):
+    def test_notify_new_review_request_with_custom_trophy(self) -> None:
         """Testing SlackIntegration notifies on new review request with
         ignored custom trophy
         """
@@ -470,9 +481,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -504,7 +515,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_updated_review_request(self):
+    def test_notify_updated_review_request(self) -> None:
         """Testing SlackIntegration notifies on updated review request"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -528,9 +539,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New update from Test User: '
                     'http://example.com/r/1/'
@@ -557,7 +568,9 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_updated_review_request_with_change_description(self):
+    def test_notify_updated_review_request_with_change_description(
+        self,
+    ) -> None:
         """Testing SlackIntegration notifies on updated review request with
         change description
         """
@@ -587,9 +600,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New update from Test User: '
                     'http://example.com/r/1/'
@@ -616,7 +629,9 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_updated_review_request_with_new_image_attachments(self):
+    def test_notify_updated_review_request_with_new_image_attachments(
+        self,
+    ) -> None:
         """Testing SlackIntegration notifies on updated review request with
         new image attachments
         """
@@ -643,9 +658,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New update from Test User: '
                     'http://example.com/r/1/'
@@ -673,7 +688,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_closed_review_request_as_submitted(self):
+    def test_notify_closed_review_request_as_submitted(self) -> None:
         """Testing SlackIntegration notifies on closing review request as
         submitted
         """
@@ -693,9 +708,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Closed as completed by Test User: '
                     'http://example.com/r/1/'
@@ -710,7 +725,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_closed_review_request_as_discarded(self):
+    def test_notify_closed_review_request_as_discarded(self) -> None:
         """Testing SlackIntegration notifies on closing review request as
         discarded
         """
@@ -730,9 +745,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Discarded by Test User: '
                     'http://example.com/r/1/'
@@ -748,7 +763,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         })
 
     @add_fixtures(['test_site'])
-    def test_notify_closed_review_request_with_local_site(self):
+    def test_notify_closed_review_request_with_local_site(self) -> None:
         """Testing SlackIntegration notifies on closing review request with
         local site
         """
@@ -772,9 +787,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Closed as completed by Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -790,7 +805,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_reopened_review_request(self):
+    def test_notify_reopened_review_request(self) -> None:
         """Testing SlackIntegration notifies on reopened review request"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -809,9 +824,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Reopened by Test User: '
                     'http://example.com/r/1/'
@@ -827,7 +842,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         })
 
     @add_fixtures(['test_site'])
-    def test_notify_reopened_review_request_with_local_site(self):
+    def test_notify_reopened_review_request_with_local_site(self) -> None:
         """Testing SlackIntegration notifies on reopened review request with
         local site
         """
@@ -852,9 +867,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Reopened by Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -870,7 +885,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_body_top(self):
+    def test_notify_new_review_with_body_top(self) -> None:
         """Testing SlackIntegration notifies on new review with body_top"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -891,9 +906,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review from Test User: '
                     'http://example.com/r/1/#review1'
@@ -909,7 +924,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         })
 
     @add_fixtures(['test_site'])
-    def test_notify_new_review_with_local_site(self):
+    def test_notify_new_review_with_local_site(self) -> None:
         """Testing SlackIntegration notifies on new review with local site"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -934,9 +949,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review from Test User: '
                     'http://example.com/s/local-site-1/r/1/#review1'
@@ -954,7 +969,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_comments(self):
+    def test_notify_new_review_with_comments(self) -> None:
         """Testing SlackIntegration notifies on new review with only comments
         """
         review_request = self.create_review_request(
@@ -975,9 +990,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review from Test User: '
                     'http://example.com/r/1/#review1'
@@ -992,7 +1007,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_one_open_issue(self):
+    def test_notify_new_review_with_one_open_issue(self) -> None:
         """Testing SlackIntegration notifies on new review with 1 open
         issue
         """
@@ -1015,7 +1030,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1037,7 +1052,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_open_issues(self):
+    def test_notify_new_review_with_open_issues(self) -> None:
         """Testing SlackIntegration notifies on new review with > 1 open
         issue
         """
@@ -1062,7 +1077,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1084,7 +1099,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_ship_it(self):
+    def test_notify_new_review_with_ship_it(self) -> None:
         """Testing SlackIntegration notifies on new review with Ship It!"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -1107,7 +1122,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'good',
                 'fallback': (
@@ -1129,7 +1144,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_ship_it_and_custom_body_top(self):
+    def test_notify_new_review_with_ship_it_and_custom_body_top(self) -> None:
         """Testing SlackIntegration notifies on new review with Ship It and
         custom body_top
         !"""
@@ -1153,7 +1168,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'good',
                 'fallback': (
@@ -1175,7 +1190,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_ship_it_and_one_open_issue(self):
+    def test_notify_new_review_with_ship_it_and_one_open_issue(self) -> None:
         """Testing SlackIntegration notifies on new review with Ship It! and
         1 open issue
         """
@@ -1201,7 +1216,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1224,7 +1239,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_review_with_ship_it_and_open_issues(self):
+    def test_notify_new_review_with_ship_it_and_open_issues(self) -> None:
         """Testing SlackIntegration notifies on new review with Ship It! and
         > 1 open issues
         """
@@ -1253,7 +1268,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1276,7 +1291,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_with_body_bottom(self):
+    def test_notify_with_body_bottom(self) -> None:
         """Testing SlackIntegration notifies on new review with body_bottom"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -1297,7 +1312,7 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': '#efcc96',
                 'fallback': (
@@ -1314,7 +1329,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_reply_with_body_top(self):
+    def test_notify_new_reply_with_body_top(self) -> None:
         """Testing SlackIntegration notifies on new reply with body_top"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -1342,9 +1357,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New reply from Test User: '
                     'http://example.com/r/1/#review2'
@@ -1360,7 +1375,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         })
 
     @add_fixtures(['test_site'])
-    def test_notify_new_reply_with_local_site(self):
+    def test_notify_new_reply_with_local_site(self) -> None:
         """Testing SlackIntegration notifies on new reply with local site"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -1392,9 +1407,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New reply from Test User: '
                     'http://example.com/s/local-site-1/r/1/#review2'
@@ -1412,7 +1427,7 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def test_notify_new_reply_with_comment(self):
+    def test_notify_new_reply_with_comment(self) -> None:
         """Testing SlackIntegration notifies on new reply with comment"""
         review_request = self.create_review_request(
             create_repository=True,
@@ -1438,9 +1453,9 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New reply from Test User: '
                     'http://example.com/r/1/#review2'
@@ -1455,7 +1470,47 @@ class SlackIntegrationTests(IntegrationTestCase):
             }],
         })
 
-    def _create_config(self, with_local_site=False):
+    def test_notify_with_no_webhook_url(self) -> None:
+        """Testing SlackIntegration logs an error when attempting to send
+        a notification when no webhook URL is configured
+        """
+        review_request = self.create_review_request(
+            create_repository=True,
+            submitter=self.user,
+            summary='Test Review Request',
+            description='My description.',
+            publish=False)
+
+        config = self._create_config()
+        config.set('webhook_url', None)
+        config.save()
+        self.integration.enable_integration()
+
+        self.spy_on(urlopen, call_original=False)
+        self.spy_on(self.integration.notify)
+
+        with self.assertLogs() as logs:
+            review_request.publish(self.user)
+
+            self.assertEqual(
+                logs.records[0].getMessage(),
+                'Failed to send notification: '
+                'WebHook URL has not been configured.')
+
+    def _create_config(
+        self,
+        with_local_site: bool = False,
+    ) -> BaseIntegrationConfig:
+        """Set configuration values for the integration.
+
+        Args:
+            with_local_site (bool, optional):
+                Whether the configuration should be for a local site.
+
+        Returns:
+            djblets.integrations.models.BaseIntegrationConfig:
+            The configuration for the integration.
+        """
         choice = ReviewRequestRepositoriesChoice()
 
         condition_set = ConditionSet(conditions=[
@@ -1478,7 +1533,10 @@ class SlackIntegrationTests(IntegrationTestCase):
 
         return config
 
-    def _check_notify_request(self, expected_payload):
+    def _check_notify_request(
+        self,
+        expected_payload: JSONDict,
+    ) -> None:
         """Check that a notify and HTTP request meets expected criteria.
 
         This will ensure that only a single request was invoked, and that the
@@ -1501,7 +1559,7 @@ class SlackIntegrationTests(IntegrationTestCase):
         headers = request.headers
 
         self.assertIsInstance(body, bytes)
-        self.assertEqual(headers['Content-length'], len(body))
+        self.assertEqual(headers['Content-length'], str(len(body)))
         self.assertEqual(headers['Content-type'], str('application/json'))
         self.assertEqual(json.loads(body.decode('utf-8')),
                          expected_payload)

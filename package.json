@@ -1,0 +1,7 @@
+{
+  "name": "RBIntegrationsExtension",
+  "private": true,
+  "workspaces": [
+    ".npm-workspaces/*"
+  ]
+}

@@ -278,6 +278,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             self.integration.update_status(status_update)
 
         self.assertEqual(status_update.timestamp, old_timestamp)
+        self.assertIsNone(status_update.timeout)
 
     def test_update_status_with_noops(self) -> None:
         """Testing BaseCIIntegration.update_status with no no-op changes"""
@@ -299,6 +300,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 url_text='Link')
 
         self.assertEqual(status_update.timestamp, old_timestamp)
+        self.assertIsNone(status_update.timeout)
 
     def test_update_status_with_new_data(self) -> None:
         """Testing BaseCIIntegration.update_status with new data"""
@@ -332,6 +334,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.DONE_SUCCESS,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -375,6 +378,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.DONE_SUCCESS,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -389,6 +393,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'description': 'description.',
                 'state': StatusUpdate.PENDING,
                 'timestamp': old_timestamp,
+                'timeout': None,
                 'url': 'https://example.com',
                 'url_text': 'Link',
             })
@@ -409,6 +414,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         attrs = {
             'description': 'waiting to run.',
             'state': StatusUpdate.NOT_YET_RUN,
+            'timeout': None,
             'url': 'https://example.com',
             'url_text': 'Link',
         }
@@ -442,6 +448,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         attrs = {
             'description': 'new description.',
             'state': StatusUpdate.NOT_YET_RUN,
+            'timeout': None,
             'url': 'https://example.com/new/',
             'url_text': 'New link',
         }
@@ -478,6 +485,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.NOT_YET_RUN,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -512,6 +520,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         attrs = {
             'description': 'starting build...',
             'state': StatusUpdate.PENDING,
+            'timeout': None,
             'url': 'https://example.com',
             'url_text': 'Link',
         }
@@ -547,6 +556,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.PENDING,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -560,6 +570,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.PENDING,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -588,6 +599,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.PENDING,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -601,6 +613,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'description.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'timestamp': old_timestamp,
                 'url': 'https://example.com',
                 'url_text': 'Link',
@@ -624,6 +637,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'internal error.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com',
                 'url_text': 'Link',
             })
@@ -637,6 +651,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'internal error.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com',
                 'url_text': 'Link',
             })
@@ -664,6 +679,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -677,6 +693,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -705,6 +722,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'new description.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com/new/',
                 'url_text': 'New link',
             })
@@ -718,6 +736,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'description.',
                 'state': StatusUpdate.PENDING,
+                'timeout': None,
                 'timestamp': old_timestamp,
                 'url': 'https://example.com',
                 'url_text': 'Link',
@@ -769,6 +788,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': prep_data.user,
             })
 
@@ -820,6 +840,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': prep_data.user,
             })
         self.assertIsNotNone(status_update.pk)
@@ -845,6 +866,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'some error.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com/error/',
                 'url_text': 'Error',
             })
@@ -867,6 +889,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'internal error: oh no.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
             })
 
     @add_fixtures(['test_scmtools'])
@@ -913,7 +936,9 @@ class BaseCIIntegrationTests(IntegrationTestCase):
 
     @add_fixtures(['test_scmtools'])
     def test_manual_run(self) -> None:
-        """Testing BaseCIIntegration._on_status_update_request_run"""
+        """Testing BaseCIIntegration._on_status_update_request_run with
+        manual run
+        """
         integration = self.integration
 
         info = self._setup_run_test(with_manual_run=True)
@@ -943,6 +968,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.NOT_YET_RUN,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': user,
             })
 
@@ -972,6 +998,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': user,
             })
 
@@ -1002,12 +1029,15 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': prep_data.user,
             })
 
     @add_fixtures(['test_scmtools'])
     def test_manual_run_with_changedesc(self) -> None:
-        """Testing BaseCIIntegration._on_status_update_request_run"""
+        """Testing BaseCIIntegration._on_status_update_request_run with
+        manual run on update to review request
+        """
         integration = self.integration
 
         info = self._setup_run_test(with_changedesc=True,
@@ -1041,6 +1071,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.NOT_YET_RUN,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': user,
             })
         self.assertIsNotNone(status_update.change_description)
@@ -1086,6 +1117,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': prep_data.user,
             })
 
@@ -1143,6 +1175,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.NOT_YET_RUN,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': user,
             })
 
@@ -1172,6 +1205,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': user,
             })
 
@@ -1202,6 +1236,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
                 'service_id': 'my-ci',
                 'state': StatusUpdate.PENDING,
                 'summary': 'My CI',
+                'timeout': None,
                 'user': prep_data.user,
             })
 
@@ -1237,6 +1272,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'some error.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
                 'url': 'https://example.com/error/',
                 'url_text': 'Error',
             })
@@ -1270,6 +1306,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             {
                 'description': 'internal error: oh no.',
                 'state': StatusUpdate.ERROR,
+                'timeout': None,
             })
 
     @add_fixtures(['test_scmtools'])
@@ -1382,6 +1419,106 @@ class BaseCIIntegrationTests(IntegrationTestCase):
 
         self.assertSpyNotCalled(integration.start_build)
 
+    @add_fixtures(['test_scmtools'])
+    def test_timeout(self) -> None:
+        """Testing BaseCIIntegration._on_status_update_request_run with
+        timeout
+        """
+        integration = self.integration
+
+        info = self._setup_run_test(with_manual_run=True,
+                                    timeout=12345)
+        config = info['config']
+        diffsets = info['diffsets']
+        review_request = info['review_request']
+
+        assert config
+
+        self.assertSpyNotCalled(integration.start_build)
+
+        # Check the status update created on publish.
+        status_update = StatusUpdate.objects.get()
+        user = integration.get_or_create_user()
+
+        self.assertIsNotNone(status_update.pk)
+        self.assertAttrsEqual(
+            status_update,
+            {
+                'change_description': None,
+                'description': 'waiting to run.',
+                'extra_data': {
+                    '__integration_config_id': config.pk,
+                    'can_retry': True,
+                },
+                'review_request': review_request,
+                'service_id': 'my-ci',
+                'state': StatusUpdate.NOT_YET_RUN,
+                'summary': 'My CI',
+                'timeout': 12345,
+                'user': user,
+            })
+
+        # Perform the manual run.
+        status_update.run()
+
+        self.assertSpyCalled(integration.start_build)
+        call_kwargs = integration.start_build.last_call.kwargs
+        prep_data = call_kwargs['prep_data']
+
+        self.assertEqual(call_kwargs['status_update'], status_update)
+        self.assertEqual(call_kwargs['config'], config)
+
+        status_update = call_kwargs['status_update']
+
+        self.assertIsNotNone(status_update.pk)
+        self.assertAttrsEqual(
+            status_update,
+            {
+                'change_description': None,
+                'description': 'starting build...',
+                'extra_data': {
+                    '__integration_config_id': config.pk,
+                    'can_retry': True,
+                },
+                'review_request': review_request,
+                'service_id': 'my-ci',
+                'state': StatusUpdate.PENDING,
+                'summary': 'My CI',
+                'timeout': 12345,
+                'user': user,
+            })
+
+        self.assertAttrsEqual(
+            prep_data,
+            {
+                'changedesc': None,
+                'configs': [config],
+                'diffset': diffsets[0],
+                'extra_state': {
+                    'my_state': 123,
+                },
+                'review_request': review_request,
+            })
+        self.assertEqual(prep_data.user.username, 'test-ci-user')
+
+        self.assertIsNotNone(status_update.pk)
+        self.assertAttrsEqual(
+            status_update,
+            {
+                'change_description': None,
+                'description': 'starting build...',
+                'extra_data': {
+                    '__integration_config_id': config.pk,
+                    'can_retry': True,
+                },
+                'review_request': review_request,
+                'service_id': 'my-ci',
+                'state': StatusUpdate.PENDING,
+                'summary': 'My CI',
+                'timeout': 12345,
+                'user': prep_data.user,
+            })
+
     def _setup_run_test(
         self,
         *,
@@ -1389,6 +1526,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         with_config: bool = True,
         with_diffset: bool = True,
         with_manual_run: bool = False,
+        timeout: Optional[int] = None,
         spy_op: Optional[BaseSpyOperation] = None,
     ) -> SetupRunTestResults:
         """Set up a test for a build run, and handle publishing.
@@ -1411,6 +1549,13 @@ class BaseCIIntegrationTests(IntegrationTestCase):
             with_manual_run (bool, optional):
                 Whether to test with a manual run configuration.
 
+            timeout (int, optional):
+                Optional number of seconds until the build is considered to
+                have timed out.
+
+                Version Added:
+                    4.0
+
             spy_op (kgb.ops.BaseSpyOperation, optional):
                 An explicit spy operation to use for checking builds.
 
@@ -1429,7 +1574,8 @@ class BaseCIIntegrationTests(IntegrationTestCase):
 
         if with_config:
             config = self._create_config(name='config',
-                                         with_manual_run=with_manual_run)
+                                         with_manual_run=with_manual_run,
+                                         timeout=timeout)
         else:
             config = None
 
@@ -1474,6 +1620,7 @@ class BaseCIIntegrationTests(IntegrationTestCase):
         name: str,
         integration_id: str = MyCIIntegration.integration_id,
         enabled: bool = True,
+        timeout: Optional[int] = None,
         local_site: Optional[LocalSite] = None,
         with_condition_match: bool = True,
         with_manual_run: bool = False,
@@ -1489,6 +1636,13 @@ class BaseCIIntegrationTests(IntegrationTestCase):
 
             enabled (bool, optional):
                 Whether this configuration is enabled.
+
+            timeout (int, optional):
+                Optional number of seconds until the build is considered to
+                have timed out.
+
+                Version Added:
+                    4.0
 
             local_site (reviewboard.site.models.LocalSite, optional):
                 The Local Site the configuration is bound to.
@@ -1521,6 +1675,9 @@ class BaseCIIntegrationTests(IntegrationTestCase):
 
         if with_manual_run:
             config_settings['run_manually'] = True
+
+        if timeout is not None:
+            config_settings['timeout'] = timeout
 
         return IntegrationConfig.objects.create(
             integration_id=integration_id,

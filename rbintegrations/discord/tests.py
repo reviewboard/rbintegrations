@@ -50,9 +50,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review request from Test User: '
                         'http://example.com/r/1/'
@@ -116,9 +116,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review request from Test User: '
                         'http://example.com/s/local-site-1/r/1/'
@@ -178,9 +178,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review request from Test User: '
                         'http://example.com/r/1/'
@@ -251,9 +251,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review request from Test User: '
                         'http://example.com/s/local-site-1/r/1/'
@@ -322,9 +322,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review request from Test User: '
                         'http://example.com/r/1/'
@@ -385,9 +385,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#12321: New review request from Test User: '
                         'http://example.com/r/12321/'
@@ -409,7 +409,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
                             'value': 'my-branch',
                         },
                     ],
-                    'thumb_url': self.integration.TROPHY_URLS['fish'],
+                    'thumb_url': self.integration.trophy_urls['fish'],
                     'title': '#12321: Test Review Request',
                     'title_link': 'http://example.com/r/12321/',
                     'text': None,
@@ -448,9 +448,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#10000: New review request from Test User: '
                         'http://example.com/r/10000/'
@@ -472,7 +472,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
                             'value': 'my-branch',
                         },
                     ],
-                    'thumb_url': self.integration.TROPHY_URLS['milestone'],
+                    'thumb_url': self.integration.trophy_urls['milestone'],
                     'title': '#10000: Test Review Request',
                     'title_link': 'http://example.com/r/10000/',
                     'text': None,
@@ -526,9 +526,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review request from Test User: '
                         'http://example.com/r/1/'
@@ -538,6 +538,64 @@ class DiscordIntegrationTests(IntegrationTestCase):
                             'short': False,
                             'title': 'Description',
                             'value': 'My description.',
+                        },
+                        {
+                            'short': True,
+                            'title': 'Repository',
+                            'value': 'Test Repo',
+                        },
+                        {
+                            'short': True,
+                            'title': 'Branch',
+                            'value': 'my-branch',
+                        },
+                    ],
+                    'title': '#1: Test Review Request',
+                    'title_link': 'http://example.com/r/1/',
+                    'text': None,
+                    'pretext': None,
+                }],
+                'text': (
+                    'New review request from '
+                    '<http://example.com/users/test/|Test User>'
+                ),
+            })
+
+    def test_notify_new_review_request_with_long_text(self) -> None:
+        """Testing DiscordIntegration.notify with long text on a field"""
+        review_request = self.create_review_request(
+            create_repository=True,
+            submitter=self.user,
+            summary='Test Review Request',
+            description='X' * 2000,
+            target_people=[self.user],
+            publish=False)
+
+        self._create_config()
+        self.integration.enable_integration()
+
+        self.spy_on(urlopen, call_original=False)
+        self.spy_on(self.integration.notify)
+        review_request.publish(self.user)
+
+        self.assertSpyCallCount(self.integration.notify, 1)
+        self.assertSpyCallCount(urlopen, 1)
+        self.assertEqual(
+            json.loads(urlopen.spy.calls[0].args[0].data),
+            {
+                'username': 'RB User',
+                'icon_url': self.integration.logo_url,
+                'attachments': [{
+                    'color': self.integration.default_color,
+                    'fallback': (
+                        '#1: New review request from Test User: '
+                        'http://example.com/r/1/'
+                    ),
+                    'fields': [
+                        {
+                            'short': False,
+                            'title': 'Description',
+                            'value': '%s...' % ('X' * 1021),
                         },
                         {
                             'short': True,
@@ -590,9 +648,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New update from Test User: '
                         'http://example.com/r/1/'
@@ -655,9 +713,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New update from Test User: '
                         'http://example.com/r/1/'
@@ -717,9 +775,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New update from Test User: '
                         'http://example.com/r/1/'
@@ -773,9 +831,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: Closed as completed by Test User: '
                         'http://example.com/r/1/'
@@ -816,9 +874,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: Discarded by Test User: '
                         'http://example.com/r/1/'
@@ -864,9 +922,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: Closed as completed by Test User: '
                         'http://example.com/s/local-site-1/r/1/'
@@ -907,9 +965,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: Reopened by Test User: '
                         'http://example.com/r/1/'
@@ -956,9 +1014,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: Reopened by Test User: '
                         'http://example.com/s/local-site-1/r/1/'
@@ -1001,9 +1059,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review from Test User: '
                         'http://example.com/r/1/#review1'
@@ -1050,9 +1108,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review from Test User: '
                         'http://example.com/s/local-site-1/r/1/#review1'
@@ -1097,9 +1155,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New review from Test User: '
                         'http://example.com/r/1/#review1'
@@ -1143,7 +1201,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
                     'color': 'warning',
                     'fallback': (
@@ -1196,7 +1254,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
                     'color': 'warning',
                     'fallback': (
@@ -1247,7 +1305,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
                     'color': 'good',
                     'fallback': (
@@ -1300,7 +1358,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
                     'color': 'good',
                     'fallback': (
@@ -1355,7 +1413,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
                     'color': 'warning',
                     'fallback': (
@@ -1414,7 +1472,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
                     'color': 'warning',
                     'fallback': (
@@ -1472,7 +1530,7 @@ class DiscordIntegrationTests(IntegrationTestCase):
                     'text': 'Test',
                     'pretext': None,
                 }],
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'text': (
                     'New review from '
                     '<http://example.com/users/test/|Test User>'
@@ -1514,9 +1572,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New reply from Test User: '
                         'http://example.com/r/1/#review2'
@@ -1573,9 +1631,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New reply from Test User: '
                         'http://example.com/s/local-site-1/r/1/#review2'
@@ -1626,9 +1684,9 @@ class DiscordIntegrationTests(IntegrationTestCase):
             json.loads(urlopen.spy.calls[0].args[0].data),
             {
                 'username': 'RB User',
-                'icon_url': self.integration.LOGO_URL,
+                'icon_url': self.integration.logo_url,
                 'attachments': [{
-                    'color': self.integration.DEFAULT_COLOR,
+                    'color': self.integration.default_color,
                     'fallback': (
                         '#1: New reply from Test User: '
                         'http://example.com/r/1/#review2'

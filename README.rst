@@ -26,6 +26,7 @@ Chat
 * `Discord <https://www.reviewboard.org/integrations/discord/>`_
 * `Matrix <https://www.reviewboard.org/integrations/matrix/>`_
 * `Mattermost <https://www.reviewboard.org/integrations/mattermost/>`_
+* `Microsoft Teams <https://www.reviewboard.org/integrations/msteams/>`_
 * `Slack <https://www.reviewboard.org/integrations/slack/>`_
 
 

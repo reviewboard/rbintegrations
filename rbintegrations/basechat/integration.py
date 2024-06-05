@@ -1,9 +1,15 @@
 """Integration for chat integrations"""
 
-import logging
+from __future__ import annotations
 
+import logging
+from typing import (ClassVar, Optional, Sequence, TYPE_CHECKING, Tuple,
+                    TypedDict)
+
+from django.utils.functional import cached_property
 from djblets.db.query import get_object_or_none
 from djblets.util.templatetags.djblets_utils import user_displayname
+from housekeeping.functions import deprecate_non_keyword_only_args
 from reviewboard.accounts.models import Trophy
 from reviewboard.admin.server import build_server_url
 from reviewboard.extensions.hooks import SignalHook
@@ -20,6 +26,41 @@ from reviewboard.reviews.signals import (review_request_closed,
                                          reply_published)
 from reviewboard.site.urlresolvers import local_site_reverse
 
+from rbintegrations.basechat.forms import BaseChatIntegrationConfigForm
+from rbintegrations.deprecation import RemovedInRBIntegrations50Warning
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
+    from djblets.integrations.forms import IntegrationConfigForm
+    from reviewboard.changedescs.models import ChangeDescription
+    from reviewboard.reviews.models import Review
+    from reviewboard.site.models import LocalSite
+
+
+logger = logging.getLogger(__name__)
+
+
+class FieldsDict(TypedDict):
+    """The fields comprising the information to display in a chat message.
+
+    Version Added:
+        4.0
+    """
+
+    #: Whether the field is short.
+    #:
+    #: This should be ``True`` if the field is short enough to be displayed
+    #: side by side with other fields.
+    #:
+    #: This may not be relevant for some chat integrations.
+    short: Optional[bool]
+
+    #: The title for the field.
+    title: str
+
+    #: The value for the field.
+    value: str
+
 
 class BaseChatIntegration(Integration):
     """Integrates Review Board with chat applications.
@@ -28,7 +69,89 @@ class BaseChatIntegration(Integration):
     changed, or closed, and when there's new activity on the review request.
     """
 
-    def initialize(self):
+    #: The base URL to use for static assets to use in chat messages.
+    #:
+    #: The static assets will usually just be the Review Board logo and
+    #: trophy icons.
+    #:
+    #: Type:
+    #:     str
+    assets_base_url: ClassVar[str] = (
+        'https://static.reviewboard.org/integration-assets/chat-common'
+    )
+
+    #: The timestamp to use for static assets.
+    #:
+    #: Type:
+    #:     str
+    assets_timestamp: ClassVar[str] = '?20240501-1234'
+
+    #: The default color to style the chat message.
+    #:
+    #: Type:
+    #:     str
+    default_color: ClassVar[str] = '#efcc96'
+
+    #: Whether to use shortcodes to represent emojis instead of unicode blocks.
+    #:
+    #: Version Added:
+    #:     4.0
+    #:
+    #: Type:
+    #:     bool
+    use_emoji_shortcode: ClassVar[bool] = True
+
+    #: Extensions of images that can appear in chat messages.
+    #:
+    #: Type:
+    #:     tuple of str
+    valid_image_url_exts: ClassVar[Tuple[str, ...]] = (
+        '.png',
+        '.bmp',
+        '.gif',
+        '.jpg',
+        '.jpeg',
+    )
+
+    #: The form class for handling integration configuration.
+    #:
+    #: Type:
+    #:     djblets.integrations.forms.IntegrationConfigForm
+    config_form_cls: ClassVar[type[IntegrationConfigForm]] = \
+        BaseChatIntegrationConfigForm
+
+    @cached_property
+    def logo_url(self) -> str:
+        """The URL of the Review Board logo to use in chat messages.
+
+        Version Changed:
+            4.0:
+            This is now a read-only property. Subclasses that want to
+            override this must override the property instead of the
+            attribute.
+        """
+        return f'{self.assets_base_url}/reviewboard.png{self.assets_timestamp}'
+
+    @cached_property
+    def trophy_urls(self) -> dict[str, str]:
+        """URLs to the trophy images to use in chat messages.
+
+        Version Changed:
+            4.0:
+            This is now a read-only property. Subclasses that want to
+            override this must override the property instead of the
+            attribute.
+        """
+        assets_base_url = self.assets_base_url
+        assets_timestamp = self.assets_timestamp
+
+        return {
+            'fish': f'{assets_base_url}/fish-trophy.png{assets_timestamp}',
+            'milestone':
+                f'{assets_base_url}/milestone-trophy.png{assets_timestamp}',
+        }
+
+    def initialize(self) -> None:
         """Initialize the integration hooks."""
         hooks = (
             (review_request_closed, self._on_review_request_closed),
@@ -41,27 +164,42 @@ class BaseChatIntegration(Integration):
         for signal, handler in hooks:
             SignalHook(self, signal, handler)
 
-    def notify(self, title, title_link, fallback_text, local_site,
-               review_request, event_name=None, fields={}, pre_text=None,
-               body=None, color=None, thumb_url=None, image_url=None):
-        """Send a webhook notification to chat application.
+    @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+    def notify(
+        self,
+        *,
+        title: str,
+        title_link: str,
+        fallback_text: str,
+        local_site: Optional[LocalSite],
+        review_request: ReviewRequest,
+        event_name: Optional[str] = None,
+        fields: Sequence[FieldsDict] = [],
+        pre_text: Optional[str] = None,
+        body: Optional[str] = None,
+        color: Optional[str] = None,
+        thumb_url: Optional[str] = None,
+        image_url: Optional[str] = None,
+    ) -> None:
+        """Send a WebHook notification to chat application.
 
         This will post the given message to any channels configured to
         receive it.
 
+        Version Changed:
+            4.0:
+            * Made all arguments keyword-only.
+
         Args:
-            title (unicode):
+            title (str):
                 The title for the message.
 
-            title_link (unicode):
+            title_link (str):
                 The link for the title of the message.
 
-            fallback_text (unicode):
+            fallback_text (str):
                 The non-rich fallback text to display in the chat, for use in
                 IRC and other services.
-
-            fields (dict):
-                The fields comprising the rich message to display in chat.
 
             local_site (reviewboard.site.models.LocalSite):
                 The Local Site for the review request or review emitting
@@ -71,33 +209,51 @@ class BaseChatIntegration(Integration):
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request the notification is bound to.
 
-            event_name (unicode):
+            event_name (str, optional):
                 The name of the event triggering this notification.
 
-            pre_text (unicode, optional):
+            fields (list of rbintegrations.basechat.integration.FieldsDict,
+                    optional):
+                The fields comprising the rich message to display in chat.
+
+            pre_text (str, optional):
                 Text to display before the rest of the message.
 
-            body (unicode, optional):
+            body (str, optional):
                 The body of the message.
 
-            color (unicode, optional):
+            color (str, optional):
                 A color string or RGB hex value for the message.
 
-            thumb_url (unicode, optional):
+            thumb_url (str, optional):
                 URL of an image to show on the side of the message.
 
-            image_url (unicode, optional):
+            image_url (str, optional):
                 URL of an image to show in the message.
         """
         raise NotImplementedError(
             '%s must implement notify' % type(self).__name__)
 
-    def notify_review_or_reply(self, user, review, pre_text, fallback_text,
-                               event_name, first_comment=None, **kwargs):
+    @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+    def notify_review_or_reply(
+        self,
+        *,
+        user: User,
+        review: Review,
+        pre_text: Optional[str] = None,
+        fallback_text: Optional[str] = None,
+        event_name: Optional[str] = None,
+        first_comment: Optional[BaseComment] = None,
+        **kwargs,
+    ) -> None:
         """Notify chat application for any new posted reviews or replies.
 
         This performs the common work of notifying configured channels
         when there's a review or a reply.
+
+        Version Changed:
+            4.0:
+            * Made all arguments keyword-only.
 
         Args:
             user (django.contrib.auth.models.User):
@@ -106,14 +262,14 @@ class BaseChatIntegration(Integration):
             review (reviewboard.reviews.models.Review):
                 The review or reply that was posted.
 
-            pre_text (unicode, optional):
+            pre_text (str, optional):
                 Text to show before the message attachments.
 
-            fallback_text (unicode, optional):
+            fallback_text (str, optional):
                 Text to show in the fallback text, before the review URL and
                 after the review request ID.
 
-            event_name (unicode):
+            event_name (str, optional):
                 The name of the event triggering this notification.
 
             first_comment (reviewboard.reviews.models.BaseComment, optional):
@@ -128,12 +284,13 @@ class BaseChatIntegration(Integration):
         fallback_text = '#%s: %s: %s' % (review_request.display_id,
                                          fallback_text, review_url)
         body = ''
+        review_body_top = review.body_top
 
         # Prefer showing the body, unless it's just a repeat of a "Ship It!".
         # Otherwise, we'll aim for a comment, or body_bottom.
-        if (review.body_top and
-            (not review.ship_it or review.body_top != 'Ship It!')):
-            body = review.body_top
+        if (review_body_top and
+            (not review.ship_it or review_body_top != 'Ship It!')):
+            body = review_body_top
         else:
             if not first_comment:
                 for comment_cls in (Comment, FileAttachmentComment,
@@ -163,22 +320,33 @@ class BaseChatIntegration(Integration):
                     event_name=event_name,
                     **kwargs)
 
-    def notify_review_request(self, review_request, fallback_text, event_name,
-                              **kwargs):
+    @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+    def notify_review_request(
+        self,
+        review_request: ReviewRequest,
+        *,
+        fallback_text: Optional[str],
+        event_name: Optional[str],
+        **kwargs,
+    ) -> None:
         """Notify chat application for a review request update.
 
         This performs the common work of notifying configured channels
         when there's a new review request or update to a review request.
 
+        Version Changed:
+            4.0:
+            * Made all arguments other than ``review_request`` keyword-only.
+
         Args:
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request.
 
-            fallback_text (unicode, optional):
+            fallback_text (str):
                 Text to show in the fallback text, before the review URL and
                 after the review request ID.
 
-            event_name (unicode):
+            event_name (str):
                 The name of the event triggering this notification.
 
             **kwargs (dict):
@@ -196,28 +364,70 @@ class BaseChatIntegration(Integration):
                     event_name=event_name,
                     **kwargs)
 
-    def format_link(self, path, text):
+    @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+    def format_link(
+        self,
+        *,
+        path: str,
+        text: str,
+    ) -> str:
         """Format the given URL and text to be shown in a Slack message.
 
         This will combine together the parts of the URL (method, domain, path)
         and format it using Slack's URL syntax.
 
+        Version Changed:
+            4.0:
+            * Made all arguments keyword-only.
+
         Args:
-            path (unicode):
+            path (str):
                 The path on the Review Board server.
 
-            text (unicode):
+            text (str):
                 The text for the link.
 
         Returns:
-            unicode:
+            str:
             The link for use in Slack.
         """
         raise NotImplementedError(
             '%s must implement format_link' % type(self).__name__)
 
-    def get_user_text_url(self, user, local_site):
+    def format_field_text(
+        self,
+        text: str,
+    ) -> str:
+        """Format the field text, providing any normalization required.
+
+        This can be used by subclasses to make any changes before sending the
+        text off to the Slack-compatible endpoint.
+
+        Version Added:
+            4.0
+
+        Args:
+            text (str):
+                The text for the field.
+
+        Returns:
+            str:
+            The formatted or normalized text.
+        """
+        return text
+
+    @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+    def get_user_text_url(
+        self,
+        *,
+        user: User,
+        local_site: Optional[LocalSite],
+    ) -> str:
         """Return the URL to a user page.
+
+        Version Changed:
+            4.0:
+            * Made all arguments keyword-only.
 
         Args:
             user (django.contrib.auth.models.User):
@@ -227,7 +437,7 @@ class BaseChatIntegration(Integration):
                 The local site for the link, if any.
 
         Returns:
-            unicode:
+            str:
             The URL to the user page.
         """
         # This doesn't use user.get_absolute_url because that won't include
@@ -237,8 +447,18 @@ class BaseChatIntegration(Integration):
             local_site=local_site,
             kwargs={'username': user.username})
 
-    def get_user_text_link(self, user, local_site):
+    @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+    def get_user_text_link(
+        self,
+        *,
+        user: User,
+        local_site: Optional[LocalSite],
+    ) -> str:
         """Return the chat application-formatted link to a user page.
+
+        Version Changed:
+            4.0:
+            * Made all arguments keyword-only.
 
         Args:
             user (django.contrib.auth.models.User):
@@ -248,13 +468,17 @@ class BaseChatIntegration(Integration):
                 The local site for the link, if any.
 
         Returns:
-            unicode:
+            str:
             The formatted link to the user page.
         """
-        return self.format_link(self.get_user_text_url(user, local_site),
-                                user.get_full_name() or user.username)
+        return self.format_link(
+            path=self.get_user_text_url(user=user, local_site=local_site),
+            text=user.get_full_name() or user.username)
 
-    def get_review_request_title(self, review_request):
+    def get_review_request_title(
+        self,
+        review_request: ReviewRequest,
+    ) -> str:
         """Return the title for a review request message.
 
         Args:
@@ -262,12 +486,15 @@ class BaseChatIntegration(Integration):
                 The review request.
 
         Returns:
-            unicode:
+            str:
             The title for the message.
         """
-        return '#%s: %s' % (review_request.display_id, review_request.summary)
+        return f'#{review_request.display_id}: {review_request.summary}'
 
-    def get_review_request_text_link(self, review_request):
+    def get_review_request_text_link(
+        self,
+        review_request: ReviewRequest,
+    ) -> str:
         """Return the chat application-formatted link to a review request.
 
         Args:
@@ -275,23 +502,33 @@ class BaseChatIntegration(Integration):
                 The review request being linked to.
 
         Returns:
-            unicode:
+            str:
             The formatted link to the review request.
         """
-        return self.format_link(review_request.get_absolute_url(),
-                                review_request.summary)
+        return self.format_link(
+            path=review_request.get_absolute_url(),
+            text=review_request.summary)
 
-    def get_review_request_url(self, review_request):
+    def get_review_request_url(
+        self,
+        review_request: ReviewRequest,
+    ) -> str:
         """Return the absolute URL to a review request.
 
         Returns:
-            unicode:
+            str:
             The absolute URL to the review request.
         """
         return build_server_url(review_request.get_absolute_url())
 
-    def _on_review_request_closed(self, user, review_request, close_type,
-                                  description=None, **kwargs):
+    def _on_review_request_closed(
+        self,
+        user: User,
+        review_request: ReviewRequest,
+        close_type: str,
+        description: Optional[str] = None,
+        **kwargs,
+    ) -> None:
         """Handler for when review requests are closed.
 
         This will send a notification to any configured channels when
@@ -304,35 +541,33 @@ class BaseChatIntegration(Integration):
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request that was closed.
 
-            close_type (unicode):
+            close_type (str):
                 The close type.
 
-            description (unicode):
+            description (str, optional):
                 The close message,
 
-            **kwargs (dict):
+            **kwargs (dict, unused):
                 Additional keyword arguments passed to the handler.
         """
         if not user:
             user = review_request.submitter
 
-        user_link = self.get_user_text_link(user, review_request.local_site)
+        user_link = self.get_user_text_link(
+            user=user,
+            local_site=review_request.local_site)
 
         if close_type == ReviewRequest.DISCARDED:
-            pre_text = 'Discarded by %s' % user_link
-            fallback_text = 'Discarded by %s' % user_displayname(user)
+            pre_text = f'Discarded by {user_link}'
+            fallback_text = f'Discarded by {user_displayname(user)}'
         elif close_type == ReviewRequest.SUBMITTED:
-            pre_text = 'Closed as completed by %s' % user_link
-            fallback_text = 'Closed as completed by %s' % \
-                user_displayname(user)
+            pre_text = f'Closed as completed by {user_link}'
+            fallback_text = f'Closed as completed by {user_displayname(user)}'
         else:
-            logging.error('Tried to notify on review_request_closed for '
-                          ' review request pk=%d with unknown close type "%s"',
-                          review_request.pk, close_type)
+            logger.error('Tried to notify on review_request_closed for '
+                         'review request pk=%d with unknown close type "%s"',
+                         review_request.pk, close_type)
             return
-
-        if not user:
-            user = review_request.submitter
 
         self.notify_review_request(review_request,
                                    fallback_text=fallback_text,
@@ -341,8 +576,13 @@ class BaseChatIntegration(Integration):
                                    local_site=review_request.local_site,
                                    event_name='review_request_closed')
 
-    def _on_review_request_published(self, user, review_request, changedesc,
-                                     **kwargs):
+    def _on_review_request_published(
+        self,
+        user: User,
+        review_request: ReviewRequest,
+        changedesc: ChangeDescription,
+        **kwargs,
+    ) -> None:
         """Handler for when review requests are published.
 
         This will send a notification to any configured channels when
@@ -358,29 +598,30 @@ class BaseChatIntegration(Integration):
             changedesc (reviewboard.changedescs.models.ChangeDescription):
                 The change description for the update, if any.
 
-            **kwargs (dict):
+            **kwargs (dict, unused):
                 Additional keyword arguments passed to the handler.
         """
-        user_link = self.get_user_text_link(user, review_request.local_site)
-        fields = []
+        user_link = self.get_user_text_link(
+            user=user,
+            local_site=review_request.local_site)
+        fields: list[FieldsDict] = []
 
         if changedesc:
-            fallback_text = 'New update from %s' % user_displayname(user)
-            pre_text = 'New update from %s' % user_link
+            fallback_text = f'New update from {user_displayname(user)}'
+            pre_text = f'New update from {user_link}'
 
             # This might be empty, which is fine. We won't show an update
             # at that point.
             body = changedesc.text
         else:
-            fallback_text = 'New review request from %s' % \
-                user_displayname(user)
-            pre_text = 'New review request from %s' % user_link
+            fallback_text = f'New review request from {user_displayname(user)}'
+            pre_text = f'New review request from {user_link}'
             body = None
 
             fields.append({
                 'short': False,
                 'title': 'Description',
-                'value': review_request.description,
+                'value': self.format_field_text(review_request.description),
             })
 
         # Link to the diff in the update, if any.
@@ -398,52 +639,54 @@ class BaseChatIntegration(Integration):
             fields.append({
                 'short': True,
                 'title': 'Diff',
-                'value': self.format_link(diff_url,
-                                          'Revision %s' % diffset.revision),
+                'value': self.format_field_text(
+                    self.format_link(path=diff_url,
+                                     text=f'Revision {diffset.revision}')),
             })
 
         if review_request.repository:
             fields.append({
                 'short': True,
                 'title': 'Repository',
-                'value': review_request.repository.name,
+                'value': self.format_field_text(
+                    review_request.repository.name),
             })
 
         if review_request.branch:
             fields.append({
                 'short': True,
                 'title': 'Branch',
-                'value': review_request.branch,
+                'value': self.format_field_text(review_request.branch),
             })
 
         # See if there are any new interesting file attachments to show.
         # These will only show up if the file is accessible.
         attachment = None
+        valid_image_url_exts = self.valid_image_url_exts
 
         if changedesc:
             # Only show new files added in this change.
             try:
-                new_files = changedesc.fields_changed['files']['added']
+                new_files_pks = [
+                    file[2]
+                    for file in changedesc.fields_changed['files']['added']
+                    if len(file) >= 3
+                ]
             except KeyError:
-                new_files = []
+                new_files_pks = []
 
-            for file_info in new_files:
-                if (len(file_info) >= 3 and
-                    file_info[1].endswith(self.VALID_IMAGE_URL_EXTS)):
-                    # This one wins. Show it.
-                    attachment = get_object_or_none(
-                        review_request.file_attachments,
-                        pk=file_info[2])
-                    break
+            file_attachments = review_request.file_attachments.filter(
+                pk__in=new_files_pks)
         else:
-            # This is a new review request, so show the first valid image
-            # we can find.
-            for attachment in review_request.file_attachments.all():
-                if attachment.filename.endswith(self.VALID_IMAGE_URL_EXTS):
-                    # This one wins. Show it.
-                    break
-            else:
-                attachment = None
+            # This is a new review request, so show any valid image.
+            file_attachments = review_request.file_attachments.all()
+
+        for attachment in file_attachments:
+            if attachment.filename.endswith(valid_image_url_exts):
+                # This one wins. Show it.
+                break
+        else:
+            attachment = None
 
         if attachment:
             image_url = attachment.get_absolute_url()
@@ -460,7 +703,7 @@ class BaseChatIntegration(Integration):
             # wins.
             for trophy in trophies:
                 try:
-                    trophy_url = self.TROPHY_URLS[trophy.category]
+                    trophy_url = self.trophy_urls[trophy.category]
                     break
                 except KeyError:
                     pass
@@ -475,7 +718,12 @@ class BaseChatIntegration(Integration):
                                    local_site=review_request.local_site,
                                    event_name='review_request_published')
 
-    def _on_review_request_reopened(self, user, review_request, **kwargs):
+    def _on_review_request_reopened(
+        self,
+        user: User,
+        review_request: ReviewRequest,
+        **kwargs,
+    ) -> None:
         """Handler for when review requests are reopened.
 
         This will send a notification to any configured channels when
@@ -488,15 +736,17 @@ class BaseChatIntegration(Integration):
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request that was published.
 
-            **kwargs (dict):
+            **kwargs (dict, unused):
                 Additional keyword arguments passed to the handler.
         """
         if not user:
             user = review_request.submitter
 
-        user_link = self.get_user_text_link(user, review_request.local_site)
-        pre_text = 'Reopened by %s' % user_link
-        fallback_text = 'Reopened by %s' % user_displayname(user)
+        user_link = self.get_user_text_link(
+            user=user,
+            local_site=review_request.local_site)
+        pre_text = f'Reopened by {user_link}'
+        fallback_text = f'Reopened by {user_displayname(user)}'
 
         self.notify_review_request(review_request,
                                    fallback_text=fallback_text,
@@ -505,7 +755,12 @@ class BaseChatIntegration(Integration):
                                    local_site=review_request.local_site,
                                    event_name='review_request_reopened')
 
-    def _on_review_published(self, user, review, **kwargs):
+    def _on_review_published(
+        self,
+        user: User,
+        review: Review,
+        **kwargs,
+    ) -> None:
         """Handler for when a review is published.
 
         This will send a notification to any configured channels when
@@ -518,9 +773,10 @@ class BaseChatIntegration(Integration):
             review (reviewboard.reviews.models.Review):
                 The review that was published.
 
-            **kwargs (dict):
+            **kwargs (dict, unused):
                 Additional keyword arguments passed to the handler.
         """
+        fields: list[FieldsDict]
         open_issues = 0
         first_comment = None
 
@@ -535,21 +791,26 @@ class BaseChatIntegration(Integration):
         if open_issues == 1:
             issue_text = '1 issue'
         else:
-            issue_text = '%d issues' % open_issues
+            issue_text = f'{open_issues} issues'
 
-        user_link = self.get_user_text_link(user,
-                                            review.review_request.local_site)
-        pre_text = 'New review from %s' % user_link
+        user_link = self.get_user_text_link(
+            user=user,
+            local_site=review.review_request.local_site)
+        pre_text = f'New review from {user_link}'
 
-        # There doesn't seem to be any image support inside the text fields,
-        # but the :white_check_mark: emoji shows a green box with a check-mark
-        # in it, and the :warning: emoji is a yellow exclamation point, which
-        # are close enough.
+        warning_emoji = '⚠'
+        checkmark_emoji = '✅'
+
+        if self.use_emoji_shortcode:
+            warning_emoji = ':warning:'
+            checkmark_emoji = ':white_check_mark:'
+
         if review.ship_it:
             if open_issues:
                 fields = [{
                     'title': 'Fix it, then Ship it!',
-                    'value': ':warning: %s' % issue_text,
+                    'value': self.format_field_text(
+                        f'{warning_emoji} {issue_text}'),
                     'short': True,
                 }]
                 extra_text = ' (Fix it, then Ship it!)'
@@ -557,7 +818,7 @@ class BaseChatIntegration(Integration):
             else:
                 fields = [{
                     'title': 'Ship it!',
-                    'value': ':white_check_mark:',
+                    'value': self.format_field_text(checkmark_emoji),
                     'short': True,
                 }]
                 extra_text = ' (Ship it!)'
@@ -565,18 +826,18 @@ class BaseChatIntegration(Integration):
         elif open_issues:
             fields = [{
                 'title': 'Open Issues',
-                'value': ':warning: %s' % issue_text,
+                'value': self.format_field_text(
+                    f'{warning_emoji} {issue_text}'),
                 'short': True,
             }]
-            extra_text = ' (%s)' % issue_text
+            extra_text = f' ({issue_text})'
             color = 'warning'
         else:
             fields = []
             extra_text = ''
             color = None
 
-        fallback_text = 'New review from %s%s' % (
-            user_displayname(user), extra_text)
+        fallback_text = f'New review from {user_displayname(user)}{extra_text}'
 
         self.notify_review_or_reply(user=user,
                                     review=review,
@@ -587,7 +848,12 @@ class BaseChatIntegration(Integration):
                                     color=color,
                                     event_name='review_published')
 
-    def _on_reply_published(self, user, reply, **kwargs):
+    def _on_reply_published(
+        self,
+        user: User,
+        reply: Review,
+        **kwargs,
+    ) -> None:
         """Handler for when a reply to a review is published.
 
         This will send a notification to any configured channels when
@@ -597,16 +863,17 @@ class BaseChatIntegration(Integration):
             user (django.contrib.auth.models.User):
                 The user who published the reply.
 
-            review (reviewboard.reviews.models.Review):
+            reply (reviewboard.reviews.models.Review):
                 The reply that was published.
 
-            **kwargs (dict):
+            **kwargs (dict, unused):
                 Additional keyword arguments passed to the handler.
         """
-        user_link = self.get_user_text_link(user,
-                                            reply.review_request.local_site)
-        pre_text = 'New reply from %s' % user_link
-        fallback_text = 'New reply from %s' % user_displayname(user)
+        user_link = self.get_user_text_link(
+            user=user,
+            local_site=reply.review_request.local_site)
+        pre_text = f'New reply from {user_link}'
+        fallback_text = f'New reply from {user_displayname(user)}'
 
         self.notify_review_or_reply(user=user,
                                     review=reply,

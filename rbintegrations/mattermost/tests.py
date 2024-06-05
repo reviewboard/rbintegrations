@@ -47,9 +47,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -107,9 +107,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -164,9 +164,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -232,9 +232,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -297,9 +297,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -354,9 +354,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#12321: New review request from Test User: '
                     'http://example.com/r/12321/'
@@ -378,7 +378,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                         'value': 'my-branch',
                     },
                 ],
-                'thumb_url': self.integration.TROPHY_URLS['fish'],
+                'thumb_url': self.integration.trophy_urls['fish'],
                 'title': '#12321: Test Review Request',
                 'title_link': 'http://example.com/r/12321/',
                 'text': None,
@@ -411,9 +411,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#10000: New review request from Test User: '
                     'http://example.com/r/10000/'
@@ -435,7 +435,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
                         'value': 'my-branch',
                     },
                 ],
-                'thumb_url': self.integration.TROPHY_URLS['milestone'],
+                'thumb_url': self.integration.trophy_urls['milestone'],
                 'title': '#10000: Test Review Request',
                 'title_link': 'http://example.com/r/10000/',
                 'text': None,
@@ -484,9 +484,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review request from Test User: '
                     'http://example.com/r/1/'
@@ -542,9 +542,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New update from Test User: '
                     'http://example.com/r/1/'
@@ -601,9 +601,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New update from Test User: '
                     'http://example.com/r/1/'
@@ -657,9 +657,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New update from Test User: '
                     'http://example.com/r/1/'
@@ -708,9 +708,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Closed as completed by Test User: '
                     'http://example.com/r/1/'
@@ -746,9 +746,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Discarded by Test User: '
                     'http://example.com/r/1/'
@@ -789,9 +789,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Closed as completed by Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -827,9 +827,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Reopened by Test User: '
                     'http://example.com/r/1/'
@@ -871,9 +871,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: Reopened by Test User: '
                     'http://example.com/s/local-site-1/r/1/'
@@ -913,9 +913,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review from Test User: '
                     'http://example.com/r/1/#review1'
@@ -959,9 +959,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review from Test User: '
                     'http://example.com/s/local-site-1/r/1/#review1'
@@ -1002,9 +1002,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New review from Test User: '
                     'http://example.com/r/1/#review1'
@@ -1043,7 +1043,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1091,7 +1091,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1139,7 +1139,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'good',
                 'fallback': (
@@ -1186,7 +1186,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'good',
                 'fallback': (
@@ -1235,7 +1235,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1288,7 +1288,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': 'warning',
                 'fallback': (
@@ -1334,7 +1334,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
                 'color': '#efcc96',
                 'fallback': (
@@ -1380,9 +1380,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New reply from Test User: '
                     'http://example.com/r/1/#review2'
@@ -1433,9 +1433,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New reply from Test User: '
                     'http://example.com/s/local-site-1/r/1/#review2'
@@ -1480,9 +1480,9 @@ class MattermostIntegrationTests(IntegrationTestCase):
 
         self._check_notify_request({
             'username': 'RB User',
-            'icon_url': self.integration.LOGO_URL,
+            'icon_url': self.integration.logo_url,
             'attachments': [{
-                'color': self.integration.DEFAULT_COLOR,
+                'color': self.integration.default_color,
                 'fallback': (
                     '#1: New reply from Test User: '
                     'http://example.com/r/1/#review2'
@@ -1543,7 +1543,7 @@ class MattermostIntegrationTests(IntegrationTestCase):
         headers = request.headers
 
         self.assertIsInstance(body, bytes)
-        self.assertEqual(headers['Content-length'], len(body))
+        self.assertEqual(headers['Content-length'], str(len(body)))
         self.assertEqual(headers['Content-type'], str('application/json'))
         self.assertEqual(json.loads(body.decode('utf-8')),
                          expected_payload)

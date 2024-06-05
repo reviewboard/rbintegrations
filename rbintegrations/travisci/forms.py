@@ -1,10 +1,13 @@
 """The form for configuring the Travis CI integration."""
 
+from __future__ import annotations
+
 import logging
 from urllib.error import HTTPError, URLError
+from typing import TYPE_CHECKING
 
 from django import forms
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djblets.forms.fields import ConditionsField
 from djblets.conditions.choices import ConditionChoices
 from reviewboard.integrations.forms import IntegrationConfigForm
@@ -15,7 +18,11 @@ from reviewboard.reviews.conditions import (ReviewRequestConditionChoiceMixin,
 from reviewboard.scmtools.conditions import RepositoriesChoice
 from reviewboard.scmtools.models import Repository
 
+from rbintegrations.baseci.forms import BaseCIIntegrationConfigForm
 from rbintegrations.travisci.api import TravisAPI
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 
 logger = logging.getLogger(__name__)
@@ -29,8 +36,19 @@ class GitHubRepositoriesChoice(ReviewRequestConditionChoiceMixin,
     but limits the queryset to only be GitHub repositories.
     """
 
-    queryset = Repository.objects.filter(
-        hosting_account__service_name='github')
+    def get_queryset(self) -> QuerySet[Repository]:
+        """Return the queryset used to look up repository choices.
+
+        This will limit the results to GitHub repositories.
+
+        Returns:
+            django.db.models.query.QuerySet:
+            The queryset for repositories.
+        """
+        return (
+            super().get_queryset()
+            .filter(hosting_account__service_name='github')
+        )
 
     def get_match_value(self, review_request, **kwargs):
         """Return the repository used for matching.
@@ -69,14 +87,12 @@ class GitHubOnlyConditionChoices(ConditionChoices):
     )
 
 
-class TravisCIIntegrationConfigForm(IntegrationConfigForm):
+class TravisCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
     """Form for configuring Travis CI."""
 
     conditions = ConditionsField(
         GitHubOnlyConditionChoices,
-        label=_('Conditions'),
-        help_text=_('You can choose which review requests will be built using '
-                    'this Travis CI configuration.'))
+        label=_('Conditions'))
 
     travis_endpoint = forms.ChoiceField(
         label=_('Travis CI'),
@@ -107,13 +123,6 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
         required=False,
         help_text=_('An optional branch name to use for review request '
                     'builds within the Travis CI user interface.'))
-
-    run_manually = forms.BooleanField(
-        label=_('Run builds manually'),
-        required=False,
-        help_text=_('Wait to run this service until manually started. This '
-                    'will add a "Run" button to the Travis CI entry.'),
-        initial=False)
 
     def __init__(self, *args, **kwargs):
         """Initialize the form.
@@ -223,7 +232,7 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
 
         return cleaned_data
 
-    class Meta:
+    class Meta(BaseCIIntegrationConfigForm.Meta):
         fieldsets = (
             (_('What To Build'), {
                 'description': _(
@@ -251,11 +260,12 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
                     "listed here will be used instead of the contents of the "
                     "repository's <code>.travis.yml</code> file. Note that "
                     "this should not contain any secret environment "
-                    "variables.\n"
+                    "variables."
+                    "\n"
                     "It's also recommended to create a special branch head "
                     "in the GitHub repository to use for these builds, so "
-                    "they don't appear to be happening on "
-                    "<code>master</code>. This branch can contain anything "
+                    "they don't appear to be happening on your main "
+                    "development branch. This branch can contain anything "
                     "(or even be empty), since the code will come from the "
                     "review request."
                 ),
@@ -263,6 +273,9 @@ class TravisCIIntegrationConfigForm(IntegrationConfigForm):
                 'classes': ('wide',)
             }),
             (_('When To Build'), {
-                'fields': ('run_manually',),
+                'fields': (
+                    'run_manually',
+                    'timeout',
+                ),
             }),
         )

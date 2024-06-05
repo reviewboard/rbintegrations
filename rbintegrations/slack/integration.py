@@ -1,62 +1,96 @@
+"""Integration for Slack."""
+
+from __future__ import annotations
+
 import json
 import logging
+from typing import (MutableMapping, Optional, Sequence, TYPE_CHECKING, Union,
+                    cast)
 from urllib.request import Request, urlopen
 
 from django.utils.functional import cached_property
+from djblets.util.typing import JSONListImmutable
+from housekeeping.functions import deprecate_non_keyword_only_args
 from reviewboard.admin.server import build_server_url
 
-from rbintegrations.basechat.forms import BaseChatIntegrationConfigForm
 from rbintegrations.basechat.integration import BaseChatIntegration
+from rbintegrations.deprecation import RemovedInRBIntegrations50Warning
+
+if TYPE_CHECKING:
+    from djblets.util.typing import JSONDict, JSONValue
+    from rbintegrations.basechat.integration import FieldsDict
+    from reviewboard.reviews.models import ReviewRequest
+    from reviewboard.site.models import LocalSite
 
 
-def build_slack_message(integration, title, title_link, fallback_text, fields,
-                        pre_text, body, color, thumb_url, image_url):
-    """Build message using Slack webhook format.
+logger = logging.getLogger(__name__)
+
+
+@deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+def build_slack_message(
+    *,
+    integration: BaseChatIntegration,
+    title: str,
+    title_link: str,
+    fallback_text: str,
+    fields: Sequence[FieldsDict] = [],
+    pre_text: Optional[str] = None,
+    body: Optional[str] = None,
+    color: Optional[str] = None,
+    thumb_url: Optional[str] = None,
+    image_url: Optional[str] = None,
+) -> JSONDict:
+    """Build message using Slack WebHook format.
 
     This will build the payload data for HTTP requests to services such as
     Slack, Mattermost and Discord.
+
+    Version Changed:
+        4.0:
+        * Made all arguments keyword-only.
 
     Args:
         integration (BaseChatIntegration):
             The Integration.
 
-        title (unicode):
+        title (str):
             The title for the message.
 
-        title_link (unicode):
+        title_link (str):
             The link for the title of the message.
 
-        fallback_text (unicode):
+        fallback_text (str):
             The non-rich fallback text to display in the chat, for use in
             IRC and other services.
 
-        fields (dict):
+        fields (list of rbintegrations.basechat.integration.FieldsDict,
+                optional):
             The fields comprising the rich message to display in chat.
 
-        pre_text (unicode):
+        pre_text (str, optional):
             Text to display before the rest of the message.
 
-        body (unicode):
+        body (str, optional):
             The body of the message.
 
-        color (unicode):
+        color (str, optional):
             A Slack color string or RGB hex value for the message.
 
-        thumb_url (unicode):
+        thumb_url (str, optional):
             URL of an image to show on the side of the message.
 
-        image_url (unicode):
+        image_url (str, optional):
             URL of an image to show in the message.
 
     Returns:
-        dict:
+        djblets.util.typing.JSONDict:
         The payload of the Slack message request.
     """
     if not color:
-        color = integration.DEFAULT_COLOR
+        color = integration.default_color
 
-    attachment = {
-        'color': color or integration.DEFAULT_COLOR,
+    attachment: dict[str, Union[JSONValue, Sequence[FieldsDict]]] = {
+        'color': color or integration.default_color,
         'fallback': fallback_text,
         'title': title,
         'title_link': title_link,
@@ -74,32 +108,50 @@ def build_slack_message(integration, title, title_link, fallback_text, fields,
         attachment['image_url'] = image_url
 
     return {
-        'attachments': [attachment],
-        'icon_url': integration.LOGO_URL,
+        'attachments': cast(JSONListImmutable, [attachment]),
+        'icon_url': integration.logo_url,
     }
 
 
-def notify(integration, title, title_link, fallback_text, local_site,
-           review_request, event_name, fields, pre_text, body, color,
-           thumb_url, image_url):
-    """Send a webhook notification.
+@deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+def notify(
+    *,
+    integration: BaseChatIntegration,
+    title: str,
+    title_link: str,
+    fallback_text: str,
+    local_site: Optional[LocalSite],
+    review_request: ReviewRequest,
+    event_name: Optional[str] = None,
+    fields: Sequence[FieldsDict] = [],
+    pre_text: Optional[str] = None,
+    body: Optional[str] = None,
+    color: Optional[str] = None,
+    thumb_url: Optional[str] = None,
+    image_url: Optional[str] = None,
+) -> None:
+    """Send a WebHook notification.
 
     This will post the given message to any Slacks/Mattermost channels
     configured to receive it. This is oriented towards Slack, however is
     broken out of the SlackIntegration because other services (like
     Mattermost) duplicate Slack APIs.
 
+    Version Changed:
+        4.0:
+        * Made all arguments keyword-only.
+
     Args:
         integration (BaseChatIntegration):
             The Integration.
 
-        title (unicode):
+        title (str):
             The title for the message.
 
-        title_link (unicode):
+        title_link (str):
             The link for the title of the message.
 
-        fallback_text (unicode):
+        fallback_text (str):
             The non-rich fallback text to display in the chat, for use in
             IRC and other services.
 
@@ -111,25 +163,26 @@ def notify(integration, title, title_link, fallback_text, local_site,
         review_request (reviewboard.reviews.models.ReviewRequest):
             The review request the notification is bound to.
 
-        event_name (unicode):
+        event_name (str):
             The name of the event triggering this notification.
 
-        fields (dict):
+        fields (list of rbintegrations.basechat.integration.FieldsDict,
+                optional):
             The fields comprising the rich message to display in chat.
 
-        pre_text (unicode):
+        pre_text (str, optional):
             Text to display before the rest of the message.
 
-        body (unicode):
+        body (str, optional):
             The body of the message.
 
-        color (unicode):
+        color (str, optional):
             A Slack color string or RGB hex value for the message.
 
-        thumb_url (unicode):
+        thumb_url (str, optional):
             URL of an image to show on the side of the message.
 
-        image_url (unicode):
+        image_url (str, optional):
             URL of an image to show in the message.
     """
     common_payload = build_slack_message(integration=integration,
@@ -160,24 +213,32 @@ def notify(integration, title, title_link, fallback_text, local_site,
 
         webhook_url = config.get('webhook_url')
 
-        logging.debug('Sending notification for event "%s", '
-                      'review_request ID %d to channel "%s", '
-                      'webhook URL %s',
-                      event_name, review_request.pk, channel, webhook_url)
+        logger.debug('Sending notification for event "%s", '
+                     'review_request ID %d to channel "%s", '
+                     'WebHook URL %s',
+                     event_name, review_request.pk, channel, webhook_url)
 
         try:
+            if not webhook_url:
+                raise Exception('WebHook URL has not been configured.')
+
             data = json.dumps(payload).encode('utf-8')
-            headers = {
+            headers: MutableMapping[str, str] = {
                 'Content-Type': 'application/json',
-                'Content-Length': len(data),
+                'Content-Length': str(len(data)),
             }
             urlopen(Request(webhook_url, data, headers))
         except Exception as e:
-            logging.error('Failed to send notification: %s',
-                          e, exc_info=True)
+            logger.error('Failed to send notification: %s',
+                         e, exc_info=True)
 
 
-def format_link(path, text):
+@deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)
+def format_link(
+    *,
+    path: str,
+    text: str,
+) -> str:
     """Format the given URL and text to be shown in a message.
 
     This will combine together the parts of the URL (method, domain, path)
@@ -185,15 +246,19 @@ def format_link(path, text):
     towards Slack, however is broken out of the SlackIntegration because
     other services (like Mattermost) duplicate Slack APIs.
 
+    Version Changed:
+        4.0:
+        * Made all arguments keyword-only.
+
     Args:
-        path (unicode):
+        path (str):
             The path on the Review Board server.
 
-        text (unicode):
+        text (str):
             The text for the link.
 
     Returns:
-        unicode:
+        str:
         The link for use in Slack.
     """
     # Slack/Mattermost only want these three entities replaced, rather than
@@ -224,40 +289,44 @@ class SlackIntegration(BaseChatIntegration):
         'notify_username': 'Review Board',
     }
 
-    config_form_cls = BaseChatIntegrationConfigForm
+    assets_base_url = (
+        'https://static.reviewboard.org/integration-assets/slack'
+    )
 
-    DEFAULT_COLOR = '#efcc96'
-    ASSETS_BASE_URL = 'https://static.reviewboard.org/integration-assets/slack'
-    ASSETS_TIMESTAMP = '?20160830-2346'
-    LOGO_URL = '%s/reviewboard.png?%s' % (ASSETS_BASE_URL, ASSETS_TIMESTAMP)
-    VALID_IMAGE_URL_EXTS = ('.png', '.bmp', '.gif', '.jpg', '.jpeg')
-
-    TROPHY_URLS = {
-        'fish': '%s/fish-trophy.png?%s' % (ASSETS_BASE_URL, ASSETS_TIMESTAMP),
-        'milestone': '%s/milestone-trophy.png?%s' % (ASSETS_BASE_URL,
-                                                     ASSETS_TIMESTAMP),
-    }
-
-    def notify(self, title, title_link, fallback_text, local_site,
-               review_request, event_name=None, fields={}, pre_text=None,
-               body=None, color=None, thumb_url=None, image_url=None):
-        """Send a webhook notification to Slack.
+    def notify(
+        self,
+        *,
+        title: str,
+        title_link: str,
+        fallback_text: str,
+        local_site: Optional[LocalSite],
+        review_request: ReviewRequest,
+        event_name: Optional[str] = None,
+        fields: Sequence[FieldsDict] = [],
+        pre_text: Optional[str] = None,
+        body: Optional[str] = None,
+        color: Optional[str] = None,
+        thumb_url: Optional[str] = None,
+        image_url: Optional[str] = None,
+    ) -> None:
+        """Send a WebHook notification to Slack.
 
         This will post the given message to any Slack channels configured to
         receive it.
 
         Args:
-            title (unicode):
+            title (str):
                 The title for the message.
 
-            title_link (unicode):
+            title_link (str):
                 The link for the title of the message.
 
-            fallback_text (unicode):
+            fallback_text (str):
                 The non-rich fallback text to display in the chat, for use in
                 IRC and other services.
 
-            fields (dict):
+            fields (list of rbintegrations.basechat.integration.FieldsDict,
+                    optional):
                 The fields comprising the rich message to display in chat.
 
             local_site (reviewboard.site.models.LocalSite):
@@ -268,49 +337,66 @@ class SlackIntegration(BaseChatIntegration):
             review_request (reviewboard.reviews.models.ReviewRequest):
                 The review request the notification is bound to.
 
-            event_name (unicode):
+            event_name (str):
                 The name of the event triggering this notification.
 
-            pre_text (unicode, optional):
+            pre_text (str, optional):
                 Text to display before the rest of the message.
 
-            body (unicode, optional):
+            body (str, optional):
                 The body of the message.
 
-            color (unicode, optional):
+            color (str, optional):
                 A Slack color string or RGB hex value for the message.
 
-            thumb_url (unicode, optional):
+            thumb_url (str, optional):
                 URL of an image to show on the side of the message.
 
-            image_url (unicode, optional):
+            image_url (str, optional):
                 URL of an image to show in the message.
         """
-        notify(self, title, title_link, fallback_text, local_site,
-               review_request, event_name, fields, pre_text, body, color,
-               thumb_url, image_url)
+        notify(integration=self,
+               title=title,
+               title_link=title_link,
+               fallback_text=fallback_text,
+               local_site=local_site,
+               review_request=review_request,
+               event_name=event_name,
+               fields=fields,
+               pre_text=pre_text,
+               body=body,
+               color=color,
+               thumb_url=thumb_url,
+               image_url=image_url)
 
-    def format_link(self, path, text):
+    def format_link(
+        self,
+        *,
+        path: str,
+        text: str,
+    ) -> str:
         """Format the given URL and text to be shown in a Slack message.
 
         This will combine together the parts of the URL (method, domain, path)
         and format it using Slack's URL syntax.
 
         Args:
-            path (unicode):
+            path (str):
                 The path on the Review Board server.
 
-            text (unicode):
+            text (str):
                 The text for the link.
 
         Returns:
-            unicode:
+            str:
             The link for use in Slack.
         """
-        return format_link(path, text)
+        return format_link(path=path, text=text)
 
+    # NOTE: It's technically type-unsafe to replace an attribute with a
+    #       property, but this works for us practically.
     @cached_property
-    def icon_static_urls(self):
+    def icon_static_urls(self) -> dict[str, str]:  # type: ignore
         """Return the icons used for the integration.
 
         Returns:
@@ -320,6 +406,8 @@ class SlackIntegration(BaseChatIntegration):
         from rbintegrations.extension import RBIntegrationsExtension
 
         extension = RBIntegrationsExtension.instance
+
+        assert extension is not None
 
         return {
             '1x': extension.get_static_url('images/slack/icon.png'),

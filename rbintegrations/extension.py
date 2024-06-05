@@ -11,6 +11,7 @@ from rbintegrations.idonethis.integration import IDoneThisIntegration
 from rbintegrations.jenkinsci.integration import JenkinsCIIntegration
 from rbintegrations.matrix.integration import MatrixIntegration
 from rbintegrations.mattermost.integration import MattermostIntegration
+from rbintegrations.msteams.integration import MSTeamsIntegration
 from rbintegrations.slack.integration import SlackIntegration
 from rbintegrations.travisci.integration import TravisCIIntegration
 from rbintegrations.trello.integration import TrelloIntegration
@@ -33,6 +34,7 @@ class RBIntegrationsExtension(Extension):
         JenkinsCIIntegration,
         MatrixIntegration,
         MattermostIntegration,
+        MSTeamsIntegration,
         SlackIntegration,
         TravisCIIntegration,
         TrelloIntegration
