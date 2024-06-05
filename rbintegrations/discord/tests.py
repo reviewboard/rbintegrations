@@ -1577,10 +1577,10 @@ class DiscordIntegrationTests(IntegrationTestCase):
                     'color': self.integration.default_color,
                     'fallback': (
                         '#1: New reply from Test User: '
-                        'http://example.com/r/1/#review2'
+                        'http://example.com/r/1/#review1'
                     ),
                     'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review2',
+                    'title_link': 'http://example.com/r/1/#review1',
                     'text': 'This is body_top.',
                     'pretext': None,
                 }],
@@ -1636,11 +1636,11 @@ class DiscordIntegrationTests(IntegrationTestCase):
                     'color': self.integration.default_color,
                     'fallback': (
                         '#1: New reply from Test User: '
-                        'http://example.com/s/local-site-1/r/1/#review2'
+                        'http://example.com/s/local-site-1/r/1/#review1'
                     ),
                     'title': '#1: Test Review Request',
                     'title_link': (
-                        'http://example.com/s/local-site-1/r/1/#review2'
+                        'http://example.com/s/local-site-1/r/1/#review1'
                     ),
                     'text': 'This is body_top.',
                     'pretext': None,
@@ -1689,10 +1689,10 @@ class DiscordIntegrationTests(IntegrationTestCase):
                     'color': self.integration.default_color,
                     'fallback': (
                         '#1: New reply from Test User: '
-                        'http://example.com/r/1/#review2'
+                        'http://example.com/r/1/#gcomment2'
                     ),
                     'title': '#1: Test Review Request',
-                    'title_link': 'http://example.com/r/1/#review2',
+                    'title_link': 'http://example.com/r/1/#gcomment2',
                     'text': 'This is a comment.',
                     'pretext': None,
                 }],

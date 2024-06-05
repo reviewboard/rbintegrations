@@ -968,7 +968,7 @@ class MatrixIntegrationTests(IntegrationTestCase):
                 'msgtype': 'm.text',
                 'formatted_body':
                     '<strong>#1: New reply from Test User: '
-                    'http://example.com/r/1/#review2</strong><p>#1: '
+                    'http://example.com/r/1/#review1</strong><p>#1: '
                     'Test Review '
                     'Request</p><blockquote>This is body_top.'
                     '</blockquote>',
@@ -1015,7 +1015,7 @@ class MatrixIntegrationTests(IntegrationTestCase):
                 'msgtype': 'm.text',
                 'formatted_body':
                     '<strong>#1: New reply from Test User: '
-                    'http://example.com/s/local-site-1/r/1/#review2'
+                    'http://example.com/s/local-site-1/r/1/#review1'
                     '</strong><p>#1: Test Review '
                     'Request</p><blockquote>This is body_top.'
                     '</blockquote>',
@@ -1055,7 +1055,7 @@ class MatrixIntegrationTests(IntegrationTestCase):
                 'msgtype': 'm.text',
                 'formatted_body':
                     '<strong>#1: New reply from Test User: '
-                    'http://example.com/r/1/#review2</strong><p>#1: '
+                    'http://example.com/r/1/#gcomment2</strong><p>#1: '
                     'Test Review Request</p><blockquote>This '
                     'is a comment.</blockquote>',
                 'format': 'org.matrix.custom.html'

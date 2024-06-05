@@ -999,7 +999,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
             pre_text='New reply from '
                      '[Test User](http://example.com/users/test/)',
             title='[#1: Test Review Request]'
-                  '(http://example.com/r/1/#review2)',
+                  '(http://example.com/r/1/#review1)',
             body='This is body_top.',
         )
 
@@ -1038,7 +1038,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
             pre_text='New reply from [Test User]'
                      '(http://example.com/s/local-site-1/users/test/)',
             title='[#1: Test Review Request]'
-                  '(http://example.com/s/local-site-1/r/1/#review2)',
+                  '(http://example.com/s/local-site-1/r/1/#review1)',
             body='This is body_top.',
         )
 
@@ -1070,7 +1070,7 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
             pre_text='New reply from '
                      '[Test User](http://example.com/users/test/)',
             title='[#1: Test Review Request]'
-                  '(http://example.com/r/1/#review2)',
+                  '(http://example.com/r/1/#gcomment2)',
             body='This is a comment.',
         )
 
