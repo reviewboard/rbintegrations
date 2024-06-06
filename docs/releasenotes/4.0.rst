@@ -4,7 +4,7 @@
 Integrations 4.0 Release Notes
 ==============================
 
-**Release date**: TBD
+**Release date**: June 6, 2024
 
 
 Compatibility
@@ -76,6 +76,11 @@ Bug Fixes
   Travis CI only works with GitHub repositories. A regression had made it
   so the configuration UI would allow administrators to select non-GitHub
   repositories, which would then fail to run.
+
+* Fixed links in chat integrations for review replies.
+
+  Notifications sent to chat services for replies to reviews were linking to
+  the correct page, but would not scroll to the relevant reply.
 
 
 Contributors

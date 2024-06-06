@@ -280,9 +280,6 @@ class BaseChatIntegration(Integration):
                 Other keyword arguments to pass to :py:meth:`notify`.
         """
         review_request = review.review_request
-        review_url = build_server_url(review.get_absolute_url())
-        fallback_text = '#%s: %s: %s' % (review_request.display_id,
-                                         fallback_text, review_url)
         body = ''
         review_body_top = review.body_top
 
@@ -309,6 +306,24 @@ class BaseChatIntegration(Integration):
                 body = first_comment.text
             else:
                 body = review.body_bottom
+
+        if review.base_reply_to:
+            # This is a reply. We can't use that reply's absolute URL because
+            # there's no actual anchor added for that on the page. If we have a
+            # comment (which we're using for the body text), we'll link to
+            # that, and if not, link to the parent review.
+            if first_comment:
+                review_url = first_comment.get_review_url()
+            else:
+                review_url = review.base_reply_to.get_absolute_url()
+        else:
+            # This is a top-level review. We can link directly to it.
+            review_url = review.get_absolute_url()
+
+        review_url = build_server_url(review_url)
+
+        fallback_text = '#%s: %s: %s' % (review_request.display_id,
+                                         fallback_text, review_url)
 
         self.notify(title=self.get_review_request_title(review_request),
                     title_link=review_url,

@@ -144,18 +144,16 @@ class JenkinsCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
                 'description': _(
                     "Builds performed on the code in review requests will use "
                     "a completely separate configuration from commits which "
-                    "are pushed to the GitHub repository. The configuration "
-                    "listed here will be used instead of the contents of the "
-                    "repository's <code>.travis.yml</code> file. Note that "
-                    "this should not contain any secret environment "
-                    "variables."
+                    "are pushed to the repository. The configuration listed "
+                    "here will be used regardless of and in addition to any "
+                    "external configurations."
                     "\n"
                     "It's also recommended to create a special branch head "
-                    "in the GitHub repository to use for these builds, so "
-                    "they don't appear to be happening on your main "
-                    "development branch. This branch can contain anything "
-                    "(or even be empty), since the code will come from the "
-                    "review request."
+                    "in the repository to use for these builds, so they "
+                    "don't appear to be happening on your main development "
+                    "branch. This branch can contain anything (or even be "
+                    "empty), since the code will come from the review "
+                    "request."
                 ),
                 'fields': (
                     'jenkins_job_name',
