@@ -1,5 +1,7 @@
 """Integration for associating review requests with Asana tasks."""
 
+from __future__ import annotations
+
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from reviewboard.extensions.hooks import ReviewRequestFieldsHook
@@ -16,12 +18,12 @@ class AsanaIntegration(Integration):
     description = _('Associate Asana tasks with your review requests.')
     config_form_cls = AsanaIntegrationConfigForm
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the integration hooks."""
         ReviewRequestFieldsHook(self, 'main', [AsanaField])
 
     @cached_property
-    def icon_static_urls(self):
+    def icon_static_urls(self) -> dict[str, str]:
         """The icons used for the integration."""
         from rbintegrations.extension import RBIntegrationsExtension
 

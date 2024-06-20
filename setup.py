@@ -28,7 +28,7 @@ setup(
     maintainer_email='support@beanbaginc.com',
     packages=find_packages(),
     install_requires=[
-        'asana',
+        'asana~=5.0.7',
         'housekeeping~=1.1',
         'PyYAML>=3.12',
     ],
@@ -56,5 +56,5 @@ setup(
         'Topic :: Software Development :: Build Tools',
         'Topic :: Software Development :: Quality Assurance',
         'Topic :: Software Development :: Testing',
-    ]
+    ],
 )
