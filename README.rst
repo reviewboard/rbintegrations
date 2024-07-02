@@ -1,11 +1,11 @@
 Review Board Integrations
 =========================
 
-This extends `Review Board`_ 5.0+ with support for integrating with
-third-party services, like Slack or automated code review services.
+This extends `Review Board`_ with support for integrating with third-party
+services, like Slack or automated code review services.
 
 The latest supported version is automatically installed as part of Review
-Board 5.0+, but maintained and released separately, allowing administrators to
+Board, but maintained and released separately, allowing administrators to
 get the latest and greatest integration support without having to update
 Review Board.
 
