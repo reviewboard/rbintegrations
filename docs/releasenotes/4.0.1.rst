@@ -1,0 +1,58 @@
+.. default-intersphinx:: rb7.0
+
+================================
+Integrations 4.0.1 Release Notes
+================================
+
+**Release date**: TBD
+
+
+Installation/Upgrade
+====================
+
+Integrations 4.0.1 is compatible with Review Board 7.0.x. It's automatically
+installed on Review Board 7.0.1.
+
+To install Integrations 4.0.1 manually on earlier supported versions of
+Review Board, run:
+
+.. code-block:: console
+
+    $ pip3 install rbintegrations==4.0.1
+
+To learn more, see:
+
+* :ref:`Review Board Documentation <reviewboard-docs>`
+* :ref:`Installing Review Board on Docker <installation-docker>`
+* `Power Pack for Review Board <https://www.reviewboard.org/powerpack/>`_
+* :pypi:`Integrations on PyPI <rbintegrations>`
+* `Integrations on GitHub <https://github.com/reviewboard/rbintegrations>`_
+
+For assistance with your server, `talk to us about support <Review Board
+Support_>`_.
+
+
+.. _Review Board Support: https://www.reviewboard.org/support/
+
+
+Packaging
+=========
+
+* :pypi:`asana` 5.0.x (>= 5.0.7) is now required.
+
+
+Bug Fixes
+=========
+
+* Fixed compatibility with changes made to :rbintegration:`Asana <asana>`.
+
+  This has recently regressed, preventing people from linking review
+  requests to related Asana tickets.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
