@@ -1,5 +1,7 @@
 """URL definitions for the Asana integration."""
 
+from __future__ import annotations
+
 from django.urls import include, path
 
 from rbintegrations.asana.views import (AsanaTaskSearchView,

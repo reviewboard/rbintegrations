@@ -1,10 +1,20 @@
-(function() {
+/**
+ * A review request field view for selecting Asana tasks.
+ */
+
+import { spina } from '@beanbag/spina';
+import { ReviewRequestFields } from 'reviewboard/reviews';
+import { InlineEditorView } from 'reviewboard/ui';
+import {
+    type InlineEditorViewOptions,
+} from 'reviewboard/ui/views/inlineEditorView';
 
 
 /**
  * An inline editor view for selecting Asana tasks.
  */
-const AsanaInlineEditorView = RB.InlineEditorView.extend({
+@spina
+class AsanaInlineEditorView extends InlineEditorView {
     /**
      * Initialize the view.
      *
@@ -12,7 +22,7 @@ const AsanaInlineEditorView = RB.InlineEditorView.extend({
      *     options (object):
      *         Options for the view.
      */
-    initialize(options) {
+    initialize(options: Partial<InlineEditorViewOptions>) {
         options = _.defaults(options, {
             hasRawValue: true,
             formatResult: value => {
@@ -40,8 +50,8 @@ const AsanaInlineEditorView = RB.InlineEditorView.extend({
             },
         });
 
-        RB.InlineEditorView.prototype.initialize.call(this, options);
-    },
+        super.initialize(options);
+    }
 
     /**
      * Create and return the field to use for the input element.
@@ -52,16 +62,16 @@ const AsanaInlineEditorView = RB.InlineEditorView.extend({
      */
     createField() {
         return $('<select multiple class="asana-field">');
-    },
+    }
 
     /**
      * Connect events.
      */
     setupEvents() {
-        RB.InlineEditorView.prototype.setupEvents.call(this);
+        super.setupEvents();
 
         this.$field.on('change', this._scheduleUpdateDirtyState.bind(this));
-    },
+    }
 
     /**
      * Show the editor.
@@ -71,25 +81,70 @@ const AsanaInlineEditorView = RB.InlineEditorView.extend({
      *         Options for showing the editor.
      */
     showEditor(options={}) {
-        RB.InlineEditorView.prototype.showEditor.call(this, options);
+        super.showEditor(options);
 
         if (this.options.focusOnOpen) {
             this.$field[0].selectize.focus();
         }
-    },
-});
+    }
+}
+
+
+/**
+ * A task entry in the selector.
+ *
+ * Version Added:
+ *     4.0.1
+ */
+interface TaskEntry {
+    /** Whether the task is completed. */
+    completed: boolean;
+
+    /** The ID of the workspace that the task is in. */
+    workspace_id: string;
+
+    /** The ID of the task. */
+    gid: string;
+
+    /** Alternate ID field for the task. */
+    id?: string;
+
+    /** The option group ID. */
+    optgroup?: string;
+
+    /** The summary of the task. */
+    name: string;
+
+    /** The description of the task. */
+    notes: string;
+}
+
+
+/**
+ * The response from the Asana task query URL.
+ *
+ * Version Added:
+ *     4.0.1
+ */
+interface TaskQueryResponse {
+    workspace: string;
+    workspace_id: string;
+    tasks: TaskEntry[];
+}
 
 
 /**
  * A review request field view for selecting Asana tasks.
  */
-RB.ReviewRequestFields.AsanaFieldView =
-    RB.ReviewRequestFields.TextFieldView.extend({
-    autocomplete: {},
-    multiline: true,
-    useEditIconOnly: true,
+@spina({
+    prototypeAttrs: ['taskTemplate'],
+})
+export class AsanaFieldView extends ReviewRequestFields.TextFieldView {
+    static autocomplete = {};
+    static multiline = true;
+    static useEditIconOnly = true;
 
-    taskTemplate: _.template(dedent`
+    static taskTemplate = _.template(dedent`
         <<%- tagName %> class="asana-task<% if (completed) { %> completed<% } %>">
          <a href="https://app.asana.com/0/<%- workspaceId %>/<%- taskId %>/">
           <div class="asana-task-checkbox">
@@ -100,7 +155,8 @@ RB.ReviewRequestFields.AsanaFieldView =
           <span><%- taskSummary %></span>
          </a>
         </<%- tagName %>>
-        `),
+    `);
+    taskTemplate: _.CompiledTemplate;
 
     /**
      * Format the contents of the field.
@@ -115,7 +171,7 @@ RB.ReviewRequestFields.AsanaFieldView =
         const opts = { useExtraData: this.useExtraData };
         const tasks = JSON.parse(this.model.getDraftField(fieldName, opts));
         this._renderValue(tasks);
-    },
+    }
 
     /**
      * Render the current value of the field.
@@ -124,7 +180,7 @@ RB.ReviewRequestFields.AsanaFieldView =
      *     tasks (Array of object):
      *         The current value of the field.
      */
-    _renderValue(tasks) {
+    _renderValue(tasks: TaskEntry[]) {
         const lis = tasks.map(task => this.taskTemplate({
             completed: task.completed,
             workspaceId: task.workspace_id,
@@ -134,7 +190,7 @@ RB.ReviewRequestFields.AsanaFieldView =
         }));
 
         this.$el.html(`<ul>${lis.join('')}</ul>`);
-    },
+    }
 
     /**
      * Return the type to use for the inline editor view.
@@ -143,9 +199,9 @@ RB.ReviewRequestFields.AsanaFieldView =
      *     function:
      *     The constructor for the inline editor class to instantiate.
      */
-    _getInlineEditorClass() {
+    _getInlineEditorClass(): typeof InlineEditorView {
         return AsanaInlineEditorView;
-    },
+    }
 
     /**
      * Add auto-complete functionality to the field.
@@ -156,15 +212,15 @@ RB.ReviewRequestFields.AsanaFieldView =
         const reviewRequestId = reviewRequest.get('id');
         const url = `${SITE_ROOT}rbintegrations/asana/${localSite}task-search/${reviewRequestId}/`;
         const $field = this.inlineEditorView.$field;
-        const tasks = this.$el.data('raw-value');
+        const tasks = this.$el.data('raw-value') || [];
 
-        tasks.forEach(task => {
+        tasks.forEach((task: TaskEntry) => {
             if (task.gid === undefined) {
                 task.gid = String(task.id);
             }
         });
 
-        this._renderValue(tasks || []);
+        this._renderValue(tasks);
 
         $field.selectize({
             copyClassesToDropdown: true,
@@ -173,7 +229,7 @@ RB.ReviewRequestFields.AsanaFieldView =
             valueField: 'gid',
             multiple: true,
             options: tasks,
-            items: tasks.map(task => task.gid),
+            items: tasks.map((task: TaskEntry) => task.gid),
             optgroupLabelField: 'workspace',
             searchField: 'name',
             sortField: [
@@ -181,7 +237,7 @@ RB.ReviewRequestFields.AsanaFieldView =
                 { 'field': 'name' },
             ],
             render: {
-                option: (data, escape) => {
+                option: (data: TaskEntry) => {
                     return this.taskTemplate({
                         completed: data.completed,
                         workspaceId: data.workspace_id,
@@ -191,20 +247,20 @@ RB.ReviewRequestFields.AsanaFieldView =
                     });
                 }
             },
-            load(query, callback) {
-                const params = $.param({ q: query });
+            load(
+                query: string,
+                callback: (data?: TaskEntry[]) => void,
+            ) {
+                const params = new URLSearchParams();
+                params.append('q', query);
 
-                $.ajax({
-                    url: `${url}?${params}`,
-                    type: 'GET',
-                    error: callback.bind(this),
-                    success: res => {
-                        const items = [];
-
+                fetch(`${url}?${params.toString()}`)
+                    .then(rsp => rsp.json())
+                    .then((rsp: TaskQueryResponse[]) => {
+                        const items: TaskEntry[] = [];
                         this.clearOptionGroups();
 
-                        for (let i = 0; i < res.length; i++) {
-                            const group = res[i];
+                        for (const group of rsp) {
                             this.addOptionGroup(group.workspace, group);
 
                             for (let j = 0; j < group.tasks.length; j++) {
@@ -221,12 +277,12 @@ RB.ReviewRequestFields.AsanaFieldView =
 
                         this.refreshOptions();
                         callback(items);
-                    },
-                });
+                    })
+                    .catch(err => {
+                        console.error('Unable to fetch Asana tasks:', err);
+                        callback();
+                    });
             },
         });
-    },
-});
-
-
-})();
+    }
+}

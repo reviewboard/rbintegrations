@@ -1,18 +1,19 @@
 @import (reference) "@{STATIC_ROOT}rb/css/defs.less";
 
 
-@asana-checkbox-color: #b7bfc6;
-@asana-checkbox-color-completed: #b2ebe1;
-@asana-link-color: #151b26;
-@asana-link-color-completed: #b7bfc6;
+@asana-checkbox-color: var(--ink-p-grey-600);
+@asana-checkbox-color-completed:
+    var(--if-light, var(--ink-p-green-700))
+    var(--if-dark, var(--ink-p-green-400));
 
 
 #field_rbintegrations_asana {
   font-size: @textarea-font-size;
 
   ul {
-    background-color: @textarea-editor-background;
-    border: @textarea-border;
+    background-color: var(--ink-p-input-bg);
+    border: var(--ink-g-border-input);
+    color: var(--ink-p-input-fg);
     margin: @textarea-editor-margin;
     padding: 0;
 
@@ -22,18 +23,28 @@
   }
 }
 
-.asana-field.selectize-control.loading .selectize-input:before {
-  animation: fa-spin 1s infinite steps(8);
-  content: '\f110';
-  display: block;
-  font: normal normal normal 14px/1 FontAwesome;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 16px;
-  height: 16px;
-  transform: translate(0, 0);
-  z-index: 2;
+.asana-field.selectize-control {
+  .selectize-input {
+    align-content: flex-start;
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
+  }
+
+  &.loading .selectize-input:before {
+    animation: fa-spin 1s infinite steps(8);
+    content: '\f110';
+    display: block;
+    font: normal normal normal 14px/1 FontAwesome;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 16px;
+    height: 16px;
+    transform: translate(0, 0);
+    z-index: 2;
+  }
 }
 
 .asana-field.selectize-dropdown {
@@ -45,10 +56,9 @@
 }
 
 .asana-task {
-  border-bottom: 1px solid lighten(@textarea-border-color, 10%);
-  height: 28px;
+  border-bottom: var(--ink-u-border-thin) var(--ink-p-grey-200) solid;
   list-style: none;
-  padding: 0 5px !important;
+  padding: var(--ink-u-spacing-xs) var(--ink-u-spacing-s);
 
   &:last-child {
     border-bottom: none;
@@ -59,21 +69,25 @@
     border-radius: 50%;
     display: inline-block;
     fill: @asana-checkbox-color;
-    height: 20px;
-    line-height: 22px;
-    margin: 3px 10px 3px 0;
+    height: 16px;
+    line-height: 20px;
+    margin: 3px 0;
     text-align: center;
-    vertical-align: middle;
-    width: 20px;
+    width: 16px;
+  }
+
+  a {
+    align-items: center;
+    display: flex;
+    gap: var(--ink-u-spacing-s);
+    text-decoration: none;
   }
 
   a,
   a:active,
   a:visited {
-    align-items: center;
-    color: @asana-link-color;
+    color: var(--ink-p-input-fg);
     height: 100%;
-    text-decoration: none;
   }
 
   &.completed {
@@ -86,7 +100,7 @@
     a,
     a:active,
     a:visited {
-      color: @asana-link-color-completed;
+      color: var(--ink-p-grey-500);
     }
   }
 

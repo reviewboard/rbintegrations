@@ -368,5 +368,5 @@ intersphinx_mapping = {
 
 extlinks = {
     'pypi': ('https://pypi.org/project/%s/', '%s'),
-    'rbintegration': ('https://www.reviewboard.org/integrations/%s', '%s'),
+    'rbintegration': ('https://www.reviewboard.org/integrations/%s/', '%s'),
 }

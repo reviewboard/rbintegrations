@@ -37,7 +37,7 @@ class RBIntegrationsExtension(Extension):
         MSTeamsIntegration,
         SlackIntegration,
         TravisCIIntegration,
-        TrelloIntegration
+        TrelloIntegration,
     ]
 
     css_bundles = {
@@ -59,20 +59,22 @@ class RBIntegrationsExtension(Extension):
     js_bundles = {
         'fields': {
             'source_filenames': [
-                'js/asana/asanaFieldView.es6.js',
+                'js/fields/index.ts',
                 'js/trello/trelloFieldView.es6.js',
             ],
             'apply_to': reviewable_url_names + review_request_url_names,
         },
         'asana-integration-config': {
-            'source_filenames': ['js/asana/integrationConfig.es6.js'],
+            'source_filenames': [
+                'js/asana/integrationConfig.ts',
+            ],
         },
         'travis-ci-integration-config': {
             'source_filenames': ['js/travisci/integrationConfig.es6.js'],
         },
     }
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the extension."""
         for integration_cls in self.integrations:
             IntegrationHook(self, integration_cls)
