@@ -1,7 +1,10 @@
 """Views for the Trello integration."""
 
+from __future__ import annotations
+
 import json
 import logging
+from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -11,6 +14,9 @@ from django.views.generic import View
 from reviewboard.integrations.base import get_integration_manager
 from reviewboard.reviews.views import ReviewRequestViewMixin
 
+if TYPE_CHECKING:
+    from django.http import HttpRequest
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +24,11 @@ logger = logging.getLogger(__name__)
 class TrelloCardSearchView(ReviewRequestViewMixin, View):
     """The view to search for Trello cards (for use with auto-complete)."""
 
-    def get(self, request, **kwargs):
+    def get(
+        self,
+        request: HttpRequest,
+        **kwargs,
+    ) -> HttpResponse:
         """Perform a search for cards.
 
         Args:
@@ -49,6 +59,12 @@ class TrelloCardSearchView(ReviewRequestViewMixin, View):
 
         results = []
 
+        query = request.GET.get('q')
+
+        if not query:
+            return HttpResponse(json.dumps([]),
+                                content_type='application/json')
+
         params = {
             'card_board': 'true',
             'card_fields': 'id,name,shortUrl',
@@ -56,7 +72,7 @@ class TrelloCardSearchView(ReviewRequestViewMixin, View):
             'cards_limit': 20,
             'modelTypes': 'cards',
             'partial': 'true',
-            'query': request.GET.get('q'),
+            'query': query,
         }
 
         for config in configs:
