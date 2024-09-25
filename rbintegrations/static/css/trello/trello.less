@@ -1,9 +1,8 @@
 @import (reference) "@{STATIC_ROOT}rb/css/defs.less";
 
 #field_rbintegrations_trello ul {
-  background-color: @textarea-editor-background;
-  border: @textarea-border;
-  margin: @textarea-editor-margin;
+  background: var(--ink-p-input-bg);
+  border: var(--ink-g-border-input);
   padding: 0;
 
   &:empty {
@@ -11,7 +10,7 @@
   }
 
   .trello-card {
-    border-bottom: 1px solid lighten(@textarea-border-color, 10%);
+    border-bottom: var(--ink-u-border-thin) var(--ink-p-grey-200) solid;
     height: 28px;
     line-height: 28px;
     list-style: none;
@@ -52,7 +51,7 @@
 
 .trello-card-card {
   a {
-    color: black;
+    color: var(--ink-p-input-fg);
     font-weight: bold;
     text-decoration: none;
   }
