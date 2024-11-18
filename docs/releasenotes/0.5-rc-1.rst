@@ -18,5 +18,5 @@ CircleCI
 Contributors
 ============
 
-* Barret Rennie
+* Beth Rennie
 * Christian Hammond

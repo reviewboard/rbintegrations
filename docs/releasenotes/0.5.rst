@@ -80,6 +80,6 @@ as part of the notification process.
 Contributors
 ============
 
-* Barret Rennie
+* Beth Rennie
 * Christian Hammond
 * David Trowbridge
