@@ -4,16 +4,15 @@ from __future__ import annotations
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
-from reviewboard.reviews.conditions import ReviewRequestConditionChoices
+
+from rbintegrations.util.conditions import ReviewRequestConditionsField
 
 
 class AsanaIntegrationConfigForm(IntegrationConfigForm):
     """Form for configuring Asana."""
 
-    conditions = ConditionsField(ReviewRequestConditionChoices,
-                                 label=_('Conditions'))
+    conditions = ReviewRequestConditionsField()
 
     asana_access_token = forms.CharField(
         label=_('Asana Personal Access Token'),

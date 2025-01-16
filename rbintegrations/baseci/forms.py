@@ -8,11 +8,10 @@ from __future__ import annotations
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from djblets.forms.widgets import AmountSelectorWidget
-
 from reviewboard.integrations.forms import IntegrationConfigForm
-from reviewboard.reviews.conditions import ReviewRequestConditionChoices
+
+from rbintegrations.util.conditions import ReviewRequestConditionsField
 
 
 class BaseCIIntegrationConfigForm(IntegrationConfigForm):
@@ -22,9 +21,7 @@ class BaseCIIntegrationConfigForm(IntegrationConfigForm):
         4.0
     """
 
-    conditions = ConditionsField(
-        ReviewRequestConditionChoices,
-        label=_('Conditions'))
+    conditions = ReviewRequestConditionsField()
 
     run_manually = forms.BooleanField(
         label=_('Run builds manually'),

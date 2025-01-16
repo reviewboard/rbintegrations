@@ -11,15 +11,13 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 import kgb
 from django.db.models import Q
 from djblets.conditions import ConditionSet, Condition
-from djblets.forms.fields import ConditionsField
 from djblets.testing.decorators import add_fixtures
 from kgb.ops import BaseSpyOperation
 from reviewboard.diffviewer.models import DiffSet
 from reviewboard.integrations.base import get_integration_manager
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.integrations.models import IntegrationConfig
-from reviewboard.reviews.conditions import (ReviewRequestConditionChoices,
-                                            ReviewRequestRepositoriesChoice)
+from reviewboard.reviews.conditions import ReviewRequestRepositoriesChoice
 from reviewboard.reviews.models import StatusUpdate
 from reviewboard.site.models import LocalSite
 from typing_extensions import TypedDict
@@ -28,6 +26,7 @@ from rbintegrations.baseci.errors import CIBuildError
 from rbintegrations.baseci.integration import BaseCIIntegration, BuildPrepData
 from rbintegrations.testing.testcases import IntegrationTestCase
 from rbintegrations.travisci.integration import TravisCIIntegration
+from rbintegrations.util.conditions import ReviewRequestConditionsField
 
 if TYPE_CHECKING:
     from reviewboard.reviews.models import ReviewRequest
@@ -57,7 +56,7 @@ class MyCIIntegrationConfigForm(IntegrationConfigForm):
         3.1
     """
 
-    conditions = ConditionsField(ReviewRequestConditionChoices)
+    conditions = ReviewRequestConditionsField()
 
 
 class MyCIIntegration(BaseCIIntegration):
