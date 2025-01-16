@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import logging
 from urllib.error import HTTPError, URLError
-from typing import TYPE_CHECKING
+from typing import Iterator, TYPE_CHECKING
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from djblets.conditions.choices import ConditionChoices
 from reviewboard.integrations.forms import IntegrationConfigForm
 from reviewboard.reviews.conditions import (ReviewRequestConditionChoiceMixin,
@@ -20,9 +19,12 @@ from reviewboard.scmtools.models import Repository
 
 from rbintegrations.baseci.forms import BaseCIIntegrationConfigForm
 from rbintegrations.travisci.api import TravisAPI
+from rbintegrations.util.conditions import (ReviewRequestConditionsField,
+                                            review_request_condition_choices)
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+    from djblets.conditions.choices import BaseConditionChoice
 
 
 logger = logging.getLogger(__name__)
@@ -77,21 +79,38 @@ class GitHubOnlyConditionChoices(ConditionChoices):
     show GitHub repositories.
     """
 
-    choice_classes = list(
-        (set(ReviewRequestConditionChoices.choice_classes) - {
+    def get_defaults(self) -> Iterator[type[BaseConditionChoice]]:
+        """Return defaults for the condition choices.
+
+        This will generate defaults from the standard conditions for a
+        review request, replacing the standard repository-related fields
+        with one specific to Travis CI.
+
+        Yields:
+            djblets.conditions.choice.BaseConditionChoice:
+            Each choice to include.
+        """
+        ignored = {
             ReviewRequestRepositoriesChoice,
             ReviewRequestRepositoryTypeChoice,
-        }) | {
-            GitHubRepositoriesChoice,
         }
-    )
+
+        for choice in review_request_condition_choices:
+            if choice not in ignored:
+                yield choice
+
+        yield GitHubRepositoriesChoice
 
 
 class TravisCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
     """Form for configuring Travis CI."""
 
-    conditions = ConditionsField(
-        GitHubOnlyConditionChoices,
+    # Note that we're lazily constructing this so that we ensure that any
+    # form instance will re-fetch the full list of conditions, ensuring
+    # anything provided by extensions will be there and anything stale will
+    # not.
+    conditions = ReviewRequestConditionsField(
+        choices=lambda: GitHubOnlyConditionChoices(),
         label=_('Conditions'))
 
     travis_endpoint = forms.ChoiceField(

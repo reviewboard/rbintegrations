@@ -6,15 +6,14 @@ from urllib.request import urlopen
 
 from django import forms
 from django.utils.translation import gettext, gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from reviewboard.accounts.forms.pages import AccountPageForm
 from reviewboard.integrations.forms import IntegrationConfigForm
-from reviewboard.reviews.conditions import ReviewRequestConditionChoices
 from reviewboard.scmtools.crypto_utils import encrypt_password
 
 from rbintegrations.idonethis.utils import (create_idonethis_request,
                                             delete_cached_user_team_ids,
                                             get_user_api_token)
+from rbintegrations.util.conditions import ReviewRequestConditionsField
 
 
 class IDoneThisIntegrationConfigForm(IntegrationConfigForm):
@@ -24,8 +23,7 @@ class IDoneThisIntegrationConfigForm(IntegrationConfigForm):
     entries to a given I Done This team based on the specified conditions.
     """
 
-    conditions = ConditionsField(ReviewRequestConditionChoices,
-                                 label=_('Conditions'))
+    conditions = ReviewRequestConditionsField()
 
     team_id = forms.CharField(
         label=_('Team ID'),

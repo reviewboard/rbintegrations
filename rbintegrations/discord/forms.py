@@ -2,9 +2,9 @@
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from djblets.forms.fields import ConditionsField
 from reviewboard.integrations.forms import IntegrationConfigForm
-from reviewboard.reviews.conditions import ReviewRequestConditionChoices
+
+from rbintegrations.util.conditions import ReviewRequestConditionsField
 
 
 class DiscordIntegrationConfigForm(IntegrationConfigForm):
@@ -15,8 +15,7 @@ class DiscordIntegrationConfigForm(IntegrationConfigForm):
     conditions.
     """
 
-    conditions = ConditionsField(ReviewRequestConditionChoices,
-                                 label=_('Conditions'))
+    conditions = ReviewRequestConditionsField()
 
     webhook_url = forms.CharField(
         label=_('Webhook URL'),
