@@ -18,9 +18,12 @@ except ImportError:
     assert not TYPE_CHECKING
 
     from django.utils.translation import gettext_lazy as _
-    from djblets.forms.fields import ConditionsField, ConditionsFieldChoices
+    from djblets.forms.fields import ConditionsField
     from djblets.util.typing import StrOrPromise
     from reviewboard.reviews.conditions import ReviewRequestConditionChoices
+
+    if TYPE_CHECKING:
+        from djblets.conditions.choices import ConditionChoices
 
     review_request_condition_choices = ReviewRequestConditionChoices()
 
@@ -36,7 +39,7 @@ except ImportError:
         def __init__(
             self,
             *,
-            choices: ConditionsFieldChoices = review_request_condition_choices,
+            choices: ConditionChoices = review_request_condition_choices,
             label: StrOrPromise = _('Conditions'),
             **kwargs,
         ) -> None:
