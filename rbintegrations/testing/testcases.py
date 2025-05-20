@@ -21,8 +21,8 @@ class RBIntegrationsExtensionTestCase(SpyAgency, ExtensionTestCase):
     extension_class = RBIntegrationsExtension
 
 
-class IntegrationTestCase(Generic[_IntegrationT],
-                          RBIntegrationsExtensionTestCase):
+class IntegrationTestCase(RBIntegrationsExtensionTestCase,
+                          Generic[_IntegrationT]):
     """Base class for unit tests for individual integrations."""
 
     #: The integration class to test.
