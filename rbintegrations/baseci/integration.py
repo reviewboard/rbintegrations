@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, cast
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
@@ -34,6 +34,8 @@ from reviewboard.webapi.models import WebAPIToken
 from rbintegrations.baseci.errors import CIBuildError
 
 if TYPE_CHECKING:
+    from djblets.util.typing import JSONDict
+
     from reviewboard.changedescs.models import ChangeDescription
     from reviewboard.reviews.models import ReviewRequest
     from reviewboard.scmtools.models import Repository
@@ -41,6 +43,10 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+_has_create_for_integration = hasattr(StatusUpdate.objects,
+                                      'create_for_integration')
 
 
 @dataclass
@@ -65,7 +71,7 @@ class BuildPrepData:
     #:
     #: Type:
     #:     list of reviewboard.integrations.models.IntegrationConfig
-    configs: List[IntegrationConfig]
+    configs: list[IntegrationConfig]
 
     #: The DiffSet being applied and tested against.
     #:
@@ -89,7 +95,7 @@ class BuildPrepData:
     #:
     #: Type:
     #:     reviewboard.changedescs.models.ChangeDescription
-    changedesc: Optional[ChangeDescription] = None
+    changedesc: (ChangeDescription | None) = None
 
     #: Extra state set by the integration.
     #:
@@ -98,7 +104,7 @@ class BuildPrepData:
     #:
     #: Type:
     #:     dict
-    extra_state: Dict = field(default_factory=dict)
+    extra_state: JSONDict = field(default_factory=dict)
 
     @property
     def local_site(self) -> LocalSite:
@@ -150,7 +156,8 @@ class BuildPrepData:
                 local_site=local_site,
                 auto_generated=True,
                 token_generator_id=token_generator.token_generator_id,
-                token_info={'token_type': 'rbp'})
+                token_info={'token_type': 'rbp'},
+            )
 
 
 class BaseCIIntegration(Integration):
@@ -160,7 +167,7 @@ class BaseCIIntegration(Integration):
     requests to run a build, setting up the necessary state (including any
     :term:`status updates`), and performing the build.
 
-    Subclasses only need to implemenet:
+    Subclasses only need to implement:
 
     * :py:meth:`start_build`
     * :py:meth:`prepare_builds` (optional)
@@ -179,7 +186,7 @@ class BaseCIIntegration(Integration):
     #:
     #: Type:
     #:     str
-    status_update_service_id: Optional[str] = None
+    status_update_service_id: (str | None) = None
 
     #: The username for the bot user to create/use for any status updates.
     #:
@@ -187,7 +194,7 @@ class BaseCIIntegration(Integration):
     #:
     #: Type:
     #:     str
-    bot_username: Optional[str] = None
+    bot_username: (str | None) = None
 
     #: The first name for the bot user.
     #:
@@ -195,7 +202,7 @@ class BaseCIIntegration(Integration):
     #:
     #: Type:
     #:     str
-    bot_user_first_name: Optional[str] = None
+    bot_user_first_name: (str | None) = None
 
     #: The last name for the bot user.
     #:
@@ -203,9 +210,9 @@ class BaseCIIntegration(Integration):
     #:
     #: Type:
     #:     str
-    bot_user_last_name: Optional[str] = None
+    bot_user_last_name: (str | None) = None
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the integration.
 
         This will begin listening for any signals needed to trigger builds or
@@ -217,8 +224,10 @@ class BaseCIIntegration(Integration):
                           'bot_user_first_name',
                           'bot_user_last_name'):
             if not getattr(self, attr_name, None):
-                raise ImproperlyConfigured('%s must set the "%s" attribute.'
-                                           % (type(self).__name__, attr_name))
+                raise ImproperlyConfigured(
+                    f'{type(self).__name__} must set the "{attr_name}" '
+                    f'attribute.'
+                )
 
         SignalHook(self,
                    review_request_published,
@@ -301,7 +310,7 @@ class BaseCIIntegration(Integration):
     def get_or_create_api_token(
         self,
         user: User,
-        local_site: Optional[LocalSite],
+        local_site: LocalSite | None,
     ) -> WebAPIToken:
         """Return or create an API token used to communicate with Review Board.
 
@@ -375,7 +384,7 @@ class BaseCIIntegration(Integration):
     def get_matching_configs(
         self,
         review_request: ReviewRequest,
-    ) -> List[IntegrationConfig]:
+    ) -> list[IntegrationConfig]:
         """Return configurations that match the review request and integration.
 
         This will return all configurations found in the database that are
@@ -395,10 +404,12 @@ class BaseCIIntegration(Integration):
         """
         config_form_cls = self.config_form_cls
         local_site = review_request.local_site
+        configs = cast(list[IntegrationConfig],
+                       self.get_configs(local_site=local_site))
 
         return [
             config
-            for config in self.get_configs(local_site=local_site)
+            for config in configs
             if config.match_conditions(form_cls=config_form_cls,
                                        review_request=review_request)
         ]
@@ -407,10 +418,10 @@ class BaseCIIntegration(Integration):
         self,
         status_update: StatusUpdate,
         *,
-        state: Optional[str] = None,
-        description: Optional[str] = None,
-        url: Optional[str] = None,
-        url_text: Optional[str] = None,
+        state: (str | None) = None,
+        description: (str | None) = None,
+        url: (str | None) = None,
+        url_text: (str | None) = None,
         save: bool = True,
     ) -> None:
         """Update fields on a StatusUpdate.
@@ -443,7 +454,7 @@ class BaseCIIntegration(Integration):
                 :py:class:`~reviewboard.reviews.models.status_update.
                 StatusUpdate`.
         """
-        fields: List[str] = []
+        fields: list[str] = []
 
         if state is not None and state != status_update.state:
             status_update.state = state
@@ -476,9 +487,9 @@ class BaseCIIntegration(Integration):
         self,
         status_update: StatusUpdate,
         *,
-        description: Optional[str] = None,
-        url: Optional[str] = None,
-        url_text: Optional[str] = None,
+        description: (str | None) = None,
+        url: (str | None) = None,
+        url_text: (str | None) = None,
         save: bool = True,
     ) -> None:
         """Set a status update to "waiting to run" mode.
@@ -514,9 +525,9 @@ class BaseCIIntegration(Integration):
         self,
         status_update: StatusUpdate,
         *,
-        description: Optional[str] = None,
-        url: Optional[str] = None,
-        url_text: Optional[str] = None,
+        description: (str | None) = None,
+        url: (str | None) = None,
+        url_text: (str | None) = None,
         save: bool = True,
     ) -> None:
         """Set a status update to "starting build" mode.
@@ -552,9 +563,9 @@ class BaseCIIntegration(Integration):
         self,
         status_update: StatusUpdate,
         *,
-        description: Optional[str] = None,
-        url: Optional[str] = None,
-        url_text: Optional[str] = None,
+        description: (str | None) = None,
+        url: (str | None) = None,
+        url_text: (str | None) = None,
         save: bool = True,
     ) -> None:
         """Set a status update to "internal error" mode.
@@ -588,9 +599,9 @@ class BaseCIIntegration(Integration):
 
     def _on_review_request_published(
         self,
-        sender: Type[ReviewRequest],
+        sender: type[ReviewRequest],
         review_request: ReviewRequest,
-        changedesc: Optional[ChangeDescription] = None,
+        changedesc: (ChangeDescription | None) = None,
         **kwargs,
     ) -> None:
         """Handle when a review request is published.
@@ -649,21 +660,18 @@ class BaseCIIntegration(Integration):
         status_update_service_id = self.status_update_service_id
         status_update_name = self.name
 
-        has_create_for_integration = hasattr(StatusUpdate.objects,
-                                             'create_for_integration')
-
         for config in matching_configs:
             run_manually = config.get('run_manually')
             timeout_secs = config.get('timeout')
 
-            if has_create_for_integration:
+            if _has_create_for_integration:
                 # Review Board >= 5.0.3
                 status_update = StatusUpdate.objects.create_for_integration(
                     self,
                     config=config,
                     service_id=status_update_service_id,
                     user=user,
-                    summary=status_update_name,
+                    summary=str(status_update_name),
                     review_request=review_request,
                     change_description=changedesc,
                     can_retry=True,
@@ -695,9 +703,9 @@ class BaseCIIntegration(Integration):
 
     def _on_status_update_request_run(
         self,
-        sender: Type[StatusUpdate],
+        sender: type[StatusUpdate],
         status_update: StatusUpdate,
-        config: Optional[IntegrationConfig] = None,
+        config: (IntegrationConfig | None) = None,
         **kwargs,
     ) -> None:
         """Handle a request to run or rerun a build.
@@ -749,7 +757,7 @@ class BaseCIIntegration(Integration):
         # If there's a change description associated with the status
         # update, then use the diff from that. Otherwise, choose the first
         # diffset on the review request.
-        diffset: Optional[DiffSet] = None
+        diffset: (DiffSet | None) = None
 
         try:
             if changedesc:
@@ -836,4 +844,4 @@ class BaseCIIntegration(Integration):
                              self.name, prep_data.review_request.pk,
                              config.pk, e)
             self.set_error(status_update,
-                           description='internal error: %s' % e)
+                           description=f'internal error: {e}')
