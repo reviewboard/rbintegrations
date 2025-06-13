@@ -31,7 +31,7 @@ class CircleCIWebHookView(View):
         'infrastructure_fail': 'build infrastructure failure.',
         'failed': 'build failed.',
         'fixed': 'build succeeded.',
-        'success': 'build succeded.',
+        'success': 'build succeeded.',
         'queued': 'build queued.',
         'running': 'build running.',
         'scheduled': 'build scheduled.',
