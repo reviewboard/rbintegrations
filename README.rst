@@ -1,6 +1,8 @@
 Review Board Integrations
 =========================
 
+|release-badge| |license-badge| |reviewed-with-badge| |python-badge|
+
 This extends `Review Board`_ with support for integrating with third-party
 services, like Slack or automated code review services.
 
@@ -10,6 +12,22 @@ get the latest and greatest integration support without having to update
 Review Board.
 
 .. _Review Board: https://www.reviewboard.org/
+
+.. |release-badge| image:: https://img.shields.io/pypi/v/rbintegrations
+   :target: https://pypi.org/project/rbintegrations
+   :alt: Latest release
+
+.. |license-badge| image:: https://img.shields.io/badge/license-MIT-green.svg
+   :target: https://opensource.org/licenses/MIT
+   :alt: MIT License
+
+.. |reviewed-with-badge| image:: https://img.shields.io/badge/Review%20Board-d0e6ff?label=reviewed%20with
+   :target: https://www.reviewboard.org
+   :alt: Reviewed with Review Board
+
+.. |python-badge| image:: https://img.shields.io/pypi/pyversions/rbintegrations
+   :target: https://pypi.org/project/rbintegrations
+   :alt: Compatible python versions
 
 
 Integrations

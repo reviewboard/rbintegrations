@@ -1,0 +1,61 @@
+.. default-intersphinx:: rb7.0
+
+================================
+Integrations 4.0.2 Release Notes
+================================
+
+**Release date**: August 5, 2025
+
+
+Installation/Upgrade
+====================
+
+Integrations 4.0.2 is compatible with Review Board 7.0.x. It's automatically
+installed on Review Board 7.0.3.
+
+To install Integrations 4.0.2 manually on earlier supported versions of
+Review Board, run:
+
+.. code-block:: console
+
+    $ pip3 install rbintegrations==4.0.2
+
+To learn more, see:
+
+* :ref:`Review Board Documentation <reviewboard-docs>`
+* :ref:`Installing Review Board on Docker <installation-docker>`
+* `Power Pack for Review Board <https://www.reviewboard.org/powerpack/>`_
+* :pypi:`Integrations on PyPI <rbintegrations>`
+* `Integrations on GitHub <https://github.com/reviewboard/rbintegrations>`_
+
+For assistance with your server, `talk to us about support <Review Board
+Support_>`_.
+
+
+.. _Review Board Support: https://www.reviewboard.org/support/
+
+
+New Features
+============
+
+* Added support for the upcoming pluggable condition ruleset support in
+  Review Board 7.1.
+
+  This will allow extensions to add new rules that can be used when
+  configuring integrations in order to tailor rules for your organization.
+
+* Updated :rbintegration:`Trello <trello>` to look good on dark mode.
+
+
+Bug Fixes
+=========
+
+* Fixed excessive logging from :rbintegration:`Trello <trello>` searches.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
