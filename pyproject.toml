@@ -1,23 +1,91 @@
+[build-system]
+requires = [
+    'reviewboard',
+    'reviewboard[extension-packaging]',
+]
+build-backend = 'reviewboard.extensions.packaging.backend'
+
+
+[project]
+name = 'rbintegrations'
+description = 'A set of third-party service integrations for Review Board'
+authors = [
+    {name = 'Beanbag, Inc.', email = 'questions@beanbaginc.com' },
+]
+license = 'MIT'
+license-files = ['LICENSE', 'AUTHORS']
+readme = 'README.rst'
+requires-python = '>=3.8'
+dynamic = ['version']
+
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Web Environment',
+    'Framework :: Review Board',
+    'Intended Audience :: Developers',
+    'Natural Language :: English',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'Topic :: Communications :: Chat',
+    'Topic :: Software Development :: Build Tools',
+    'Topic :: Software Development :: Quality Assurance',
+    'Topic :: Software Development :: Testing',
+]
+
+dependencies = [
+    'asana~=5.0.7',
+    'housekeeping~=1.1',
+    'pydantic~=2.5',
+    'python-gitlab',
+    'PyYAML>=3.12',
+]
+
+
+[project.entry-points.'reviewboard.extensions']
+rbintegrations = 'rbintegrations.extension:RBIntegrationsExtension'
+
+
+[project.urls]
+Homepage = 'https://www.reviewboard.org/'
+
+
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "reviewboard.settings"
+DJANGO_SETTINGS_MODULE = 'reviewboard.settings'
 django_debug_mode = false
 
-python_files = ["tests.py", "test_*.py"]
-python_classes = ["*Tests"]
-python_functions = ["test_*"]
-pythonpath = "."
+python_files = ['tests.py', 'test_*.py']
+python_classes = ['*Tests']
+python_functions = ['test_*']
+pythonpath = '.'
 testpaths = [
-    "rbintegrations",
+    'rbintegrations',
 ]
 
 env = [
-    "RB_RUNNING_TESTS=1",
-    "RBSSH_STORAGE_BACKEND=reviewboard.ssh.storage.FileSSHStorage",
+    'RB_RUNNING_TESTS=1',
+    'RBSSH_STORAGE_BACKEND=reviewboard.ssh.storage.FileSSHStorage',
 ]
 
-addopts = ["--reuse-db"]
+addopts = ['--reuse-db']
 
 required_plugins = [
-    "pytest-django",
-    "pytest-env",
+    'pytest-django',
+    'pytest-env',
 ]
+
+
+[tool.setuptools.dynamic.version]
+attr = 'rbintegrations.__version__'
+
+
+[tool.setuptools.packages.find]
+where = ['.']
+namespaces = false
