@@ -15,17 +15,19 @@ try:
     from reviewboard.reviews.forms import ReviewRequestConditionsField
 except ImportError:
     # Review Board < 7.1
-    assert not TYPE_CHECKING
-
-    from django.utils.translation import gettext_lazy as _
-    from djblets.forms.fields import ConditionsField
-    from djblets.util.typing import StrOrPromise
-    from reviewboard.reviews.conditions import ReviewRequestConditionChoices
-
     if TYPE_CHECKING:
+        assert False
         from djblets.conditions.choices import ConditionChoices
+    else:
+        from django.utils.translation import gettext_lazy as _
+        from djblets.forms.fields import ConditionsField
+        from djblets.util.typing import StrOrPromise
+        from reviewboard.reviews.conditions import \
+            ReviewRequestConditionChoices
 
-    review_request_condition_choices = ReviewRequestConditionChoices()
+
+    review_request_condition_choices = \
+        ReviewRequestConditionChoices()  # noqa: E303
 
     class ReviewRequestConditionsField(ConditionsField):
         """Compatibility field for selecting review request conditions.
