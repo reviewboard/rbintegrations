@@ -34,6 +34,8 @@ from reviewboard.webapi.models import WebAPIToken
 from rbintegrations.baseci.errors import CIBuildError
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from djblets.util.typing import JSONDict
 
     from reviewboard.changedescs.models import ChangeDescription
@@ -423,6 +425,7 @@ class BaseCIIntegration(Integration):
         url: (str | None) = None,
         url_text: (str | None) = None,
         save: bool = True,
+        extra_fields: (Sequence[str] | None) = None,
     ) -> None:
         """Update fields on a StatusUpdate.
 
@@ -431,6 +434,10 @@ class BaseCIIntegration(Integration):
 
         This should be used when subclasses need to modify a
         :py:class:`~reviewboard.reviews.models.status_update.StatusUpdate`.
+
+        Version Changed:
+            5.0:
+            Added the ``extra_fields`` argument.
 
         Args:
             status_update (reviewboard.reviews.models.status_update.
@@ -453,6 +460,12 @@ class BaseCIIntegration(Integration):
                 Whether to save the resulting
                 :py:class:`~reviewboard.reviews.models.status_update.
                 StatusUpdate`.
+
+            extra_fields (list of str, optional):
+                Any extra fields to include when saving the result.
+
+                Version Added:
+                    5.0
         """
         fields: list[str] = []
 
@@ -472,6 +485,9 @@ class BaseCIIntegration(Integration):
         if url_text is not None and url_text != status_update.url_text:
             status_update.url_text = url_text
             fields.append('url_text')
+
+        if extra_fields is not None:
+            fields.extend(extra_fields)
 
         if fields:
             status_update.timestamp = timezone.now()

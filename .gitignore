@@ -10,6 +10,7 @@
 .noseids
 
 # Build-related directories
+.local-packages
 .npm-workspaces
 _build
 build

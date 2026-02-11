@@ -1,3 +1,7 @@
+"""Review Board extension for common integrations."""
+
+from __future__ import annotations
+
 from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 from reviewboard.extensions.base import Extension
@@ -7,6 +11,7 @@ from reviewboard.urls import reviewable_url_names, review_request_url_names
 from rbintegrations.asana.integration import AsanaIntegration
 from rbintegrations.circleci.integration import CircleCIIntegration
 from rbintegrations.discord.integration import DiscordIntegration
+from rbintegrations.gitlabci.integration import GitLabCIIntegration
 from rbintegrations.idonethis.integration import IDoneThisIntegration
 from rbintegrations.jenkinsci.integration import JenkinsCIIntegration
 from rbintegrations.matrix.integration import MatrixIntegration
@@ -30,6 +35,7 @@ class RBIntegrationsExtension(Extension):
         AsanaIntegration,
         CircleCIIntegration,
         DiscordIntegration,
+        GitLabCIIntegration,
         IDoneThisIntegration,
         JenkinsCIIntegration,
         MatrixIntegration,
@@ -84,6 +90,8 @@ class RBIntegrationsExtension(Extension):
                  include('rbintegrations.asana.urls')),
             path('rbintegrations/circle-ci/',
                  include('rbintegrations.circleci.urls')),
+            path('rbintegrations/gitlab-ci/',
+                 include('rbintegrations.gitlabci.urls')),
             path('rbintegrations/travis-ci/',
                  include('rbintegrations.travisci.urls')),
             path('rbintegrations/trello/',

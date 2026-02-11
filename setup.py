@@ -17,7 +17,7 @@ setup(
     name=PACKAGE,
     version=get_package_version(),
     description=(
-        'A set of third-party service integrations for Review Board 5.0+.'
+        'A set of third-party service integrations for Review Board.'
     ),
     long_description=long_description,
     long_description_content_type='text/x-rst',
@@ -30,6 +30,8 @@ setup(
     install_requires=[
         'asana~=5.0.7',
         'housekeeping~=1.1',
+        'pydantic~=2.5',
+        'python-gitlab',
         'PyYAML>=3.12',
     ],
     entry_points={
@@ -52,6 +54,8 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
         'Topic :: Communications :: Chat',
         'Topic :: Software Development :: Build Tools',
         'Topic :: Software Development :: Quality Assurance',
