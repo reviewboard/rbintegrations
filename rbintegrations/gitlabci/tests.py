@@ -151,22 +151,13 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
         review_request = self._setup_build_test()
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {})
 
         @self.spy_for(ProjectPipelineManager.create,
                       owner=ProjectPipelineManager)
-        def _create_pipeline(
-            self: ProjectPipelineManager,
-            data: (dict[str, Any] | None) = None,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _create_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         self.spy_on(gitlab.Gitlab.auth,
                     owner=gitlab.Gitlab,
@@ -222,21 +213,12 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
         review_request = self._setup_build_test(use_trigger_token=True)
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {})
 
         @self.spy_for(Project.trigger_pipeline, owner=Project)
-        def _trigger_pipeline(
-            self: Project,
-            *args,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _trigger_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         review_request.publish(review_request.submitter)
 
@@ -266,22 +248,13 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
         review_request = self._setup_build_test(with_local_site=True)
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {'id': 1})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {'id': 1})
 
         @self.spy_for(ProjectPipelineManager.create,
                       owner=ProjectPipelineManager)
-        def _create_pipeline(
-            self: ProjectPipelineManager,
-            data: dict[str, Any] | None = None,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {'id': 1})
+        def _create_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {'id': 1})
 
         self.spy_on(gitlab.Gitlab.auth,
                     owner=gitlab.Gitlab,
@@ -342,30 +315,17 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
         review_request = self._setup_build_test(run_manually=True)
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {})
 
         @self.spy_for(ProjectPipelineManager.create,
                       owner=ProjectPipelineManager)
-        def _create_pipeline(
-            self: ProjectPipelineManager,
-            data: dict[str, Any] | None = None,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _create_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         @self.spy_for(Project.trigger_pipeline, owner=Project)
-        def _trigger_pipeline(
-            self: Project,
-            *args,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _trigger_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         review_request.publish(review_request.submitter)
 
@@ -377,22 +337,13 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
         review_request = self._setup_build_test(run_manually=True)
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {})
 
         @self.spy_for(ProjectPipelineManager.create,
                       owner=ProjectPipelineManager)
-        def _create_pipeline(
-            self: ProjectPipelineManager,
-            data: dict[str, Any] | None = None,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _create_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         self.spy_on(gitlab.Gitlab.auth,
                     owner=gitlab.Gitlab,
@@ -418,22 +369,13 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
             repository_name='Test Repo')
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {})
 
         @self.spy_for(ProjectPipelineManager.create,
                       owner=ProjectPipelineManager)
-        def _create_pipeline(
-            self: ProjectPipelineManager,
-            data: dict[str, Any] | None = None,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _create_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         self.spy_on(gitlab.Gitlab.auth,
                     owner=gitlab.Gitlab,
@@ -450,22 +392,13 @@ class GitLabCIIntegrationTests(BaseGitLabCITestCase):
             gitlab_inputs='{"input1": "{repository_name}"}')
 
         @self.spy_for(ProjectManager.get, owner=ProjectManager)
-        def _get_project(
-            self: ProjectManager,
-            id: str,
-            lazy: bool = False,
-            **kwargs,
-        ) -> Project:
-            return Project(self, {})
+        def _get_project(*args, **kwargs) -> Project:
+            return Project(args[0], {})
 
         @self.spy_for(ProjectPipelineManager.create,
                       owner=ProjectPipelineManager)
-        def _create_pipeline(
-            self: ProjectPipelineManager,
-            data: dict[str, Any] | None = None,
-            **kwargs,
-        ) -> ProjectPipeline:
-            return ProjectPipeline(self, {})
+        def _create_pipeline(*args, **kwargs) -> ProjectPipeline:
+            return ProjectPipeline(args[0], {})
 
         self.spy_on(gitlab.Gitlab.auth,
                     owner=gitlab.Gitlab,
@@ -743,6 +676,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': None,
@@ -766,6 +700,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -791,6 +726,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -831,6 +767,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -870,6 +807,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -908,12 +846,14 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
                 {
                     'id': 123,
                     'name': 'test-job',
+                    'stage': 'test',
                     'status': 'success',
                 },
             ],
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -955,6 +895,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'failed',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -984,7 +925,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
         self.assertEqual(response.status_code, 200)
 
         status_update = StatusUpdate.objects.get(pk=self.status_update.pk)
-        self.assertEqual(status_update.state, StatusUpdate.DONE_FAILURE)
+        self.assertEqual(status_update.state, StatusUpdate.ERROR)
 
     def test_webhook_pipeline_running(self) -> None:
         """Testing GitLabCIWebHookView with running pipeline"""
@@ -994,6 +935,7 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'running',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -1036,17 +978,20 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
                 {
                     'id': 123,
                     'name': 'test-job-1',
+                    'stage': 'test',
                     'status': 'success',
                 },
                 {
                     'id': 124,
                     'name': 'test-job-2',
+                    'stage': 'test',
                     'status': 'failed',
                 },
             ],
             'object_attributes': {
                 'id': 123,
                 'source': 'api',
+                'stages': ['test'],
                 'status': 'failed',
                 'url': 'https://gitlab.example.com/pipeline/123',
                 'variables': [
@@ -1081,11 +1026,13 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
             {
                 '123': {
                     'name': 'test-job-1',
+                    'stage': 'test',
                     'status': 'success',
                     'url': 'https://gitlab.example.com/project/-/jobs/123',
                 },
                 '124': {
                     'name': 'test-job-2',
+                    'stage': 'test',
                     'status': 'failed',
                     'url': 'https://gitlab.example.com/project/-/jobs/124',
                 },
@@ -1102,12 +1049,14 @@ class GitLabCIWebHookTests(BaseGitLabCITestCase):
                 {
                     'id': 125,
                     'name': 'child-job',
+                    'stage': 'test',
                     'status': 'success',
                 },
             ],
             'object_attributes': {
                 'id': 124,
                 'source': 'parent_pipeline',
+                'stages': ['test'],
                 'status': 'success',
                 'url': 'https://gitlab.example.com/pipeline/124',
                 'variables': [
