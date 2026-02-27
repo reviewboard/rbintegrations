@@ -104,13 +104,19 @@ class BaseCIIntegrationTests(IntegrationTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        """Set up the test case class."""
+        super().setUpClass()
+
         get_integration_manager().register_integration_class(
             cls.integration_cls)
 
     @classmethod
     def tearDownClass(cls) -> None:
+        """Tear down the test case class."""
         get_integration_manager().unregister_integration_class(
             cls.integration_cls)
+
+        super().tearDownClass()
 
     def test_get_or_create_api_token_with_new(self) -> None:
         """Testing BaseCIIntegration.get_or_create_api_token with new token"""
