@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Literal, TYPE_CHECKING
+from typing import List, Literal, Optional, TYPE_CHECKING
 
 import pydantic
 from django.core.exceptions import ObjectDoesNotExist
@@ -87,15 +87,15 @@ class _WebHookPayload(pydantic.BaseModel):
 
         id: int
         source: str
-        stages: list[str]
+        stages: List[str]
         status: GitLabStatus
         url: str
-        variables: (list[PipelineVariable] | None) = None
+        variables: Optional[List[PipelineVariable]] = None
 
     class ProjectData(pydantic.BaseModel):
         web_url: str
 
-    builds: list[BuildData]
+    builds: List[BuildData]
     object_attributes: ObjectAttributes
     project: ProjectData
 

@@ -42,7 +42,7 @@ classifiers = [
 dependencies = [
     'asana~=5.0.7',
     'housekeeping~=1.1',
-    'pydantic~=2.5',
+    'pydantic~=2.10',
     'python-gitlab',
     'PyYAML>=3.12',
 ]

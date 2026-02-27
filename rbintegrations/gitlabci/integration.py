@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 import gitlab
 import pydantic
@@ -70,7 +70,7 @@ class GitLabCIConfiguration(pydantic.BaseModel):
     gitlab_vars: str
 
     #: The secret token to use for validating WebHook responses.
-    gitlab_webhook_secret_token: (str | None) = None
+    gitlab_webhook_secret_token: Optional[str] = None
 
 
 class GitLabCIIntegration(BaseCIIntegration):

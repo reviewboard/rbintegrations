@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, cast
+from typing import List, TYPE_CHECKING, cast
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
@@ -406,7 +406,7 @@ class BaseCIIntegration(Integration):
         """
         config_form_cls = self.config_form_cls
         local_site = review_request.local_site
-        configs = cast(list[IntegrationConfig],
+        configs = cast(List[IntegrationConfig],
                        self.get_configs(local_site=local_site))
 
         return [
