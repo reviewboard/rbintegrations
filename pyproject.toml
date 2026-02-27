@@ -12,8 +12,7 @@ description = 'A set of third-party service integrations for Review Board'
 authors = [
     {name = 'Beanbag, Inc.', email = 'questions@beanbaginc.com' },
 ]
-license = 'MIT'
-license-files = ['LICENSE', 'AUTHORS']
+license = { text = 'MIT' }
 readme = 'README.rst'
 requires-python = '>=3.8'
 dynamic = ['version']
