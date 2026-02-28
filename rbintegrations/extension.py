@@ -8,19 +8,6 @@ from reviewboard.extensions.base import Extension
 from reviewboard.extensions.hooks import IntegrationHook, URLHook
 from reviewboard.urls import reviewable_url_names, review_request_url_names
 
-from rbintegrations.asana.integration import AsanaIntegration
-from rbintegrations.circleci.integration import CircleCIIntegration
-from rbintegrations.discord.integration import DiscordIntegration
-from rbintegrations.gitlabci.integration import GitLabCIIntegration
-from rbintegrations.idonethis.integration import IDoneThisIntegration
-from rbintegrations.jenkinsci.integration import JenkinsCIIntegration
-from rbintegrations.matrix.integration import MatrixIntegration
-from rbintegrations.mattermost.integration import MattermostIntegration
-from rbintegrations.msteams.integration import MSTeamsIntegration
-from rbintegrations.slack.integration import SlackIntegration
-from rbintegrations.travisci.integration import TravisCIIntegration
-from rbintegrations.trello.integration import TrelloIntegration
-
 
 class RBIntegrationsExtension(Extension):
     """Extends Review Board with support for many common integrations."""
@@ -30,21 +17,6 @@ class RBIntegrationsExtension(Extension):
         'Summary': _('A set of third-party service integrations for '
                      'Review Board.'),
     }
-
-    integrations = [
-        AsanaIntegration,
-        CircleCIIntegration,
-        DiscordIntegration,
-        GitLabCIIntegration,
-        IDoneThisIntegration,
-        JenkinsCIIntegration,
-        MatrixIntegration,
-        MattermostIntegration,
-        MSTeamsIntegration,
-        SlackIntegration,
-        TravisCIIntegration,
-        TrelloIntegration,
-    ]
 
     css_bundles = {
         'fields': {
@@ -82,8 +54,31 @@ class RBIntegrationsExtension(Extension):
 
     def initialize(self) -> None:
         """Initialize the extension."""
-        for integration_cls in self.integrations:
-            IntegrationHook(self, integration_cls)
+        from rbintegrations.asana.integration import AsanaIntegration
+        from rbintegrations.circleci.integration import CircleCIIntegration
+        from rbintegrations.discord.integration import DiscordIntegration
+        from rbintegrations.gitlabci.integration import GitLabCIIntegration
+        from rbintegrations.idonethis.integration import IDoneThisIntegration
+        from rbintegrations.jenkinsci.integration import JenkinsCIIntegration
+        from rbintegrations.matrix.integration import MatrixIntegration
+        from rbintegrations.mattermost.integration import MattermostIntegration
+        from rbintegrations.msteams.integration import MSTeamsIntegration
+        from rbintegrations.slack.integration import SlackIntegration
+        from rbintegrations.travisci.integration import TravisCIIntegration
+        from rbintegrations.trello.integration import TrelloIntegration
+
+        IntegrationHook(self, AsanaIntegration)
+        IntegrationHook(self, CircleCIIntegration)
+        IntegrationHook(self, DiscordIntegration)
+        IntegrationHook(self, GitLabCIIntegration)
+        IntegrationHook(self, IDoneThisIntegration)
+        IntegrationHook(self, JenkinsCIIntegration)
+        IntegrationHook(self, MatrixIntegration)
+        IntegrationHook(self, MattermostIntegration)
+        IntegrationHook(self, MSTeamsIntegration)
+        IntegrationHook(self, SlackIntegration)
+        IntegrationHook(self, TravisCIIntegration)
+        IntegrationHook(self, TrelloIntegration)
 
         URLHook(self, [
             path('rbintegrations/asana/',
