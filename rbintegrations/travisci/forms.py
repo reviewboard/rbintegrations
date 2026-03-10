@@ -19,6 +19,7 @@ from reviewboard.scmtools.models import Repository
 
 from rbintegrations.baseci.forms import BaseCIIntegrationConfigForm
 from rbintegrations.travisci.api import TravisAPI
+from rbintegrations.util.compat.logs import log_timed
 from rbintegrations.util.conditions import (ReviewRequestConditionsField,
                                             review_request_condition_choices)
 
@@ -218,36 +219,43 @@ class TravisCIIntegrationConfigForm(BaseCIIntegrationConfigForm):
 
         # Use the Travis API's "lint" endpoint to verify that the provided
         # config is valid.
-        try:
-            lint_results = api.lint(cleaned_data['travis_yml'])
+        request = self.request
 
-            for warning in lint_results['warnings']:
-                if warning['key']:
-                    if isinstance(warning['key'], list):
-                        key = '.'.join(warning['key'])
+        with log_timed('Triggering Travis CI lint check',
+                       logger=logger,
+                       request=request) as log_timer:
+            try:
+                lint_results = api.lint(cleaned_data['travis_yml'])
+
+                for warning in lint_results['warnings']:
+                    if warning['key']:
+                        if isinstance(warning['key'], list):
+                            key = '.'.join(warning['key'])
+                        else:
+                            key = warning['key']
+
+                        message = (_('In %s section: %s')
+                                   % (key, warning['message']))
                     else:
-                        key = warning['key']
+                        message = warning['message']
 
-                    message = (_('In %s section: %s')
-                               % (key, warning['message']))
-                else:
-                    message = warning['message']
-
-                self._errors['travis_yml'] = self.error_class([message])
-        except URLError as e:
-            logger.exception('Unexpected error when trying to lint Travis CI '
-                             'config: %s',
-                             e,
-                             extra={'request': self.request})
-            self._errors['travis_endpoint'] = self.error_class([
-                _('Unable to communicate with Travis CI server.')
-            ])
-        except Exception as e:
-            logger.exception('Unexpected error when trying to lint Travis CI '
-                             'config: %s',
-                             e,
-                             extra={'request': self.request})
-            self._errors['travis_endpoint'] = self.error_class([e])
+                    self._errors['travis_yml'] = self.error_class([message])
+            except URLError as e:
+                logger.exception('[%s] Unexpected error when trying to lint '
+                                 'Travis CI config: %s',
+                                 log_timer.trace_id,
+                                 e,
+                                 extra={'request': request})
+                self._errors['travis_endpoint'] = self.error_class([
+                    _('Unable to communicate with Travis CI server.')
+                ])
+            except Exception as e:
+                logger.exception('[%s] Unexpected error when trying to lint '
+                                 'Travis CI config: %s',
+                                 log_timer.trace_id,
+                                 e,
+                                 extra={'request': self.request})
+                self._errors['travis_endpoint'] = self.error_class([e])
 
         return cleaned_data
 

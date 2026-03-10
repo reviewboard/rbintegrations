@@ -18,6 +18,7 @@ from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.integration import BaseChatIntegration
 from rbintegrations.msteams.forms import MSTeamsIntegrationConfigForm
+from rbintegrations.util.compat.logs import log_timed
 
 if TYPE_CHECKING:
     from djblets.util.typing import JSONDict, JSONList
@@ -248,23 +249,23 @@ class MSTeamsIntegration(BaseChatIntegration):
 
             webhook_url = config.get('webhook_url')
 
-            logger.debug('Sending notification for event "%s", '
-                         'review_request ID %d, '
-                         'WebHook URL %s',
-                         event_name, review_request.pk, webhook_url)
+            with log_timed(f'Sending notification for event "{event_name}", '
+                           f'review_request ID {review_request.pk}, '
+                           f'WebHook URL {webhook_url}',
+                           logger=logger) as log_timer:
+                try:
+                    if not webhook_url:
+                        raise Exception('WebHook URL has not been configured.')
 
-            try:
-                if not webhook_url:
-                    raise Exception('WebHook URL has not been configured.')
-
-                data = json.dumps(payload).encode('utf-8')
-                headers: MutableMapping[str, str] = {
-                    'Content-Length': str(len(data)),
-                    'Content-Type': 'application/json',
-                }
-                urlopen(Request(webhook_url, data, headers))
-            except Exception as e:
-                logger.exception('Failed to send notification: %s', e)
+                    data = json.dumps(payload).encode('utf-8')
+                    headers: MutableMapping[str, str] = {
+                        'Content-Length': str(len(data)),
+                        'Content-Type': 'application/json',
+                    }
+                    urlopen(Request(webhook_url, data, headers))
+                except Exception as e:
+                    logger.exception('[%s] Failed to send notification: %s',
+                                     log_timer.trace_id, e)
 
     def format_link(
         self,

@@ -9,7 +9,9 @@ from typing import Iterable, cast
 import asana
 import asana.rest
 from django.http import HttpRequest, HttpResponse
+from django.utils.translation import gettext as _
 from django.views.generic import View
+from djblets.log import log_timed
 from djblets.util.typing import JSONValue
 from reviewboard.accounts.mixins import CheckLoginRequiredViewMixin
 from reviewboard.integrations.base import get_integration_manager
@@ -69,30 +71,40 @@ class AsanaTaskSearchView(ReviewRequestViewMixin, View):
         }
 
         for config in configs:
-            try:
-                asana_config = asana.Configuration()
-                asana_config.access_token = \
-                    config.settings['asana_access_token']
+            workspace = config.settings.get('asana_workspace')
 
-                api_client = asana.ApiClient(asana_config)
-                typeahead_api = asana.TypeaheadApi(api_client)
+            with log_timed(f'Requesting tasks from Asana for workspace '
+                           f'{workspace}',
+                           logger=logger) as log_timer:
+                try:
+                    if not workspace:
+                        raise ValueError(_(
+                            'The workspace ID is not configured.'
+                        ))
 
-                workspace = config.settings['asana_workspace']
+                    asana_config = asana.Configuration()
+                    asana_config.access_token = \
+                        config.settings['asana_access_token']
 
-                tasks = cast(
-                    Iterable[JSONValue],
-                    typeahead_api.typeahead_for_workspace(
-                        workspace, 'task', params))
+                    api_client = asana.ApiClient(asana_config)
+                    typeahead_api = asana.TypeaheadApi(api_client)
 
-                results.append({
-                    'workspace': config.settings['asana_workspace_name'],
-                    'workspace_id': workspace,
-                    'tasks': list(tasks),
-                })
-            except Exception as e:
-                logger.exception('Unexpected error when searching for Asana '
-                                 'tasks: %s',
-                                 e)
+                    workspace = config.settings['asana_workspace']
+
+                    tasks = cast(
+                        Iterable[JSONValue],
+                        typeahead_api.typeahead_for_workspace(
+                            workspace, 'task', params))
+
+                    results.append({
+                        'workspace': config.settings['asana_workspace_name'],
+                        'workspace_id': workspace,
+                        'tasks': list(tasks),
+                    })
+                except Exception as e:
+                    logger.exception('[%s] Unexpected error when searching '
+                                     'for Asana tasks: %s',
+                                     log_timer.trace_id, e)
 
         return HttpResponse(json.dumps(results),
                             content_type='application/json')

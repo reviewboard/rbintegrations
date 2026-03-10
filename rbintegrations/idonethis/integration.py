@@ -23,6 +23,10 @@ from rbintegrations.idonethis.pages import IDoneThisIntegrationAccountPage
 from rbintegrations.idonethis.utils import (create_idonethis_request,
                                             get_user_api_token,
                                             get_user_team_ids)
+from rbintegrations.util.compat.logs import log_timed
+
+
+logger = logging.getLogger(__name__)
 
 
 class IDoneThisIntegration(Integration):
@@ -158,34 +162,43 @@ class IDoneThisIntegration(Integration):
             request = create_idonethis_request(request_path='entries',
                                                api_token=api_token,
                                                json_payload=json_payload)
-            logging.debug('IDoneThis: Posting entry "%s" for signal "%s", '
-                          'review_request ID %d, user "%s" to team "%s", '
-                          'request "%s %s"',
-                          entry_type,
-                          signal_name,
-                          review_request.pk,
-                          user.username,
-                          team_id,
-                          request.get_method(),
-                          request.get_full_url())
 
-            try:
-                urlopen(request)
-            except (HTTPError, URLError) as e:
-                # TODO: record failure in user settings and possibly notify the
-                # user on the account page so that problems can be noticed.
-                if isinstance(e, HTTPError):
-                    error_info = '%s, error data: %s' % (e, e.read())
-                else:
-                    error_info = e.reason
+            with log_timed(f'Posting entry "{entry_type}" for signal '
+                           f'"{signal_name}", review_request ID '
+                           f'{review_request.pk}, user "{user.username}" to '
+                           f'team "{team_id}", request '
+                           f'"{request.get_method()} '
+                           f'{request.get_full_url()}"',
+                           logger=logger) as log_timer:
+                try:
+                    urlopen(request)
+                except (HTTPError, URLError) as e:
+                    # TODO: Record failure in user settings and possibly
+                    #       notify the user on the account page so that
+                    #       problems can be noticed.
+                    if isinstance(e, HTTPError):
+                        error_info = '%s, error data: %s' % (e, e.read())
+                    else:
+                        error_info = e.reason
 
-                logging.error('IDoneThis: Failed to post entry for user "%s" '
-                              'to team "%s", request "%s %s": %s',
-                              user.username,
-                              team_id,
-                              request.get_method(),
-                              request.get_full_url(),
-                              error_info)
+                    logger.error('[%s] Failed to post entry for user "%s" '
+                                 'to team "%s", request "%s %s": %s',
+                                 log_timer.trace_id,
+                                 user.username,
+                                 team_id,
+                                 request.get_method(),
+                                 request.get_full_url(),
+                                 error_info)
+                except Exception as e:
+                    logger.exception('[%s] Unexpected error posting entry '
+                                     'for user "%s" to team "%s", request '
+                                     '"%s %s": %s',
+                                     log_timer.trace_id,
+                                     user.username,
+                                     team_id,
+                                     request.get_method(),
+                                     request.get_full_url(),
+                                     e)
 
     def _on_review_request_closed(self, user, review_request, close_type,
                                   **kwargs):

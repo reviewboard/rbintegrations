@@ -20,7 +20,7 @@ from reviewboard.scmtools.crypto_utils import (decrypt_password,
 from rbintegrations.idonethis.forms import (
     IDoneThisIntegrationAccountPageForm,
     IDoneThisIntegrationConfigForm)
-from rbintegrations.idonethis.integration import IDoneThisIntegration
+from rbintegrations.idonethis.integration import IDoneThisIntegration, logger
 from rbintegrations.idonethis.utils import get_user_team_ids
 from rbintegrations.testing.testcases import IntegrationTestCase
 
@@ -1257,13 +1257,13 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
 
         self.spy_on(self.integration.post_entry)
         self.spy_on(urlopen, call_fake=_urlopen_raise_httperror)
-        self.spy_on(logging.error)
+        self.spy_on(logger.error)
 
         review_request.close(review_request.SUBMITTED, self.user)
 
-        self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 2)
-        self.assertEqual(len(logging.error.spy.calls), 2)
+        self.assertSpyCallCount(self.integration.post_entry, 1)
+        self.assertSpyCallCount(urlopen, 2)
+        self.assertSpyCallCount(logger.error, 2)
 
         self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
 
@@ -1284,13 +1284,13 @@ class IDoneThisIntegrationTests(IntegrationTestCase):
 
         self.spy_on(self.integration.post_entry)
         self.spy_on(urlopen, call_fake=_urlopen_raise_urlerror)
-        self.spy_on(logging.error)
+        self.spy_on(logger.error)
 
         review_request.close(review_request.SUBMITTED, self.user)
 
-        self.assertEqual(len(self.integration.post_entry.spy.calls), 1)
-        self.assertEqual(len(urlopen.spy.calls), 2)
-        self.assertEqual(len(logging.error.spy.calls), 2)
+        self.assertSpyCallCount(self.integration.post_entry, 1)
+        self.assertSpyCallCount(urlopen, 2)
+        self.assertSpyCallCount(logger.error, 2)
 
         self.assertIsNone(self.integration.post_entry.spy.calls[0].exception)
 

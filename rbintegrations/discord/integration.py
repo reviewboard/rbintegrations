@@ -6,7 +6,6 @@ import json
 import logging
 from typing import MutableMapping, Optional, Sequence, TYPE_CHECKING
 from urllib.request import Request, urlopen
-from uuid import uuid4
 
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -14,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from rbintegrations.basechat.integration import BaseChatIntegration
 from rbintegrations.discord.forms import DiscordIntegrationConfigForm
 from rbintegrations.slack.integration import format_link, build_slack_message
+from rbintegrations.util.compat.logs import log_timed
 
 if TYPE_CHECKING:
     from djblets.util.typing import JSONDict
@@ -138,33 +138,34 @@ class DiscordIntegration(BaseChatIntegration):
             # Tell Discord to use Slack formatted message.
             webhook_url = '%s/slack' % config.get('webhook_url')
 
-            logger.debug('Sending notification for event "%s", '
-                         'review_request ID %d, '
-                         'WebHook URL %s',
-                         event_name, review_request.pk, webhook_url)
+            with log_timed(f'Sending notification for event "{event_name}", '
+                           f'review_request ID {review_request.pk}, '
+                           f'WebHook URL {webhook_url}',
+                           logger=logger) as log_timer:
+                try:
+                    data = json.dumps(payload).encode('utf-8')
 
-            try:
-                data = json.dumps(payload).encode('utf-8')
+                    # Must include 'User-Agent' to avoid being blocked by
+                    # Discord.
+                    headers: MutableMapping[str, str] = {
+                        'Content-Length': str(len(data)),
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64)',
+                    }
 
-                # Must include 'User-Agent' to avoid being blocked by Discord.
-                headers: MutableMapping[str, str] = {
-                    'Content-Length': str(len(data)),
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64)',
-                }
-                urlopen(Request(webhook_url, data, headers))
-            except Exception as e:
-                error_id = str(uuid4())
-                fp = getattr(e, 'fp', None)
+                    urlopen(Request(webhook_url, data, headers))
+                except Exception as e:
+                    error_id = log_timer.trace_id
+                    fp = getattr(e, 'fp', None)
 
-                logger.exception('[%s] Failed to send notification: %s',
-                                 error_id, e)
-                logger.debug('[%s] Discord message payload = %r',
-                             error_id, payload)
+                    logger.exception('[%s] Failed to send notification: %s',
+                                     error_id, e)
+                    logger.debug('[%s] Discord message payload = %r',
+                                 error_id, payload)
 
-                if fp is not None:
-                    logger.debug('[%s] Discord error response = %r',
-                                 error_id, fp.read())
+                    if fp is not None:
+                        logger.debug('[%s] Discord error response = %r',
+                                     error_id, fp.read())
 
     def format_link(
         self,
