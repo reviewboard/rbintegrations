@@ -1093,10 +1093,10 @@ class MSTeamsIntegrationTests(IntegrationTestCase):
         with self.assertLogs() as logs:
             review_request.publish(self.user)
 
-            self.assertEqual(
-                logs.records[0].getMessage(),
-                'Failed to send notification: '
-                'WebHook URL has not been configured.')
+        self.assertRegex(
+            logs.records[0].getMessage(),
+            r'\[[a-z0-9-]+\] Failed to send notification: '
+            r'WebHook URL has not been configured.')
 
     def test_notify_new_review_request_escaped_markdown(self) -> None:
         """Testing MSIntegration escapes []() characters when needed

@@ -15,6 +15,7 @@ from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.integration import BaseChatIntegration
 from rbintegrations.matrix.forms import MatrixIntegrationConfigForm
+from rbintegrations.util.compat.logs import log_timed
 
 if TYPE_CHECKING:
     from djblets.util.typing import JSONDict
@@ -154,25 +155,25 @@ class MatrixIntegration(BaseChatIntegration):
             access_token = config.get('access_token')
             server = config.get('server')
 
-            logger.debug('Sending notification for event "%s", '
-                         'review_request ID %d to room "%s", '
-                         'access token %s',
-                         event_name, review_request.pk, room_id, access_token)
+            with log_timed(f'Sending notification for event "{event_name}", '
+                           f'review_request ID {review_request.pk} to room '
+                           f'"{room_id}"',
+                           logger=logger) as log_timer:
+                try:
+                    data = json.dumps(payload).encode('utf-8')
+                    url = (
+                        f'{server}/_matrix/client/r0/rooms/{room_id}/send/'
+                        f'm.room.message?access_token={access_token}'
+                    )
+                    headers: MutableMapping[str, str] = {
+                        'Content-Length': str(len(data)),
+                        'Content-Type': 'application/json',
+                    }
 
-            try:
-                data = json.dumps(payload).encode('utf-8')
-                url = (
-                    '%s/_matrix/client/r0/rooms/%s/send/'
-                    'm.room.message?access_token=%s'
-                    % (server, room_id, access_token))
-                headers: MutableMapping[str, str] = {
-                    'Content-Length': str(len(data)),
-                    'Content-Type': 'application/json',
-                }
-
-                urlopen(Request(url, data, headers))
-            except Exception as e:
-                logger.exception('Failed to send notification: %s', e)
+                    urlopen(Request(url, data, headers))
+                except Exception as e:
+                    logger.exception('[%s] Failed to send notification: %s',
+                                     log_timer.trace_id, e)
 
     def replace_shortcode(
         self,

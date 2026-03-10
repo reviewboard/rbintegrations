@@ -10,9 +10,10 @@ from urllib.request import urlopen
 
 from django.http import HttpResponse
 from django.views.generic import View
-
 from reviewboard.integrations.base import get_integration_manager
 from reviewboard.reviews.views import ReviewRequestViewMixin
+
+from rbintegrations.util.compat.logs import log_timed
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -81,22 +82,25 @@ class TrelloCardSearchView(ReviewRequestViewMixin, View):
 
             url = 'https://api.trello.com/1/search?%s' % urlencode(params)
 
-            try:
-                response = urlopen(url)
-                data = json.loads(response.read())
+            with log_timed(f'Fetching Trello cards at {url}',
+                           logger=logger,
+                           request=request) as log_timer:
+                try:
+                    response = urlopen(url)
+                    data = json.loads(response.read())
 
-                for card in data['cards']:
-                    results.append({
-                        'id': card['id'],
-                        'name': card['name'],
-                        'board': card.get('board', {}).get('name', ''),
-                        'list': card.get('list', {}).get('name', ''),
-                        'url': card['shortUrl'],
-                    })
-            except Exception as e:
-                logger.exception('Unexpected error when searching for Trello '
-                                 'cards: %s',
-                                 e)
+                    for card in data['cards']:
+                        results.append({
+                            'id': card['id'],
+                            'name': card['name'],
+                            'board': card.get('board', {}).get('name', ''),
+                            'list': card.get('list', {}).get('name', ''),
+                            'url': card['shortUrl'],
+                        })
+                except Exception as e:
+                    logger.exception('[%s] Unexpected error when searching '
+                                     'for Trello cards: %s',
+                                     log_timer.trace_id, e)
 
         return HttpResponse(json.dumps(results),
                             content_type='application/json')

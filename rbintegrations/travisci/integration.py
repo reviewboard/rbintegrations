@@ -15,6 +15,7 @@ from rbintegrations.baseci.integration import (BaseCIIntegration,
                                                BuildPrepData)
 from rbintegrations.travisci.api import TravisAPI
 from rbintegrations.travisci.forms import TravisCIIntegrationConfigForm
+from rbintegrations.util.compat.logs import log_timed
 
 if TYPE_CHECKING:
     from reviewboard.integrations.models import IntegrationConfig
@@ -204,17 +205,18 @@ class TravisCIIntegration(BaseCIIntegration):
         travis_config['env'] = env
 
         # Time to kick off the build!
-        logger.info('Triggering Travis CI build for review request %s '
-                    '(diffset revision %d)',
-                    prep_data.review_request.get_absolute_url(),
-                    diffset.revision)
-        repo_slug = self._get_github_repository_slug(prep_data.repository)
+        with log_timed(f'Triggering Travis CI build for review request '
+                       f'{prep_data.review_request.get_absolute_url()} '
+                       f'(diffset revision {diffset.revision})',
+                       logger=logger):
+            repo_slug = self._get_github_repository_slug(prep_data.repository)
 
-        api = TravisAPI(config)
-        api.start_build(repo_slug=repo_slug,
-                        travis_config=travis_config,
-                        commit_message=prep_data.extra_state['commit_message'],
-                        branch=config.get('branch_name') or 'master')
+            api = TravisAPI(config)
+            api.start_build(
+                repo_slug=repo_slug,
+                travis_config=travis_config,
+                commit_message=prep_data.extra_state['commit_message'],
+                branch=config.get('branch_name') or 'master')
 
     def _get_github_repository_slug(self, repository):
         """Return the "slug" for a GitHub repository.

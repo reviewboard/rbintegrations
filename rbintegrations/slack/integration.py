@@ -15,6 +15,7 @@ from reviewboard.admin.server import build_server_url
 
 from rbintegrations.basechat.integration import BaseChatIntegration
 from rbintegrations.deprecation import RemovedInRBIntegrations50Warning
+from rbintegrations.util.compat.logs import log_timed
 
 if TYPE_CHECKING:
     from djblets.util.typing import JSONDict, JSONValue
@@ -213,24 +214,23 @@ def notify(
 
         webhook_url = config.get('webhook_url')
 
-        logger.debug('Sending notification for event "%s", '
-                     'review_request ID %d to channel "%s", '
-                     'WebHook URL %s',
-                     event_name, review_request.pk, channel, webhook_url)
+        with log_timed(f'Sending notification for event "{event_name}", '
+                       f'review_request ID {review_request.pk} to channel '
+                       f'"{channel}", WebHook URL {webhook_url}',
+                       logger=logger) as log_timer:
+            try:
+                if not webhook_url:
+                    raise Exception('WebHook URL has not been configured.')
 
-        try:
-            if not webhook_url:
-                raise Exception('WebHook URL has not been configured.')
-
-            data = json.dumps(payload).encode('utf-8')
-            headers: MutableMapping[str, str] = {
-                'Content-Type': 'application/json',
-                'Content-Length': str(len(data)),
-            }
-            urlopen(Request(webhook_url, data, headers))
-        except Exception as e:
-            logger.error('Failed to send notification: %s',
-                         e, exc_info=True)
+                data = json.dumps(payload).encode('utf-8')
+                headers: MutableMapping[str, str] = {
+                    'Content-Type': 'application/json',
+                    'Content-Length': str(len(data)),
+                }
+                urlopen(Request(webhook_url, data, headers))
+            except Exception as e:
+                logger.exception('[%s] Failed to send notification: %s',
+                                 log_timer.trace_id, e)
 
 
 @deprecate_non_keyword_only_args(RemovedInRBIntegrations50Warning)

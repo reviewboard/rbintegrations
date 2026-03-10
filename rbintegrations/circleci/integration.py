@@ -14,6 +14,7 @@ from rbintegrations.baseci.errors import CIBuildError
 from rbintegrations.baseci.integration import (BaseCIIntegration,
                                                BuildPrepData)
 from rbintegrations.circleci.forms import CircleCIIntegrationConfigForm
+from rbintegrations.util.compat.logs import log_timed
 from rbintegrations.util.urlrequest import URLRequest
 
 if TYPE_CHECKING:
@@ -171,8 +172,6 @@ class CircleCIIntegration(BaseCIIntegration):
             body['build_parameters']['REVIEWBOARD_LOCAL_SITE'] = \
                 local_site.name
 
-        logger.info('Making CircleCI API request: %s', url)
-
         request = URLRequest(
             url,
             body=json.dumps(body),
@@ -182,12 +181,18 @@ class CircleCIIntegration(BaseCIIntegration):
             },
             method='POST')
 
-        u = urlopen(request)
-        data = json.loads(u.read())
+        with log_timed(f'Sending build request to CircleCI API at {url}',
+                       logger=logger) as log_timer:
+            try:
+                u = urlopen(request)
+                data = json.loads(u.read())
 
-        self.update_status(status_update,
-                           url=data['build_url'],
-                           url_text='View Build')
+                self.update_status(status_update,
+                                   url=data['build_url'],
+                                   url_text='View Build')
+            except Exception as e:
+                logger.exception('[%s] Failed to start build: %s',
+                                 log_timer.trace_id, e)
 
     def _get_repo_ids(self, service_name, repository):
         """Return the organization and repo name for the given repository.
