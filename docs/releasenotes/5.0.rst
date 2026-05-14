@@ -1,0 +1,51 @@
+.. default-intersphinx:: rb8.0
+
+==============================
+Integrations 5.0 Release Notes
+==============================
+
+**Release date**: TBD
+
+
+Compatibility
+=============
+
+Integrations 5.0 is compatible with Review Board 7.x and 8.x.
+
+It supports Python 3.8 - 3.13.
+
+
+New Integrations
+================
+
+* :rbintegration:`GitLab CI <gitlab-ci>`
+
+  GitLab CI is a widely-used continuous integration, deployment, and automation
+  service available as part of GitLab.
+
+  This integration will trigger jobs in GitLab CI with necessary variables set
+  to allow running pipelines when a review request is posted or updated. This
+  does require adding some additional configuration to your pipeline.
+
+  See the :ref:`documentation <integrations-gitlab-ci>` for configuration
+  instructions.
+
+  Based on work by André Klitzing.
+
+
+Bug Fixes
+=========
+
+CircleCI
+--------
+
+* Fixed a typo in the CircleCI status strings.
+
+
+Contributors
+============
+
+* André Klitzing
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin

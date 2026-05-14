@@ -359,11 +359,12 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/2.7', None),
     'python2': ('https://docs.python.org/2.7', None),
     'python3': ('https://docs.python.org/3', None),
-    'rb3.0': ('%s/docs/manual/3.0/' % rbwebsite_url, None),
-    'rb4.0': ('%s/docs/manual/4.0/' % rbwebsite_url, None),
-    'rb5.0': ('%s/docs/manual/5.0/' % rbwebsite_url, None),
-    'rb7.0': ('%s/docs/manual/7.x/' % rbwebsite_url, None),
-    'rb-dev': ('%s/docs/manual/dev/' % rbwebsite_url, None),
+    'rb3.0': (f'{rbwebsite_url}/docs/manual/3.0/', None),
+    'rb4.0': (f'{rbwebsite_url}/docs/manual/4.0/', None),
+    'rb5.0': (f'{rbwebsite_url}/docs/manual/5.0/', None),
+    'rb7.0': (f'{rbwebsite_url}/docs/manual/7.x/', None),
+    'rb8.0': (f'{rbwebsite_url}/docs/manual/8.x/', None),
+    'rb-dev': (f'{rbwebsite_url}/docs/manual/dev/', None),
 }
 
 extlinks = {
