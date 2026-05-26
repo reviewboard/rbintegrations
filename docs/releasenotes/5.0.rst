@@ -4,13 +4,13 @@
 Integrations 5.0 Release Notes
 ==============================
 
-**Release date**: TBD
+**Release date**: May 25, 2026
 
 
 Compatibility
 =============
 
-Integrations 5.0 is compatible with Review Board 7.x and 8.x.
+Integrations 5.0 is compatible with Review Board 8.x.
 
 It supports Python 3.8 - 3.13.
 
