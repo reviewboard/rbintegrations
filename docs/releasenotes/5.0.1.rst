@@ -1,0 +1,37 @@
+.. default-intersphinx:: rb8.0
+
+================================
+Integrations 5.0.1 Release Notes
+================================
+
+**Release date**: May 29, 2026
+
+
+Compatibility
+=============
+
+Integrations 5.0 is compatible with Review Board 8.x.
+
+It supports Python 3.8 - 3.13.
+
+
+New Features
+============
+
+* :rbintegration:`Jenkins CI <jenkins-ci>` builds now receive a
+  ``REVIEWBOARD_REPOSITORY_ID`` parameter containing the database ID of the
+  repository.
+
+
+Bug Fixes
+=========
+
+* Added missing icon for :rbintegration:`GitLab CI <gitlab-ci>`.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
