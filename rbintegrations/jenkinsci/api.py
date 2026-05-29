@@ -64,25 +64,29 @@ class JenkinsAPI(object):
             'parameter': [
                 {
                     'name': 'REVIEWBOARD_SERVER',
-                    'value': patch_info['reviewboard_server']
+                    'value': patch_info['reviewboard_server'],
                 },
                 {
-                    'name': 'REVIEWBOARD_REVIEW_ID',
-                    'value': patch_info['review_id']
+                    'name': 'REVIEWBOARD_REPOSITORY_ID',
+                    'value': patch_info['repository_id'],
                 },
                 {
                     'name': 'REVIEWBOARD_REVIEW_BRANCH',
-                    'value': patch_info['review_branch']
+                    'value': patch_info['review_branch'],
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
-                    'value': patch_info['diff_revision']
+                    'value': patch_info['diff_revision'],
+                },
+                {
+                    'name': 'REVIEWBOARD_REVIEW_ID',
+                    'value': patch_info['review_id'],
                 },
                 {
                     'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
-                    'value': patch_info['status_update_id']
-                }
-            ]
+                    'value': patch_info['status_update_id'],
+                },
+            ],
         }
 
         # This is not part of the official REST API, but is however listed in

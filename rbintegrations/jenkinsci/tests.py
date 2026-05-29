@@ -22,13 +22,13 @@ if TYPE_CHECKING:
     from reviewboard.reviews.models import ReviewRequest
 
 
-class JenkinsCIIntegrationTests(IntegrationTestCase):
+class JenkinsCIIntegrationTests(IntegrationTestCase[JenkinsCIIntegration]):
     """Tests for Jenkins CI."""
 
     integration_cls = JenkinsCIIntegration
     fixtures = ['test_scmtools', 'test_site', 'test_users']
 
-    def test_build_new_review_request(self):
+    def test_build_new_review_request(self) -> None:
         """Testing JenkinsCIIntegration builds a new review request"""
         review_request = self._setup_build_requests()
         review_request.publish(review_request.submitter)
@@ -37,28 +37,32 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
             'parameter': [
                 {
                     'name': 'REVIEWBOARD_SERVER',
-                    'value': 'http://example.com/'
+                    'value': 'http://example.com/',
                 },
                 {
-                    'name': 'REVIEWBOARD_REVIEW_ID',
-                    'value': review_request.display_id
+                    'name': 'REVIEWBOARD_REPOSITORY_ID',
+                    'value': review_request.repository.pk,
                 },
                 {
                     'name': 'REVIEWBOARD_REVIEW_BRANCH',
-                    'value': review_request.branch
+                    'value': review_request.branch,
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
-                    'value': 1
+                    'value': 1,
+                },
+                {
+                    'name': 'REVIEWBOARD_REVIEW_ID',
+                    'value': review_request.display_id,
                 },
                 {
                     'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
-                    'value': 1
-                }
-            ]
+                    'value': 1,
+                },
+            ],
         })
 
-    def test_build_new_review_request_with_local_site(self):
+    def test_build_new_review_request_with_local_site(self) -> None:
         """Testing JenkinsCIIntegration builds a new review request with a
         local site
         """
@@ -69,29 +73,33 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
             'parameter': [
                 {
                     'name': 'REVIEWBOARD_SERVER',
-                    'value': ('http://example.com/s/%s/' %
-                              self.local_site_name)
+                    'value':
+                        f'http://example.com/s/{self.local_site_name}/',
                 },
                 {
-                    'name': 'REVIEWBOARD_REVIEW_ID',
-                    'value': review_request.display_id
+                    'name': 'REVIEWBOARD_REPOSITORY_ID',
+                    'value': review_request.repository.pk,
                 },
                 {
                     'name': 'REVIEWBOARD_REVIEW_BRANCH',
-                    'value': review_request.branch
+                    'value': review_request.branch,
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
-                    'value': 1
+                    'value': 1,
+                },
+                {
+                    'name': 'REVIEWBOARD_REVIEW_ID',
+                    'value': review_request.display_id,
                 },
                 {
                     'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
-                    'value': 1
-                }
-            ]
+                    'value': 1,
+                },
+            ],
         })
 
-    def test_manual_run_no_build_on_publish(self):
+    def test_manual_run_no_build_on_publish(self) -> None:
         """Testing lack of JenkinsCIIntegration build when a new review
         request is made with the run manually configuration
         """
@@ -101,7 +109,7 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
         self._check_build_requests(expect_fetch_csrf_token=False,
                                    expect_open_request=False)
 
-    def test_build_manual_run(self):
+    def test_build_manual_run(self) -> None:
         """Testing JenkinsCIIntegration build via a manual trigger"""
         review_request = self._setup_build_requests(run_manually=True)
 
@@ -119,25 +127,29 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                     'value': 'http://example.com/',
                 },
                 {
-                    'name': 'REVIEWBOARD_REVIEW_ID',
-                    'value': review_request.display_id,
+                    'name': 'REVIEWBOARD_REPOSITORY_ID',
+                    'value': review_request.repository.pk,
                 },
                 {
                     'name': 'REVIEWBOARD_REVIEW_BRANCH',
-                    'value': review_request.branch
+                    'value': review_request.branch,
                 },
                 {
                     'name': 'REVIEWBOARD_DIFF_REVISION',
                     'value': 1,
                 },
                 {
+                    'name': 'REVIEWBOARD_REVIEW_ID',
+                    'value': review_request.display_id,
+                },
+                {
                     'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
                     'value': 1,
-                }
-            ]
+                },
+            ],
         })
 
-    def test_build_new_review_request_no_csrf_protection(self):
+    def test_build_new_review_request_no_csrf_protection(self) -> None:
         """Testing that JenkinsCIIntegration builds a new review request
         without csrf protection
         """
@@ -153,26 +165,30 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 'http://example.com/',
                     },
                     {
-                        'name': 'REVIEWBOARD_REVIEW_ID',
-                        'value': review_request.display_id,
+                        'name': 'REVIEWBOARD_REPOSITORY_ID',
+                        'value': review_request.repository.pk,
                     },
                     {
                         'name': 'REVIEWBOARD_REVIEW_BRANCH',
-                        'value': review_request.branch
+                        'value': review_request.branch,
                     },
                     {
                         'name': 'REVIEWBOARD_DIFF_REVISION',
                         'value': 1,
                     },
                     {
+                        'name': 'REVIEWBOARD_REVIEW_ID',
+                        'value': review_request.display_id,
+                    },
+                    {
                         'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
                         'value': 1,
-                    }
+                    },
                 ],
             },
             expect_csrf_protection=False)
 
-    def test_build_new_review_request_crumb_fetch_error(self):
+    def test_build_new_review_request_crumb_fetch_error(self) -> None:
         """Testing that JenkinsCIIntegration does not build when fetching the
         csrf token (or crumb) results in a non-404 error code
         """
@@ -203,8 +219,8 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 'http://example.com/',
                     },
                     {
-                        'name': 'REVIEWBOARD_REVIEW_ID',
-                        'value': review_request.display_id,
+                        'name': 'REVIEWBOARD_REPOSITORY_ID',
+                        'value': review_request.repository.pk,
                     },
                     {
                         'name': 'REVIEWBOARD_REVIEW_BRANCH',
@@ -215,10 +231,14 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 1,
                     },
                     {
+                        'name': 'REVIEWBOARD_REVIEW_ID',
+                        'value': review_request.display_id,
+                    },
+                    {
                         'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
                         'value': 1,
-                    }
-                ]
+                    },
+                ],
             })
 
     def test_job_name_variables_replaced_noslash(self) -> None:
@@ -242,8 +262,8 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 'http://example.com/',
                     },
                     {
-                        'name': 'REVIEWBOARD_REVIEW_ID',
-                        'value': review_request.display_id,
+                        'name': 'REVIEWBOARD_REPOSITORY_ID',
+                        'value': review_request.repository.pk,
                     },
                     {
                         'name': 'REVIEWBOARD_REVIEW_BRANCH',
@@ -254,10 +274,14 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 1,
                     },
                     {
+                        'name': 'REVIEWBOARD_REVIEW_ID',
+                        'value': review_request.display_id,
+                    },
+                    {
                         'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
                         'value': 1,
-                    }
-                ]
+                    },
+                ],
             })
 
     def test_job_name_variables_replaced_legacy(self) -> None:
@@ -281,8 +305,8 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 'http://example.com/',
                     },
                     {
-                        'name': 'REVIEWBOARD_REVIEW_ID',
-                        'value': review_request.display_id,
+                        'name': 'REVIEWBOARD_REPOSITORY_ID',
+                        'value': review_request.repository.pk,
                     },
                     {
                         'name': 'REVIEWBOARD_REVIEW_BRANCH',
@@ -293,10 +317,14 @@ class JenkinsCIIntegrationTests(IntegrationTestCase):
                         'value': 1,
                     },
                     {
+                        'name': 'REVIEWBOARD_REVIEW_ID',
+                        'value': review_request.display_id,
+                    },
+                    {
                         'name': 'REVIEWBOARD_STATUS_UPDATE_ID',
                         'value': 1,
-                    }
-                ]
+                    },
+                ],
             })
 
     def _create_config(self, job_name=None, with_local_site=False,

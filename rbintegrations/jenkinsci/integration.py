@@ -75,6 +75,7 @@ class JenkinsCIIntegration(BaseCIIntegration):
 
         prep_data.extra_state['patch_info'] = {
             'diff_revision': prep_data.diffset.revision,
+            'repository_id': review_request.repository_id,
             'review_branch': review_request.branch,
             'review_id': review_request.display_id,
             'reviewboard_server': prep_data.server_url,
@@ -141,6 +142,9 @@ class JenkinsCIIntegration(BaseCIIntegration):
             if e.code == 404:
                 raise CIBuildError('failed, job does not exist.')
             else:
+                logger.exception(
+                    'Unable to communicate with Jenkins server: %s %s',
+                    e.code, e.reason)
                 raise CIBuildError('failed to communicate with Jenkins.')
 
     def _replace_job_variables(
